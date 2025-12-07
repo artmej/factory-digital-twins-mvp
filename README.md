@@ -1,6 +1,6 @@
 # Factory Digital Twins MVP
 
-[![CI/CD](https://github.com/USERNAME/REPOSITORY/actions/workflows/ci-cd-oidc.yml/badge.svg)](https://github.com/USERNAME/REPOSITORY/actions/workflows/ci-cd-oidc.yml)
+[![CI/CD](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml/badge.svg)](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Un MVP (Minimum Viable Product) completo de **Azure Digital Twins** para monitoreo de fábrica con IoT, incluyendo CI/CD automatizado con GitHub Actions.
@@ -52,7 +52,7 @@ winget install OpenJS.NodeJS
 
 ### 2. **Clone y Deploy**
 ```bash
-git clone https://github.com/USERNAME/REPOSITORY.git
+git clone https://github.com/artmej/factory-digital-twins-mvp.git
 cd factory-digital-twins-mvp
 
 # Deploy manual (opción rápida)
@@ -160,8 +160,8 @@ Este proyecto está licenciado bajo la licencia MIT - ver el archivo [LICENSE](L
 
 ¿Problemas o preguntas?
 - 📖 Revisar la [documentación](docs/)
-- 🐛 Reportar un [issue](https://github.com/USERNAME/REPOSITORY/issues)
-- 💬 Iniciar una [discusión](https://github.com/USERNAME/REPOSITORY/discussions)
+- 🐛 Reportar un [issue](https://github.com/artmej/factory-digital-twins-mvp/issues)
+- 💬 Iniciar una [discusión](https://github.com/artmej/factory-digital-twins-mvp/discussions)
 
 ---
 
