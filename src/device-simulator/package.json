@@ -1,0 +1,17 @@
+{
+  "name": "device-simulator",
+  "version": "1.0.0",
+  "description": "IoT device simulator for factory telemetry",
+  "main": "simulator.js",
+  "scripts": {
+    "start": "node simulator.js",
+    "dev": "nodemon simulator.js"
+  },
+  "dependencies": {
+    "azure-iot-device": "^1.18.3",
+    "azure-iot-device-mqtt": "^1.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
