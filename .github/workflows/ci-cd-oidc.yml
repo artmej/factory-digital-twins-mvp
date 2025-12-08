@@ -1,10 +1,12 @@
-name: Factory Digital Twins CI/CD (OIDC)
+name: Factory Digital Twins CI/CD (OIDC - Disabled)
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run this workflow'
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       environment:
