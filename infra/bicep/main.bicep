@@ -16,10 +16,9 @@ var appServicePlanName = '${resourcePrefix}-plan-${environment}'
 // Temporarily disabling VNet for initial deployment
 // var vnetName = '${resourcePrefix}-vnet-${environment}'
 // var subnetName = 'default'
-// var privateEndpointsSubnetName = 'private-endpoints'
+var privateEndpointsSubnetName = 'private-endpoints'
 
-// Virtual Network - Temporarily disabled for initial deployment
-/*
+// Virtual Network
 resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
   name: vnetName
   location: location
@@ -55,11 +54,10 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
           addressPrefix: '10.0.2.0/24'
           privateEndpointNetworkPolicies: 'Disabled'
         }
-      }
+      ]
     ]
   }
 }
-*/
 
 // Storage Account for Function App
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
@@ -73,7 +71,11 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     supportsHttpsTrafficOnly: true
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
-    // Network restrictions disabled for initial deployment
+    publicNetworkAccess: 'Disabled'
+    networkAcls: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
   }
 }
 
@@ -82,8 +84,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'P1v2'
+    tier: 'PremiumV2'
   }
   properties: {
     reserved: true
@@ -148,7 +150,7 @@ resource digitalTwins 'Microsoft.DigitalTwins/digitalTwinsInstances@2023-01-31' 
   name: digitalTwinsName
   location: location
   properties: {
-    publicNetworkAccess: 'Enabled' // Will be disabled after private endpoints are configured
+    publicNetworkAccess: 'Disabled'
   }
   identity: {
     type: 'SystemAssigned'
@@ -177,7 +179,6 @@ resource digitalTwinsPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05
     ]
   }
 }
-*/
 
 // Function App
 resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
@@ -187,7 +188,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     reserved: true
-    // virtualNetworkSubnetId: '${vnet.id}/subnets/${subnetName}' // Disabled for initial deployment
+    virtualNetworkSubnetId: '${vnet.id}/subnets/${subnetName}'
     siteConfig: {
       linuxFxVersion: 'NODE|18'
       appSettings: [
@@ -303,7 +304,6 @@ resource storagePrivateEndpointFile 'Microsoft.Network/privateEndpoints@2023-05-
     ]
   }
 }
-*/
 
 // Create a device in IoT Hub for the simulator
 resource factoryDevice 'Microsoft.Devices/IotHubs/devices@2023-06-30' = {
