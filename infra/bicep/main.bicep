@@ -71,13 +71,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
     networkAcls: {
-      defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: '${vnet.id}/subnets/${subnetName}'
-          action: 'Allow'
-        }
-      ]
+      defaultAction: 'Allow'
+      // Initially allow access from all networks
+      // Will be secured after Function App is configured
       bypass: 'AzureServices'
     }
   }
