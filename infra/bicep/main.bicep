@@ -13,9 +13,8 @@ var iotHubName = '${resourcePrefix}-iothub-${environment}'
 var functionAppName = '${resourcePrefix}-func-${environment}'
 var storageAccountName = '${resourcePrefix}stor${environment}'
 var appServicePlanName = '${resourcePrefix}-plan-${environment}'
-// Temporarily disabling VNet for initial deployment
-// var vnetName = '${resourcePrefix}-vnet-${environment}'
-// var subnetName = 'default'
+var vnetName = '${resourcePrefix}-vnet-${environment}'
+var subnetName = 'default'
 var privateEndpointsSubnetName = 'private-endpoints'
 
 // Virtual Network
@@ -54,7 +53,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
           addressPrefix: '10.0.2.0/24'
           privateEndpointNetworkPolicies: 'Disabled'
         }
-      ]
+      }
     ]
   }
 }
@@ -157,8 +156,7 @@ resource digitalTwins 'Microsoft.DigitalTwins/digitalTwinsInstances@2023-01-31' 
   }
 }
 
-// Private Endpoint for Digital Twins - Disabled for initial deployment
-/*
+// Private Endpoint for Digital Twins
 resource digitalTwinsPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${digitalTwinsName}-pe'
   location: location
@@ -261,8 +259,7 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
-// Private Endpoints for Storage Account - Disabled for initial deployment
-/*
+// Private Endpoints for Storage Account
 resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${storageAccount.name}-pe-blob'
   location: location
