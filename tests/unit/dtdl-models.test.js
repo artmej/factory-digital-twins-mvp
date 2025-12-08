@@ -61,7 +61,7 @@ describe('DTDL Models Validation', () => {
       const properties = lineModel.contents.filter(content => content['@type'] === 'Property');
       const propertyNames = properties.map(p => p.name);
       
-      expect(propertyNames).toContain('name');
+      expect(propertyNames).toContain('oee');
       expect(propertyNames).toContain('state');
     });
 
