@@ -1,0 +1,39 @@
+{
+  "name": "factory-tests",
+  "version": "1.0.0",
+  "description": "Test suite for Factory Digital Twins MVP",
+  "scripts": {
+    "test": "npx jest",
+    "test:watch": "npx jest --watch",
+    "test:coverage": "npx jest --coverage",
+    "test:integration": "npx jest --config=jest.integration.config.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0",
+    "eslint-config-standard": "^17.1.0",
+    "@azure/digital-twins-core": "^2.0.0",
+    "@azure/identity": "^4.0.0",
+    "azure-iot-device": "^1.18.3",
+    "supertest": "^6.3.3",
+    "nock": "^13.4.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "integration/"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/node_modules/**"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    }
+  }
+}

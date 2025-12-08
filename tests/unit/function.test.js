@@ -1,24 +1,25 @@
-const { DigitalTwinsClient } = require('@azure/digital-twins-core');
+// Mock Azure SDK modules
+const mockDigitalTwinsClient = {
+  updateDigitalTwin: jest.fn(),
+  publishTelemetry: jest.fn()
+};
 
-// Mock the Azure SDK
-jest.mock('@azure/digital-twins-core');
-jest.mock('@azure/identity');
+const mockDefaultAzureCredential = jest.fn();
+
+jest.mock('@azure/digital-twins-core', () => ({
+  DigitalTwinsClient: jest.fn().mockImplementation(() => mockDigitalTwinsClient)
+}));
+
+jest.mock('@azure/identity', () => ({
+  DefaultAzureCredential: jest.fn().mockImplementation(() => mockDefaultAzureCredential)
+}));
 
 describe('Azure Function - ADT Projection', () => {
-  let mockDigitalTwinsClient;
   let functionHandler;
   
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    
-    // Mock Digital Twins client
-    mockDigitalTwinsClient = {
-      updateDigitalTwin: jest.fn(),
-      publishTelemetry: jest.fn()
-    };
-    
-    DigitalTwinsClient.mockImplementation(() => mockDigitalTwinsClient);
     
     // Set environment variables
     process.env.DIGITAL_TWINS_URL = 'https://test-adt.api.wcus.digitaltwins.azure.net';

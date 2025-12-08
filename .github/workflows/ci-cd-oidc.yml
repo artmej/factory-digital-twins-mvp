@@ -1,10 +1,12 @@
-name: Factory Digital Twins CI/CD (OIDC)
+name: Factory Digital Twins CI/CD (OIDC - Disabled)
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run this workflow'
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       environment:
@@ -41,10 +43,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: |
-          src/device-simulator/package-lock.json
-          src/function-adt-projection/package-lock.json
 
     - name: 📦 Install dependencies - Device Simulator
       working-directory: ./src/device-simulator
