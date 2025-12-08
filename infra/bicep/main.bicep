@@ -44,9 +44,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
             {
               service: 'Microsoft.Storage'
             }
-            {
-              service: 'Microsoft.DigitalTwins'
-            }
           ]
         }
       }
