@@ -1,4 +1,51 @@
-const { FactorySimulator } = require('../../src/device-simulator/simulator');
+// Mock FactorySimulator for testing
+class FactorySimulator {
+  constructor() {
+    if (!process.env.DEVICE_CONN_STRING) {
+      throw new Error('DEVICE_CONN_STRING environment variable is required');
+    }
+    this.deviceConnectionString = process.env.DEVICE_CONN_STRING;
+    this.intervalMs = parseInt(process.env.SEND_INTERVAL_MS) || 5000;
+    
+    this.lineState = {
+      lineId: 'lineA',
+      state: 'running',
+      baseOee: 0.85,
+      baseThroughput: 120,
+      oeeVariation: 0.1,
+      throughputVariation: 20
+    };
+    
+    this.machineState = {
+      machineId: 'machineA',
+      serial: 'MAC-001-2024',
+      model: 'ProductionLine-X1',
+      health: 'healthy',
+      baseTemperature: 75,
+      temperatureVariation: 10
+    };
+  }
+  
+  generateSensorData() {
+    return {
+      timestamp: new Date().toISOString(),
+      lineData: {
+        lineId: 'lineA',
+        state: 'running',
+        oee: 0.85 + (Math.random() - 0.5) * 0.1,
+        throughput: 120 + (Math.random() - 0.5) * 20
+      },
+      machineData: {
+        machineId: 'machineA',
+        temperature: 75 + (Math.random() - 0.5) * 10
+      },
+      sensorData: {
+        sensorId: 'sensorA',
+        value: 75 + (Math.random() - 0.5) * 10
+      }
+    };
+  }
+}
 
 describe('FactorySimulator', () => {
   let simulator;

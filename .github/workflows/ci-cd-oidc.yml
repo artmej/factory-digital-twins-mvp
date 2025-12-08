@@ -41,10 +41,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: |
-          src/device-simulator/package-lock.json
-          src/function-adt-projection/package-lock.json
 
     - name: 📦 Install dependencies - Device Simulator
       working-directory: ./src/device-simulator
