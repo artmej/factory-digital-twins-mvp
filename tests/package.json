@@ -20,6 +20,9 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "integration/"
+    ],
     "collectCoverageFrom": [
       "src/**/*.js",
       "!src/**/node_modules/**"
