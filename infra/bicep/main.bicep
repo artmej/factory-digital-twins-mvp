@@ -7,6 +7,9 @@ param resourcePrefix string = 'factory'
 @description('Environment suffix')
 param environment string = 'dev'
 
+@description('Deployment phase: infrastructure, compute, or all')
+param deploymentPhase string = 'all'
+
 // Variables
 var digitalTwinsName = '${resourcePrefix}-adt-${environment}'
 var iotHubName = '${resourcePrefix}-iothub-${environment}'
@@ -201,6 +204,14 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         {
           name: 'WEBSITE_CONTENTSHARE'
           value: toLower(functionAppName)
+        }
+        {
+          name: 'WEBSITE_CONTENTOVERVNET'
+          value: '1'
+        }
+        {
+          name: 'WEBSITE_VNET_ROUTE_ALL'
+          value: '1'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
