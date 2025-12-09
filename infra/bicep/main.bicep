@@ -305,5 +305,4 @@ output digitalTwinsName string = digitalTwins.name
 output digitalTwinsUrl string = 'https://${digitalTwins.properties.hostName}'
 output iotHubName string = iotHub.name
 output functionAppName string = functionApp.name
-output iotHubName string = iotHub.name
 output iotHubConnectionString string = 'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listKeys().value[0].primaryKey};EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
