@@ -13,7 +13,7 @@ param deploymentPhase string = 'all'
 // Variables
 var digitalTwinsName = '${resourcePrefix}-adt-${environment}'
 var iotHubName = '${resourcePrefix}-iothub-${environment}'
-var functionAppName = '${resourcePrefix}-func-${environment}'
+var functionAppName = '${resourcePrefix}-func-adt-${environment}'
 var storageAccountName = '${resourcePrefix}stor${environment}'
 var appServicePlanName = '${resourcePrefix}-plan-${environment}'
 var vnetName = '${resourcePrefix}-vnet-${environment}'
@@ -86,8 +86,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: 'P1v2'
-    tier: 'PremiumV2'
+    name: 'B1'
+    tier: 'Basic'
   }
   properties: {
     reserved: true
@@ -152,46 +152,30 @@ resource digitalTwins 'Microsoft.DigitalTwins/digitalTwinsInstances@2023-01-31' 
   name: digitalTwinsName
   location: location
   properties: {
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
   }
   identity: {
     type: 'SystemAssigned'
   }
 }
 
-// Private Endpoint for Digital Twins
-resource digitalTwinsPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
-  name: '${digitalTwinsName}-pe'
-  location: location
-  properties: {
-    subnet: {
-      id: '${vnet.id}/subnets/${privateEndpointsSubnetName}'
-    }
-    privateLinkServiceConnections: [
-      {
-        name: '${digitalTwinsName}-connection'
-        properties: {
-          privateLinkServiceId: digitalTwins.id
-          groupIds: [
-            'API'
-          ]
-        }
-      }
-    ]
-  }
-}
+// Note: Digital Twins Private Endpoint removed - using public access for better compatibility
 
 // Function App
 resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
+  dependsOn: [
+    storagePrivateEndpoint
+    storagePrivateEndpointFile
+  ]
   properties: {
     serverFarmId: appServicePlan.id
     reserved: true
     virtualNetworkSubnetId: '${vnet.id}/subnets/${subnetName}'
     siteConfig: {
-      linuxFxVersion: 'NODE|18'
+      linuxFxVersion: 'NODE|20'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
