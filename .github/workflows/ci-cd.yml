@@ -184,7 +184,7 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          FUNC_NAME="${{ env.RESOURCE_PREFIX }}-func-dev"
+          FUNC_NAME="${{ env.RESOURCE_PREFIX }}-func-adt-dev"
           
           # Deploy function code
           az functionapp deployment source config-zip \
@@ -196,7 +196,7 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          FUNC_NAME="${{ env.RESOURCE_PREFIX }}-func-dev"
+          FUNC_NAME="${{ env.RESOURCE_PREFIX }}-func-adt-dev"
           ADT_NAME="${{ env.RESOURCE_PREFIX }}-adt-dev"
           
           # Get Digital Twins URL
