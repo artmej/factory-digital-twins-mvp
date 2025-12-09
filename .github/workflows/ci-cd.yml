@@ -148,6 +148,21 @@ jobs:
                         resourcePrefix=${{ env.RESOURCE_PREFIX }} \
                         environment=dev
 
+    - name: 🔐 Grant Pipeline Permissions to Digital Twins
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          ADT_NAME="${{ env.RESOURCE_PREFIX }}-adt-dev"
+          
+          # Get current pipeline principal ID
+          PIPELINE_PRINCIPAL_ID=$(az account show --query user.name -o tsv)
+          
+          # Grant Azure Digital Twins Data Owner role to pipeline
+          az role assignment create \
+            --role "Azure Digital Twins Data Owner" \
+            --assignee $PIPELINE_PRINCIPAL_ID \
+            --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}-dev/providers/Microsoft.DigitalTwins/digitalTwinsInstances/$ADT_NAME"
+
     - name: 📊 Setup Digital Twins Models
       uses: azure/CLI@v1
       with:
