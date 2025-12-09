@@ -258,10 +258,6 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
 resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${storageAccount.name}-pe-blob'
   location: location
-  dependsOn: [
-    vnet
-    storageAccount
-  ]
   properties: {
     subnet: {
       id: '${vnet.id}/subnets/${privateEndpointsSubnetName}'
@@ -283,10 +279,6 @@ resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' 
 resource storagePrivateEndpointFile 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${storageAccount.name}-pe-file'
   location: location
-  dependsOn: [
-    vnet
-    storageAccount
-  ]
   properties: {
     subnet: {
       id: '${vnet.id}/subnets/${privateEndpointsSubnetName}'
@@ -305,28 +297,13 @@ resource storagePrivateEndpointFile 'Microsoft.Network/privateEndpoints@2023-05-
   }
 }
 
-// Create a device in IoT Hub for the simulator
-resource factoryDevice 'Microsoft.Devices/IotHubs/devices@2023-06-30' = {
-  parent: iotHub
-  name: 'factory-device'
-  properties: {
-    deviceId: 'factory-device'
-    status: 'Enabled'
-    statusReason: 'DeviceCreatedForFactory'
-    authMethod: {
-      type: 'SharedAccessKey'
-      symmetricKey: {
-        primaryKey: base64(guid('primary-key-${iotHub.name}-factory-device'))
-        secondaryKey: base64(guid('secondary-key-${iotHub.name}-factory-device'))
-      }
-    }
-  }
-}
+// Note: IoT Device creation moved to post-deployment script
+// Creating devices via Bicep has compatibility issues
 
 // Outputs
 output digitalTwinsName string = digitalTwins.name
 output digitalTwinsUrl string = 'https://${digitalTwins.properties.hostName}'
 output iotHubName string = iotHub.name
 output functionAppName string = functionApp.name
-output deviceConnectionString string = 'HostName=${iotHub.properties.hostName};DeviceId=factory-device;SharedAccessKey=${factoryDevice.properties.authMethod.symmetricKey.primaryKey}'
+output iotHubName string = iotHub.name
 output iotHubConnectionString string = 'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listKeys().value[0].primaryKey};EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
