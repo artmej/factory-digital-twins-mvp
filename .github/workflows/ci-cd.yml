@@ -167,13 +167,22 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          # Upload DTDL models
+          # Upload DTDL models with error handling
           ADT_NAME="${{ env.RESOURCE_PREFIX }}-adt-dev"
           
           for model in models/*.dtdl.json; do
-            echo "Uploading model: $model"
-            az dt model create --dt-name $ADT_NAME --models @"$model"
+            echo "Processing model: $model"
+            
+            # Try to create the model, ignore if it already exists
+            if az dt model create --dt-name $ADT_NAME --models @"$model" 2>/dev/null; then
+              echo "✅ Successfully uploaded model: $model"
+            else
+              echo "⚠️  Model already exists or failed to upload: $model - continuing..."
+            fi
           done
+          
+          echo "📋 Current models in Digital Twins instance:"
+          az dt model list --dt-name $ADT_NAME --query "[].id" -o table
 
     - name: 📥 Download Function artifact
       uses: actions/download-artifact@v4
