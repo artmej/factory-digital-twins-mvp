@@ -14,7 +14,7 @@ param deploymentPhase string = 'all'
 var digitalTwinsName = '${resourcePrefix}-adt-${environment}'
 var iotHubName = '${resourcePrefix}-iothub-${environment}'
 var functionAppName = '${resourcePrefix}-func-adt-${environment}'
-var storageAccountName = '${resourcePrefix}stor${environment}'
+var storageAccountName = '${resourcePrefix}st${environment}${uniqueString(resourceGroup().id)}'
 var appServicePlanName = '${resourcePrefix}-plan-${environment}'
 var vnetName = '${resourcePrefix}-vnet-${environment}'
 var subnetName = 'default'
@@ -258,6 +258,10 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
 resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${storageAccount.name}-pe-blob'
   location: location
+  dependsOn: [
+    vnet
+    storageAccount
+  ]
   properties: {
     subnet: {
       id: '${vnet.id}/subnets/${privateEndpointsSubnetName}'
@@ -279,6 +283,10 @@ resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' 
 resource storagePrivateEndpointFile 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${storageAccount.name}-pe-file'
   location: location
+  dependsOn: [
+    vnet
+    storageAccount
+  ]
   properties: {
     subnet: {
       id: '${vnet.id}/subnets/${privateEndpointsSubnetName}'
