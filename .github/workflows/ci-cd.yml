@@ -197,31 +197,31 @@ jobs:
           
           echo "Deploying function code to $FUNC_NAME..."
           
-          # Try deployment with retry logic for VNet-integrated apps
-          for i in {1..3}; do
-            echo "Deployment attempt $i/3..."
-            if az functionapp deployment source config-zip \
-              --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-              --name $FUNC_NAME \
-              --src function-app.zip \
-              --timeout 600; then
-              echo "✅ Function deployment successful!"
-              break
-            else
-              if [ $i -eq 3 ]; then
-                echo "❌ Function deployment failed after 3 attempts"
-                
-                # Show diagnostic info
-                echo "Function App status:"
-                az functionapp show --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev --name $FUNC_NAME --query "{name:name, state:state, defaultHostName:defaultHostName}" -o table
-                
-                exit 1
-              else
-                echo "⚠️ Attempt $i failed, retrying in 30 seconds..."
-                sleep 30
-              fi
-            fi
-          done
+          # Temporarily disable VNet integration for deployment
+          echo "🔧 Temporarily disabling VNet integration for deployment..."
+          az functionapp vnet-integration remove \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $FUNC_NAME || echo "VNet integration already removed or not configured"
+          
+          # Wait for the change to take effect
+          sleep 10
+          
+          # Deploy function code
+          echo "📦 Deploying function package..."
+          az functionapp deployment source config-zip \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $FUNC_NAME \
+            --src function-app.zip
+          
+          # Re-enable VNet integration
+          echo "🔧 Re-enabling VNet integration..."
+          az functionapp vnet-integration add \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $FUNC_NAME \
+            --vnet ${{ env.RESOURCE_PREFIX }}-vnet-dev \
+            --subnet default
+          
+          echo "✅ Function deployment completed with VNet integration restored!"
 
     - name: ⚙️ Configure Function Settings
       uses: azure/CLI@v1
