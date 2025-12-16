@@ -233,12 +233,12 @@ jobs:
             --vnet-name $VNET_NAME \
             --subnet $SUBNET_NAME || echo "VNet rule may already exist"
           
-          # Also temporarily enable trusted Microsoft services
-          echo "🔓 Enabling trusted Microsoft services..."
+          # Also temporarily enable additional Azure services
+          echo "🔓 Enabling Azure services bypass..."
           az storage account update \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --name $STORAGE_ACCOUNT \
-            --bypass AzureServices,Metrics,Logging,TrustedMicrosoftServices
+            --bypass AzureServices,Metrics,Logging
           
           # Wait for network rule to take effect
           echo "⏱️  Waiting for network rules to propagate..."
