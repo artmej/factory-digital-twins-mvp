@@ -189,7 +189,22 @@ jobs:
       with:
         name: function-app
 
-    - name: 🚀 Deploy Function App
+    - name: 🔍 Validate Storage Access
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          # Get storage account name
+          STORAGE_ACCOUNT=$(az storage account list \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --query "[0].name" -o tsv)
+          
+          echo "🔍 Checking storage account network rules..."
+          az storage account show --name $STORAGE_ACCOUNT --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev --query "networkRuleSet.{defaultAction:defaultAction,bypass:bypass}" -o table
+          
+          echo "🌐 Current external IP for GitHub Actions:"
+          curl -s https://ifconfig.me/ip || echo "Could not determine IP"
+
+    - name: 🚀 Deploy Function App  
       uses: azure/CLI@v1
       with:
         inlineScript: |
@@ -203,6 +218,20 @@ jobs:
             --query "[0].name" -o tsv)
           
           echo "📦 Using storage account: $STORAGE_ACCOUNT"
+          
+          # Temporarily allow GitHub Actions access
+          echo "🔓 Temporarily allowing GitHub Actions access..."
+          GITHUB_IP=$(curl -s https://ifconfig.me/ip)
+          echo "Adding GitHub Actions IP: $GITHUB_IP"
+          
+          # Add current IP to storage account network rules
+          az storage account network-rule add \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --account-name $STORAGE_ACCOUNT \
+            --ip-address $GITHUB_IP || echo "IP may already exist"
+          
+          # Wait for network rule to take effect
+          sleep 10
           
           # Use Azure RBAC instead of keys (organizationally required)
           echo "🔐 Using Azure RBAC authentication for storage operations..."
@@ -248,6 +277,13 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --name $FUNC_NAME \
             --settings WEBSITE_RUN_FROM_PACKAGE="$PACKAGE_URL"
+          
+          # Clean up - remove GitHub Actions IP from storage rules
+          echo "🔒 Removing GitHub Actions IP from storage network rules..."
+          az storage account network-rule remove \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --account-name $STORAGE_ACCOUNT \
+            --ip-address $GITHUB_IP || echo "IP removal failed or already removed"
           
           echo "✅ Function App deployment completed using run-from-package!"
 
