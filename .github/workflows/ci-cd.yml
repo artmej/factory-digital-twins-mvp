@@ -204,11 +204,8 @@ jobs:
           
           echo "📦 Using storage account: $STORAGE_ACCOUNT"
           
-          # Get storage account connection string (works with private endpoints)
-          STORAGE_CONNECTION=$(az storage account show-connection-string \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --name $STORAGE_ACCOUNT \
-            --query "connectionString" -o tsv)
+          # Use Azure RBAC instead of keys (organizationally required)
+          echo "🔐 Using Azure RBAC authentication for storage operations..."
           
           # Create container for function packages
           CONTAINER_NAME="function-releases"
@@ -217,19 +214,21 @@ jobs:
           echo "📂 Creating container: $CONTAINER_NAME"
           az storage container create \
             --name $CONTAINER_NAME \
-            --connection-string "$STORAGE_CONNECTION" \
-            --public-access off
+            --account-name $STORAGE_ACCOUNT \
+            --auth-mode login \
+            --public-access off || echo "Container may already exist"
           
-          # Upload function package
+          # Upload function package using RBAC
           echo "⬆️  Uploading function package: $BLOB_NAME"
           az storage blob upload \
             --file function-app.zip \
             --name $BLOB_NAME \
             --container-name $CONTAINER_NAME \
-            --connection-string "$STORAGE_CONNECTION" \
+            --account-name $STORAGE_ACCOUNT \
+            --auth-mode login \
             --overwrite
           
-          # Generate SAS URL for the blob (valid for 1 year)
+          # Generate SAS URL using RBAC (valid for 1 year) 
           EXPIRY=$(date -u -d "1 year" +"%Y-%m-%dT%H:%MZ")
           PACKAGE_URL=$(az storage blob generate-sas \
             --account-name $STORAGE_ACCOUNT \
@@ -237,7 +236,8 @@ jobs:
             --name $BLOB_NAME \
             --permissions r \
             --expiry $EXPIRY \
-            --connection-string "$STORAGE_CONNECTION" \
+            --auth-mode login \
+            --as-user \
             --full-uri -o tsv)
           
           echo "🔗 Package URL generated: ${PACKAGE_URL:0:50}..."
