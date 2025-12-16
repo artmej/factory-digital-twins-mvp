@@ -195,33 +195,61 @@ jobs:
         inlineScript: |
           FUNC_NAME="${{ env.RESOURCE_PREFIX }}-func-adt-dev"
           
-          echo "Deploying function code to $FUNC_NAME..."
+          echo "🚀 Deploying function code to $FUNC_NAME using run-from-package method..."
           
-          # Temporarily disable VNet integration for deployment
-          echo "🔧 Temporarily disabling VNet integration for deployment..."
-          az functionapp vnet-integration remove \
+          # Get storage account name
+          STORAGE_ACCOUNT=$(az storage account list \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --name $FUNC_NAME || echo "VNet integration already removed or not configured"
+            --query "[0].name" -o tsv)
           
-          # Wait for the change to take effect
-          sleep 10
+          echo "📦 Using storage account: $STORAGE_ACCOUNT"
           
-          # Deploy function code
-          echo "📦 Deploying function package..."
-          az functionapp deployment source config-zip \
+          # Get storage account connection string (works with private endpoints)
+          STORAGE_CONNECTION=$(az storage account show-connection-string \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $STORAGE_ACCOUNT \
+            --query "connectionString" -o tsv)
+          
+          # Create container for function packages
+          CONTAINER_NAME="function-releases"
+          BLOB_NAME="function-app-$(date +%Y%m%d-%H%M%S).zip"
+          
+          echo "📂 Creating container: $CONTAINER_NAME"
+          az storage container create \
+            --name $CONTAINER_NAME \
+            --connection-string "$STORAGE_CONNECTION" \
+            --public-access off
+          
+          # Upload function package
+          echo "⬆️  Uploading function package: $BLOB_NAME"
+          az storage blob upload \
+            --file function-app.zip \
+            --name $BLOB_NAME \
+            --container-name $CONTAINER_NAME \
+            --connection-string "$STORAGE_CONNECTION" \
+            --overwrite
+          
+          # Generate SAS URL for the blob (valid for 1 year)
+          EXPIRY=$(date -u -d "1 year" +"%Y-%m-%dT%H:%MZ")
+          PACKAGE_URL=$(az storage blob generate-sas \
+            --account-name $STORAGE_ACCOUNT \
+            --container-name $CONTAINER_NAME \
+            --name $BLOB_NAME \
+            --permissions r \
+            --expiry $EXPIRY \
+            --connection-string "$STORAGE_CONNECTION" \
+            --full-uri -o tsv)
+          
+          echo "🔗 Package URL generated: ${PACKAGE_URL:0:50}..."
+          
+          # Configure Function App to run from package
+          echo "⚙️  Configuring WEBSITE_RUN_FROM_PACKAGE setting..."
+          az functionapp config appsettings set \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --name $FUNC_NAME \
-            --src function-app.zip
+            --settings WEBSITE_RUN_FROM_PACKAGE="$PACKAGE_URL"
           
-          # Re-enable VNet integration
-          echo "🔧 Re-enabling VNet integration..."
-          az functionapp vnet-integration add \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --name $FUNC_NAME \
-            --vnet ${{ env.RESOURCE_PREFIX }}-vnet-dev \
-            --subnet default
-          
-          echo "✅ Function deployment completed with VNet integration restored!"
+          echo "✅ Function App deployment completed using run-from-package!"
 
     - name: ⚙️ Configure Function Settings
       uses: azure/CLI@v1
