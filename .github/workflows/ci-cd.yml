@@ -219,19 +219,30 @@ jobs:
           
           echo "📦 Using storage account: $STORAGE_ACCOUNT"
           
-          # Temporarily allow GitHub Actions access
-          echo "🔓 Temporarily allowing GitHub Actions access..."
-          GITHUB_IP=$(curl -s https://ifconfig.me/ip)
-          echo "Adding GitHub Actions IP: $GITHUB_IP"
+          # Temporarily allow access from VNet
+          echo "🔓 Temporarily allowing VNet access to storage account..."
           
-          # Add current IP to storage account network rules
+          # Add VNet subnet to storage account network rules
+          VNET_NAME="${{ env.RESOURCE_PREFIX }}-vnet-dev"
+          SUBNET_NAME="default"
+          
+          echo "Adding VNet access: $VNET_NAME/$SUBNET_NAME"
           az storage account network-rule add \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --account-name $STORAGE_ACCOUNT \
-            --ip-address $GITHUB_IP || echo "IP may already exist"
+            --vnet-name $VNET_NAME \
+            --subnet $SUBNET_NAME || echo "VNet rule may already exist"
+          
+          # Also temporarily enable trusted Microsoft services
+          echo "🔓 Enabling trusted Microsoft services..."
+          az storage account update \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $STORAGE_ACCOUNT \
+            --bypass AzureServices,Metrics,Logging,TrustedMicrosoftServices
           
           # Wait for network rule to take effect
-          sleep 10
+          echo "⏱️  Waiting for network rules to propagate..."
+          sleep 15
           
           # Use Azure RBAC instead of keys (organizationally required)
           echo "🔐 Using Azure RBAC authentication for storage operations..."
@@ -278,12 +289,19 @@ jobs:
             --name $FUNC_NAME \
             --settings WEBSITE_RUN_FROM_PACKAGE="$PACKAGE_URL"
           
-          # Clean up - remove GitHub Actions IP from storage rules
-          echo "🔒 Removing GitHub Actions IP from storage network rules..."
+          # Clean up - remove VNet access and restore original bypass settings
+          echo "🔒 Restoring storage network rules to original state..."
           az storage account network-rule remove \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --account-name $STORAGE_ACCOUNT \
-            --ip-address $GITHUB_IP || echo "IP removal failed or already removed"
+            --vnet-name $VNET_NAME \
+            --subnet $SUBNET_NAME || echo "VNet rule removal failed or already removed"
+          
+          # Restore original bypass settings
+          az storage account update \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
+            --name $STORAGE_ACCOUNT \
+            --bypass AzureServices || echo "Bypass update failed"
           
           echo "✅ Function App deployment completed using run-from-package!"
 
