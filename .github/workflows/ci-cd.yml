@@ -238,7 +238,7 @@ jobs:
           az storage account update \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --name $STORAGE_ACCOUNT \
-            --bypass AzureServices,Metrics,Logging
+            --bypass "AzureServices Metrics Logging"
           
           # Wait for network rule to take effect
           echo "⏱️  Waiting for network rules to propagate..."
