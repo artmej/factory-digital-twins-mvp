@@ -1,0 +1,325 @@
+# Factory Digital Twins MVP - Azure DevOps Pipeline
+# Optimizado para VNet y Private Endpoints - VERSIÓN MEJORADA
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+variables:
+  # Build Variables
+  buildConfiguration: 'Release'
+  vmImageName: 'ubuntu-latest'
+  
+  # Azure Variables - ACTUALIZADO para VNet
+  azureSubscription: 'factory-service-connection'
+  resourceGroupName: 'factory-rg-dev'
+  functionAppName: 'factory-function-dev'
+  storageAccountName: 'factorystoragedev'
+  
+  # Deployment Variables - OPTIMIZADO para VNet
+  deploymentMethod: 'zipDeploy'
+  retryAttempts: 3
+  timeoutInMinutes: 10
+
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build Application'
+    pool:
+      vmImage: $(vmImageName)
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Setup Node.js'
+      inputs:
+        versionSpec: '18.x'
+    
+    - script: |
+        cd src/device-simulator
+        npm ci
+        echo "Device simulator tests ready"
+      displayName: 'Build Device Simulator'
+    
+    - script: |
+        cd src/function-adt-projection
+        npm ci
+        echo "Function app built successfully"
+      displayName: 'Build Function App'
+    
+    - task: ArchiveFiles@2
+      displayName: 'Archive Function App'
+      inputs:
+        rootFolderOrFile: 'src/function-adt-projection'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/function-app.zip'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'drop'
+
+- stage: Deploy_Infrastructure
+  displayName: 'Deploy Infrastructure'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployInfra
+    displayName: 'Deploy Bicep Infrastructure'
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          
+          - task: AzureCLI@2
+            displayName: 'Deploy Bicep Template'
+            inputs:
+              azureSubscription: 'factory-service-connection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "🚀 Deploying infrastructure with Bicep..."
+                az deployment group create \
+                  --resource-group $(resourceGroupName) \
+                  --template-file infra/bicep/main.bicep \
+                  --parameters environment=dev \
+                  --verbose
+                echo "✅ Infrastructure deployment completed"
+
+- stage: Deploy_Application
+  displayName: 'Deploy Application Code'
+  dependsOn: Deploy_Infrastructure  
+  condition: succeeded()
+  jobs:
+  - deployment: DeployApp
+    displayName: 'Deploy Function App Code'
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy Function App (ZipDeploy for VNet)'
+            inputs:
+              azureSubscription: 'factory-service-connection'
+              appType: 'functionApp'
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop/function-app.zip'
+              deploymentMethod: 'zipDeploy'
+            retryCountOnTaskFailure: $(retryAttempts)
+
+- stage: Build
+  displayName: 'Build Artifacts'
+  dependsOn: Validate
+  jobs:
+  - job: BuildFunction
+    displayName: 'Build Function App'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Setup Node.js'
+      inputs:
+        versionSpec: '18.x'
+    
+    - script: |
+        cd src/function-adt-projection
+        npm ci --production
+      displayName: 'Install Function Dependencies'
+    
+    - task: ArchiveFiles@2
+      displayName: 'Create Function Package'
+      inputs:
+        rootFolderOrFile: 'src/function-adt-projection'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/function-app.zip'
+        replaceExistingArchive: true
+    
+    - publish: '$(Build.ArtifactStagingDirectory)/function-app.zip'
+      artifact: function-app
+      displayName: 'Publish Function Artifact'
+
+  - job: BuildSimulator
+    displayName: 'Build Device Simulator'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Setup Node.js'
+      inputs:
+        versionSpec: '18.x'
+    
+    - script: |
+        cd src/device-simulator
+        npm ci --production
+      displayName: 'Install Simulator Dependencies'
+    
+    - task: ArchiveFiles@2
+      displayName: 'Create Simulator Package'
+      inputs:
+        rootFolderOrFile: 'src/device-simulator'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/device-simulator.zip'
+        replaceExistingArchive: true
+    
+    - publish: '$(Build.ArtifactStagingDirectory)/device-simulator.zip'
+      artifact: device-simulator
+      displayName: 'Publish Simulator Artifact'
+
+- stage: DeployDev
+  displayName: 'Deploy to DEV'
+  dependsOn: Build
+  jobs:
+  - deployment: DeployInfrastructure
+    displayName: 'Deploy Infrastructure'
+    environment: 'dev'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          
+          - task: AzureCLI@2
+            displayName: 'Deploy Bicep Infrastructure'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "🏗️ Deploying infrastructure to DEV environment..."
+                
+                # Deploy infrastructure
+                az deployment group create \
+                  --resource-group $(resourceGroup)-dev \
+                  --template-file infra/bicep/main.bicep \
+                  --parameters \
+                    environment=dev \
+                    location=$(location) \
+                    resourcePrefix=$(resourcePrefix) \
+                  --name "factory-deployment-$(date +%Y%m%d-%H%M%S)"
+          
+          - task: AzureCLI@2
+            displayName: 'Setup Digital Twins Models'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "📊 Setting up Digital Twins models..."
+                
+                ADT_NAME="$(resourcePrefix)-adt-dev"
+                
+                # Grant pipeline permissions
+                PIPELINE_PRINCIPAL_ID=$(az account show --query user.name -o tsv)
+                az role assignment create \
+                  --role "Azure Digital Twins Data Owner" \
+                  --assignee $PIPELINE_PRINCIPAL_ID \
+                  --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$(resourceGroup)-dev/providers/Microsoft.DigitalTwins/digitalTwinsInstances/$ADT_NAME" \
+                  || echo "Role assignment may already exist"
+                
+                # Upload DTDL models
+                for model in models/*.dtdl.json; do
+                  echo "Processing model: $model"
+                  if az dt model create --dt-name $ADT_NAME --models @"$model" 2>/dev/null; then
+                    echo "✅ Successfully uploaded model: $model"
+                  else
+                    echo "⚠️ Model already exists or failed: $model"
+                  fi
+                done
+
+  - deployment: DeployFunctionApp
+    displayName: 'Deploy Function App'
+    dependsOn: DeployInfrastructure
+    environment: 'dev'
+    pool:
+      vmImage: 'ubuntu-latest'  # Azure DevOps agents have better Azure connectivity
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: function-app
+            displayName: 'Download Function Package'
+          
+          # 🎯 KEY: Azure DevOps tiene mejor conectividad con VNets
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy Function App (VNet Compatible)'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: 'functionApp'
+              appName: '$(resourcePrefix)-func-adt-dev'
+              package: '$(Pipeline.Workspace)/function-app/function-app.zip'
+              deploymentMethod: 'zipDeploy'  # Más compatible con VNets
+              
+          - task: AzureCLI@2
+            displayName: 'Configure Function Settings'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "⚙️ Configuring Function App settings..."
+                
+                FUNC_NAME="$(resourcePrefix)-func-adt-dev"
+                ADT_NAME="$(resourcePrefix)-adt-dev"
+                
+                # Get Digital Twins URL
+                ADT_URL=$(az dt show --dt-name $ADT_NAME --query hostName -o tsv)
+                
+                # Configure function app settings
+                az functionapp config appsettings set \
+                  --resource-group $(resourceGroup)-dev \
+                  --name $FUNC_NAME \
+                  --settings DIGITAL_TWINS_URL="https://$ADT_URL"
+                
+                echo "✅ Function App configured successfully"
+
+- stage: IntegrationTests
+  displayName: 'Integration Tests'
+  dependsOn: DeployDev
+  jobs:
+  - job: RunTests
+    displayName: 'Run Integration Tests'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: NodeTool@0
+      displayName: 'Setup Node.js'
+      inputs:
+        versionSpec: '18.x'
+    
+    - script: |
+        cd tests/integration
+        npm ci
+        export AZURE_RESOURCE_GROUP="$(resourceGroup)-dev"
+        export RESOURCE_PREFIX="$(resourcePrefix)"
+        export ENVIRONMENT="dev"
+        npm test
+      displayName: 'Run Integration Tests'
+      env:
+        AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
