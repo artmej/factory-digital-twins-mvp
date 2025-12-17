@@ -8,6 +8,10 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   RESOURCE_GROUP: factory-rg-dev
   FUNCTION_APP_NAME: factory-function-dev
