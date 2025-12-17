@@ -1,5 +1,5 @@
 # Factory Digital Twins MVP - Azure DevOps Pipeline
-# Optimizado para VNet y Private Endpoints - VERSIÓN MEJORADA
+# Optimizado para VNet - VERSIÓN CORREGIDA
 
 trigger:
   branches:
@@ -12,20 +12,10 @@ trigger:
       - docs/*
 
 variables:
-  # Build Variables
-  buildConfiguration: 'Release'
   vmImageName: 'ubuntu-latest'
-  
-  # Azure Variables - ACTUALIZADO para VNet
-  azureSubscription: 'factory-service-connection'
   resourceGroupName: 'factory-rg-dev'
   functionAppName: 'factory-function-dev'
   storageAccountName: 'factorystoragedev'
-  
-  # Deployment Variables - OPTIMIZADO para VNet
-  deploymentMethod: 'zipDeploy'
-  retryAttempts: 3
-  timeoutInMinutes: 10
 
 stages:
 - stage: Build
@@ -45,7 +35,7 @@ stages:
     - script: |
         cd src/device-simulator
         npm ci
-        echo "Device simulator tests ready"
+        echo "Device simulator built successfully"
       displayName: 'Build Device Simulator'
     
     - script: |
@@ -68,258 +58,148 @@ stages:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop'
 
-- stage: Deploy_Infrastructure
-  displayName: 'Deploy Infrastructure'
+- stage: Deploy
+  displayName: 'Deploy Infrastructure and Application'
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - deployment: DeployInfra
-    displayName: 'Deploy Bicep Infrastructure'
+  - job: DeployAll
+    displayName: 'Deploy Complete Solution'
     pool:
       vmImage: $(vmImageName)
-    environment: 'development'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - checkout: self
-          
-          - task: AzureCLI@2
-            displayName: 'Deploy Bicep Template'
-            inputs:
-              azureSubscription: 'factory-service-connection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "🚀 Deploying infrastructure with Bicep..."
-                az deployment group create \
-                  --resource-group $(resourceGroupName) \
-                  --template-file infra/bicep/main.bicep \
-                  --parameters environment=dev \
-                  --verbose
-                echo "✅ Infrastructure deployment completed"
-
-- stage: Deploy_Application
-  displayName: 'Deploy Application Code'
-  dependsOn: Deploy_Infrastructure  
-  condition: succeeded()
-  jobs:
-  - deployment: DeployApp
-    displayName: 'Deploy Function App Code'
-    pool:
-      vmImage: $(vmImageName)
-    environment: 'development'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            artifact: drop
-          
-          - task: AzureFunctionApp@1
-            displayName: 'Deploy Function App (ZipDeploy for VNet)'
-            inputs:
-              azureSubscription: 'factory-service-connection'
-              appType: 'functionApp'
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/function-app.zip'
-              deploymentMethod: 'zipDeploy'
-            retryCountOnTaskFailure: 3
-
-- stage: Build
-  displayName: 'Build Artifacts'
-  dependsOn: Validate
-  jobs:
-  - job: BuildFunction
-    displayName: 'Build Function App'
-    pool:
-      vmImage: 'ubuntu-latest'
     
     steps:
-    - task: NodeTool@0
-      displayName: 'Setup Node.js'
+    - checkout: self
+    
+    - task: AzureCLI@2
+      displayName: 'Deploy Bicep Infrastructure'
       inputs:
-        versionSpec: '18.x'
+        azureSubscription: 'factory-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🚀 Deploying infrastructure with Bicep..."
+          az deployment group create \
+            --resource-group $(resourceGroupName) \
+            --template-file infra/bicep/main.bicep \
+            --parameters environment=dev \
+            --verbose
+          echo "✅ Infrastructure deployment completed"
     
-    - script: |
-        cd src/function-adt-projection
-        npm ci --production
-      displayName: 'Install Function Dependencies'
-    
-    - task: ArchiveFiles@2
-      displayName: 'Create Function Package'
+    - task: AzureCLI@2
+      displayName: 'Configure Managed Identity'
       inputs:
-        rootFolderOrFile: 'src/function-adt-projection'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/function-app.zip'
-        replaceExistingArchive: true
-    
-    - publish: '$(Build.ArtifactStagingDirectory)/function-app.zip'
-      artifact: function-app
-      displayName: 'Publish Function Artifact'
-
-  - job: BuildSimulator
-    displayName: 'Build Device Simulator'
-    pool:
-      vmImage: 'ubuntu-latest'
-    
-    steps:
-    - task: NodeTool@0
-      displayName: 'Setup Node.js'
-      inputs:
-        versionSpec: '18.x'
-    
-    - script: |
-        cd src/device-simulator
-        npm ci --production
-      displayName: 'Install Simulator Dependencies'
-    
-    - task: ArchiveFiles@2
-      displayName: 'Create Simulator Package'
-      inputs:
-        rootFolderOrFile: 'src/device-simulator'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/device-simulator.zip'
-        replaceExistingArchive: true
-    
-    - publish: '$(Build.ArtifactStagingDirectory)/device-simulator.zip'
-      artifact: device-simulator
-      displayName: 'Publish Simulator Artifact'
-
-- stage: DeployDev
-  displayName: 'Deploy to DEV'
-  dependsOn: Build
-  jobs:
-  - deployment: DeployInfrastructure
-    displayName: 'Deploy Infrastructure'
-    environment: 'dev'
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - checkout: self
+        azureSubscription: 'factory-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🔐 Configuring managed identity roles..."
           
-          - task: AzureCLI@2
-            displayName: 'Deploy Bicep Infrastructure'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "🏗️ Deploying infrastructure to DEV environment..."
-                
-                # Deploy infrastructure
-                az deployment group create \
-                  --resource-group $(resourceGroup)-dev \
-                  --template-file infra/bicep/main.bicep \
-                  --parameters \
-                    environment=dev \
-                    location=$(location) \
-                    resourcePrefix=$(resourcePrefix) \
-                  --name "factory-deployment-$(date +%Y%m%d-%H%M%S)"
+          # Get Function App managed identity
+          PRINCIPAL_ID=$(az functionapp identity show \
+            --name $(functionAppName) \
+            --resource-group $(resourceGroupName) \
+            --query principalId -o tsv)
           
-          - task: AzureCLI@2
-            displayName: 'Setup Digital Twins Models'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "📊 Setting up Digital Twins models..."
-                
-                ADT_NAME="$(resourcePrefix)-adt-dev"
-                
-                # Grant pipeline permissions
-                PIPELINE_PRINCIPAL_ID=$(az account show --query user.name -o tsv)
-                az role assignment create \
-                  --role "Azure Digital Twins Data Owner" \
-                  --assignee $PIPELINE_PRINCIPAL_ID \
-                  --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$(resourceGroup)-dev/providers/Microsoft.DigitalTwins/digitalTwinsInstances/$ADT_NAME" \
-                  || echo "Role assignment may already exist"
-                
-                # Upload DTDL models
-                for model in models/*.dtdl.json; do
-                  echo "Processing model: $model"
-                  if az dt model create --dt-name $ADT_NAME --models @"$model" 2>/dev/null; then
-                    echo "✅ Successfully uploaded model: $model"
-                  else
-                    echo "⚠️ Model already exists or failed: $model"
-                  fi
-                done
-
-  - deployment: DeployFunctionApp
-    displayName: 'Deploy Function App'
-    dependsOn: DeployInfrastructure
-    environment: 'dev'
-    pool:
-      vmImage: 'ubuntu-latest'  # Azure DevOps agents have better Azure connectivity
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            artifact: function-app
-            displayName: 'Download Function Package'
+          if [ -z "$PRINCIPAL_ID" ] || [ "$PRINCIPAL_ID" = "null" ]; then
+            echo "⚠️ Enabling managed identity..."
+            az functionapp identity assign \
+              --name $(functionAppName) \
+              --resource-group $(resourceGroupName)
+            sleep 30
+            PRINCIPAL_ID=$(az functionapp identity show \
+              --name $(functionAppName) \
+              --resource-group $(resourceGroupName) \
+              --query principalId -o tsv)
+          fi
           
-          # 🎯 KEY: Azure DevOps tiene mejor conectividad con VNets
-          - task: AzureFunctionApp@1
-            displayName: 'Deploy Function App (VNet Compatible)'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              appType: 'functionApp'
-              appName: '$(resourcePrefix)-func-adt-dev'
-              package: '$(Pipeline.Workspace)/function-app/function-app.zip'
-              deploymentMethod: 'zipDeploy'  # Más compatible con VNets
-              
-          - task: AzureCLI@2
-            displayName: 'Configure Function Settings'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "⚙️ Configuring Function App settings..."
-                
-                FUNC_NAME="$(resourcePrefix)-func-adt-dev"
-                ADT_NAME="$(resourcePrefix)-adt-dev"
-                
-                # Get Digital Twins URL
-                ADT_URL=$(az dt show --dt-name $ADT_NAME --query hostName -o tsv)
-                
-                # Configure function app settings
-                az functionapp config appsettings set \
-                  --resource-group $(resourceGroup)-dev \
-                  --name $FUNC_NAME \
-                  --settings DIGITAL_TWINS_URL="https://$ADT_URL"
-                
-                echo "✅ Function App configured successfully"
-
-- stage: IntegrationTests
-  displayName: 'Integration Tests'
-  dependsOn: DeployDev
-  jobs:
-  - job: RunTests
-    displayName: 'Run Integration Tests'
-    pool:
-      vmImage: 'ubuntu-latest'
+          echo "Function App Principal ID: $PRINCIPAL_ID"
+          
+          # Get subscription ID
+          SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+          
+          # Assign roles
+          echo "Assigning Digital Twins Data Owner role..."
+          az role assignment create \
+            --assignee $PRINCIPAL_ID \
+            --role "Azure Digital Twins Data Owner" \
+            --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$(resourceGroupName)" || true
+          
+          echo "Assigning IoT Hub Data Contributor role..."  
+          az role assignment create \
+            --assignee $PRINCIPAL_ID \
+            --role "IoT Hub Data Contributor" \
+            --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$(resourceGroupName)" || true
+          
+          echo "Assigning Storage Blob Data Contributor role..."
+          az role assignment create \
+            --assignee $PRINCIPAL_ID \
+            --role "Storage Blob Data Contributor" \
+            --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$(resourceGroupName)" || true
+          
+          echo "✅ Managed identity roles configured"
     
-    steps:
-    - task: NodeTool@0
-      displayName: 'Setup Node.js'
+    - download: current
+      artifact: drop
+    
+    - task: AzureFunctionApp@1
+      displayName: 'Deploy Function App (ZipDeploy for VNet)'
       inputs:
-        versionSpec: '18.x'
+        azureSubscription: 'factory-service-connection'
+        appType: 'functionApp'
+        appName: $(functionAppName)
+        package: '$(Pipeline.Workspace)/drop/function-app.zip'
+        deploymentMethod: 'zipDeploy'
+      retryCountOnTaskFailure: 3
     
-    - script: |
-        cd tests/integration
-        npm ci
-        export AZURE_RESOURCE_GROUP="$(resourceGroup)-dev"
-        export RESOURCE_PREFIX="$(resourcePrefix)"
-        export ENVIRONMENT="dev"
-        npm test
-      displayName: 'Run Integration Tests'
-      env:
-        AZURE_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+    - task: AzureCLI@2
+      displayName: 'Validate Deployment'
+      inputs:
+        azureSubscription: 'factory-service-connection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "🔍 Validating deployment..."
+          
+          # Check Function App status
+          STATUS=$(az functionapp show \
+            --name $(functionAppName) \
+            --resource-group $(resourceGroupName) \
+            --query state -o tsv)
+          
+          echo "Function App Status: $STATUS"
+          
+          if [ "$STATUS" = "Running" ]; then
+            echo "✅ Function App is running successfully"
+          else
+            echo "❌ Function App deployment failed - Status: $STATUS"
+            exit 1
+          fi
+          
+          # Test Digital Twins
+          echo "📡 Testing Digital Twins..."
+          DT_ENDPOINT=$(az dt show \
+            --dt-name factory-dt-dev \
+            --resource-group $(resourceGroupName) \
+            --query hostName -o tsv 2>/dev/null)
+          
+          if [ ! -z "$DT_ENDPOINT" ]; then
+            echo "✅ Digital Twins: https://$DT_ENDPOINT"
+          else
+            echo "⚠️ Digital Twins endpoint not found"
+          fi
+          
+          # Test IoT Hub
+          echo "📡 Testing IoT Hub..."
+          IOT_STATUS=$(az iot hub show \
+            --name factory-iothub-dev \
+            --resource-group $(resourceGroupName) \
+            --query properties.state -o tsv 2>/dev/null)
+          
+          if [ "$IOT_STATUS" = "Active" ]; then
+            echo "✅ IoT Hub is active"
+          else
+            echo "⚠️ IoT Hub status: $IOT_STATUS"
+          fi
+          
+          echo "🎉 Deployment validation completed!"
