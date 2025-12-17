@@ -124,7 +124,7 @@ stages:
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/function-app.zip'
               deploymentMethod: 'zipDeploy'
-            retryCountOnTaskFailure: $(retryAttempts)
+            retryCountOnTaskFailure: 3
 
 - stage: Build
   displayName: 'Build Artifacts'
