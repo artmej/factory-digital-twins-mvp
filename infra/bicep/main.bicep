@@ -210,8 +210,16 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           value: 'https://${digitalTwins.properties.hostName}'
         }
         {
-          name: 'IOTHUB_CONNECTION'
-          value: 'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listKeys().value[0].primaryKey};EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
+          name: 'IOTHUB_EVENTHUB_PATH'
+          value: iotHub.properties.eventHubEndpoints.events.path
+        }
+        {
+          name: 'IOTHUB_EVENTHUB_ENDPOINT__fullyQualifiedNamespace'
+          value: '${iotHub.name}.azure-devices.net'
+        }
+        {
+          name: 'IOTHUB_NAME'
+          value: iotHub.name
         }
       ]
     }
@@ -233,6 +241,22 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(digitalTwins.id, functionApp.id, digitalTwinsDataOwnerRole.id)
   properties: {
     roleDefinitionId: digitalTwinsDataOwnerRole.id
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Role Assignment: Function App as IoT Hub Data Contributor
+resource iotHubDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: subscription()
+  name: '4fc6c259-987e-4a07-842e-c321cc9d413f' // IoT Hub Data Contributor
+}
+
+resource iotHubRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: iotHub
+  name: guid(iotHub.id, functionApp.id, iotHubDataContributorRole.id)
+  properties: {
+    roleDefinitionId: iotHubDataContributorRole.id
     principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
   }

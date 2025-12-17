@@ -219,89 +219,43 @@ jobs:
           
           echo "📦 Using storage account: $STORAGE_ACCOUNT"
           
-          # Temporarily allow access from VNet
-          echo "🔓 Temporarily allowing VNet access to storage account..."
+          # Use Function App with VNet integration for deployment
+          echo "🔗 Using Function App managed identity for storage deployment..."
           
-          # Add VNet subnet to storage account network rules
-          VNET_NAME="${{ env.RESOURCE_PREFIX }}-vnet-dev"
-          SUBNET_NAME="default"
+          # Get Function App managed identity
+          FUNC_PRINCIPAL_ID=$(az functionapp identity show --name $FUNC_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev --query principalId -o tsv)
           
-          echo "Adding VNet access: $VNET_NAME/$SUBNET_NAME"
-          az storage account network-rule add \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --account-name $STORAGE_ACCOUNT \
-            --vnet-name $VNET_NAME \
-            --subnet $SUBNET_NAME || echo "VNet rule may already exist"
-          
-          # Also temporarily enable additional Azure services
-          echo "🔓 Enabling Azure services bypass..."
-          az storage account update \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --name $STORAGE_ACCOUNT \
-            --bypass AzureServices Metrics Logging
+          # Ensure Function App has Storage Blob Data Contributor role
+          az role assignment create \
+            --role "Storage Blob Data Contributor" \
+            --assignee $FUNC_PRINCIPAL_ID \
+            --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}-dev/providers/Microsoft.Storage/storageAccounts/$STORAGE_ACCOUNT" \
+            || echo "Role assignment may already exist"
           
           # Wait for network rule to take effect
           echo "⏱️  Waiting for network rules to propagate..."
-          sleep 15
+          sleep 30
           
-          # Use Azure RBAC instead of keys (organizationally required)
-          echo "🔐 Using Azure RBAC authentication for storage operations..."
+          # Deploy using Azure CLI with managed identity authentication
+          echo "📦 Deploying function package via Azure CLI..."
           
-          # Create container for function packages
-          CONTAINER_NAME="function-releases"
-          BLOB_NAME="function-app-$(date +%Y%m%d-%H%M%S).zip"
-          
-          echo "📂 Creating container: $CONTAINER_NAME"
-          az storage container create \
-            --name $CONTAINER_NAME \
-            --account-name $STORAGE_ACCOUNT \
-            --auth-mode login \
-            --public-access off || echo "Container may already exist"
-          
-          # Upload function package using RBAC
-          echo "⬆️  Uploading function package: $BLOB_NAME"
-          az storage blob upload \
-            --file function-app.zip \
-            --name $BLOB_NAME \
-            --container-name $CONTAINER_NAME \
-            --account-name $STORAGE_ACCOUNT \
-            --auth-mode login \
-            --overwrite
-          
-          # Generate SAS URL using RBAC (valid for 1 year) 
-          EXPIRY=$(date -u -d "1 year" +"%Y-%m-%dT%H:%MZ")
-          PACKAGE_URL=$(az storage blob generate-sas \
-            --account-name $STORAGE_ACCOUNT \
-            --container-name $CONTAINER_NAME \
-            --name $BLOB_NAME \
-            --permissions r \
-            --expiry $EXPIRY \
-            --auth-mode login \
-            --as-user \
-            --full-uri -o tsv)
-          
-          echo "🔗 Package URL generated: ${PACKAGE_URL:0:50}..."
-          
-          # Configure Function App to run from package
-          echo "⚙️  Configuring WEBSITE_RUN_FROM_PACKAGE setting..."
-          az functionapp config appsettings set \
+          # Deploy function app package
+          echo "🚀 Deploying via Azure CLI functionapp deployment..."
+          az functionapp deployment source config-zip \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
             --name $FUNC_NAME \
-            --settings WEBSITE_RUN_FROM_PACKAGE="$PACKAGE_URL"
+            --src function-app.zip
           
-          # Clean up - remove VNet access and restore original bypass settings
-          echo "🔒 Restoring storage network rules to original state..."
-          az storage account network-rule remove \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --account-name $STORAGE_ACCOUNT \
-            --vnet-name $VNET_NAME \
-            --subnet $SUBNET_NAME || echo "VNet rule removal failed or already removed"
+          # Wait for deployment to complete
+          echo "⏱️  Waiting for Kudu deployment to complete..."
+          sleep 20
           
-          # Restore original bypass settings
-          az storage account update \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev \
-            --name $STORAGE_ACCOUNT \
-            --bypass AzureServices || echo "Bypass update failed"
+          # Verify deployment status
+          echo "✅ Checking deployment status..."
+          az functionapp show --name $FUNC_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }}-dev --query "state" -o tsv
+          
+          # No storage cleanup needed since we used Azure CLI
+          echo "✅ Deployment completed via Kudu API - no storage rules modified"
           
           echo "✅ Function App deployment completed using run-from-package!"
 
