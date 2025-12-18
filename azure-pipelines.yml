@@ -9,7 +9,7 @@ trigger:
 variables:
   vmImageName: 'ubuntu-latest'
   resourceGroupName: 'factory-rg-dev'
-  functionAppName: 'factory-function-dev'
+  functionAppName: 'factory-func-adt-dev'
 
 stages:
 - stage: Test
