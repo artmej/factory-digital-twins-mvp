@@ -1,0 +1,29 @@
+# Test Pipeline Básico
+# Para verificar que Azure DevOps funciona
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    echo "🧪 Probando pipeline básico..."
+    echo "Archivos en el directorio:"
+    ls -la
+    echo "✅ Test básico completado"
+  displayName: 'Test Básico'
+
+- task: AzureCLI@2
+  displayName: 'Test Azure Connection'
+  inputs:
+    azureSubscription: 'factory-service-connection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "🔐 Probando conexión a Azure..."
+      az account show
+      echo "✅ Conexión OK"
