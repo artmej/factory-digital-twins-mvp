@@ -1,11 +1,12 @@
 name: Smart Factory Maintenance - Predictive AI Pipeline
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+# DISABLED: OIDC authentication issues
+# on:
+#   push:
+#     branches: [ main, develop ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
     inputs:
       environment:
         description: 'Deploy Environment'

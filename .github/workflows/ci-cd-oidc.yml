@@ -1,7 +1,8 @@
 name: Factory Digital Twins CI/CD (OIDC - Disabled)
 
-on:
-  workflow_dispatch:
+# DISABLED: Missing OIDC secrets causing authentication failures
+# on:
+#   workflow_dispatch:
     inputs:
       force_run:
         description: 'Force run this workflow'

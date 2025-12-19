@@ -1,11 +1,12 @@
 name: Factory Digital Twins - DevOps Foundation
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+# DISABLED: OIDC authentication failure
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
 
 permissions:
   id-token: write
