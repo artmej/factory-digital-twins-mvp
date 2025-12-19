@@ -19,6 +19,9 @@ var appServicePlanName = '${resourcePrefix}-plan-${environment}'
 var vnetName = '${resourcePrefix}-vnet-${environment}'
 var subnetName = 'default'
 var privateEndpointsSubnetName = 'private-endpoints'
+var aciSubnetName = 'aci-agents'
+var aciName = '${resourcePrefix}-aci-agent-${environment}'
+var logAnalyticsName = '${resourcePrefix}-logs-${environment}'
 
 // Virtual Network
 resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
@@ -55,6 +58,20 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
         properties: {
           addressPrefix: '10.0.2.0/24'
           privateEndpointNetworkPolicies: 'Disabled'
+        }
+      }
+      {
+        name: aciSubnetName
+        properties: {
+          addressPrefix: '10.0.3.0/24'
+          delegations: [
+            {
+              name: 'Microsoft.ContainerInstance.containerGroups'
+              properties: {
+                serviceName: 'Microsoft.ContainerInstance/containerGroups'
+              }
+            }
+          ]
         }
       }
     ]
@@ -324,9 +341,64 @@ resource storagePrivateEndpointFile 'Microsoft.Network/privateEndpoints@2023-05-
 // Note: IoT Device creation moved to post-deployment script
 // Creating devices via Bicep has compatibility issues
 
+// Log Analytics for ACI monitoring
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: logAnalyticsName
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+// Azure Container Instances for self-hosted DevOps agent
+resource aciAgent 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
+  name: aciName
+  location: location
+  properties: {
+    containers: [
+      {
+        name: 'devops-agent'
+        properties: {
+          image: 'ubuntu:22.04'
+          resources: {
+            requests: {
+              cpu: 1
+              memoryInGB: 2
+            }
+          }
+          command: [
+            '/bin/bash'
+            '-c'
+            'apt-get update && apt-get install -y curl wget git && sleep infinity'
+          ]
+        }
+      }
+    ]
+    osType: 'Linux'
+    restartPolicy: 'Always'
+    subnetIds: [
+      {
+        id: '${vnet.id}/subnets/${aciSubnetName}'
+      }
+    ]
+    diagnostics: {
+      logAnalytics: {
+        workspaceId: logAnalytics.properties.customerId
+        workspaceKey: logAnalytics.listKeys().primarySharedKey
+      }
+    }
+  }
+}
+
 // Outputs
 output digitalTwinsName string = digitalTwins.name
 output digitalTwinsUrl string = 'https://${digitalTwins.properties.hostName}'
 output iotHubName string = iotHub.name
 output functionAppName string = functionApp.name
 output iotHubConnectionString string = 'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listKeys().value[0].primaryKey};EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
+output aciName string = aciAgent.name
+output logAnalyticsName string = logAnalytics.name
+output aciSubnetId string = '${vnet.id}/subnets/${aciSubnetName}'
