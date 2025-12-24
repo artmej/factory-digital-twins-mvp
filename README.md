@@ -1,23 +1,33 @@
-# Smart Factory Digital Twins - Complete Solution
+# Smart Factory - Azure Hybrid Solution
 
-[![CI/CD](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml/badge.svg)](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Solución completa de Digital Twins** para Smart Factory con Edge Computing, IoT, IA y visualización 3D. Incluye migración VMware → Azure Local con capacidades híbridas.
+Modern smart manufacturing solution combining Azure Cloud services with Azure Local on-premises infrastructure for real-time factory operations, predictive maintenance, and intelligent automation.
 
-## 🏭 **Arquitectura Híbrida**
+## 🏭 Overview
+
+This solution demonstrates a complete **Industry 4.0** implementation featuring:
+
+- **Hybrid Architecture**: Seamless integration between Azure Local (on-premise) and Azure Cloud
+- **Digital Twins**: Real-time digital representation of factory equipment and processes  
+- **IoT Integration**: Industrial sensor data collection and processing
+- **AI/ML Analytics**: Predictive maintenance and process optimization
+- **Mobile & Web Apps**: Multi-user interfaces for factory workers, engineers, and management
+
+## 🏗️ Architecture
 
 ```
-🏭 Edge Computing (Azure Local) → 📡 IoT Hub → ⚡ Azure Functions → 🔗 Digital Twins → 📊 Power BI
-     ↓                                ↓                    ↓                    ↓
-📱 Local Dashboard              🤖 AI Processing     📐 DTDL Models      🎮 3D Visualization
-```
+🏭 Azure Local (On-Premise)     ↔     ☁️ Azure Cloud
+├── arc-simple VM               ←→    ├── Azure Digital Twins
+├── Factory Simulator           ←→    ├── Azure IoT Hub  
+├── Industrial Sensors          ←→    ├── Azure Functions
+└── Azure Arc Agent            ←→    └── Power BI Analytics
 
-## 🎯 **Current Status: Stage 2 Complete**
-- ✅ **Edge Infrastructure**: Azure VM con Windows Server 2022 + Hyper-V
-- ✅ **Local Processing**: PLC Simulator + Real-time Dashboard  
-- ✅ **Data Persistence**: Local logging + telemetry tracking
-- 🔄 **Next**: IoT Hub integration + Digital Twins activation
+📱 Applications Layer
+├── React Native Mobile App (Factory Workers)
+├── Progressive Web App (Process Engineers)  
+└── Power BI Dashboards (Management)
+```
 
 ## 🚀 **Componentes**
 
