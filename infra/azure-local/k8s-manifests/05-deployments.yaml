@@ -1,0 +1,664 @@
+---
+# Factory Simulator Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factory-simulator
+  namespace: smart-factory
+  labels:
+    app: factory-simulator
+    component: simulation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: factory-simulator
+  template:
+    metadata:
+      labels:
+        app: factory-simulator
+        component: simulation
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: factory-simulator
+        image: node:18-alpine
+        ports:
+        - containerPort: 8080
+        - containerPort: 8081
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: FACTORY_ID
+          value: "SmartFactory-AzureLocal-001"
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        - name: INFLUXDB_URL  
+          value: "http://influxdb:8086"
+        volumeMounts:
+        - name: factory-config
+          mountPath: /app/config
+        - name: factory-data
+          mountPath: /app/data
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          cd /app
+          cat > package.json << 'EOF'
+          {
+            "name": "factory-simulator",
+            "version": "1.0.0",
+            "main": "server.js",
+            "dependencies": {
+              "express": "^4.18.0",
+              "socket.io": "^4.7.0",
+              "redis": "^4.6.0",
+              "influx": "^5.9.0",
+              "uuid": "^9.0.0"
+            }
+          }
+          EOF
+          
+          npm install
+          
+          cat > server.js << 'EOF'
+          const express = require('express');
+          const http = require('http');
+          const socketIo = require('socket.io');
+          const redis = require('redis');
+          const { InfluxDB } = require('influx');
+          const fs = require('fs');
+          
+          const app = express();
+          const server = http.createServer(app);
+          const io = socketIo(server);
+          
+          // Configuration
+          const config = JSON.parse(fs.readFileSync('/app/config/factory.json', 'utf8'));
+          
+          // Redis connection
+          const redisClient = redis.createClient({url: process.env.REDIS_URL});
+          redisClient.connect().catch(console.error);
+          
+          // InfluxDB connection 
+          const influx = new InfluxDB({
+            host: 'influxdb',
+            database: 'factory_data',
+            schema: [
+              {
+                measurement: 'sensors',
+                fields: {
+                  value: InfluxDB.FieldType.FLOAT,
+                  status: InfluxDB.FieldType.STRING
+                },
+                tags: ['sensorId', 'machineId', 'lineId', 'type']
+              }
+            ]
+          });
+          
+          console.log('🏭 Smart Factory Simulator Starting...');
+          console.log(`Factory ID: ${config.factoryId}`);
+          console.log(`Production Lines: ${config.productionLines.length}`);
+          console.log(`Robots: ${config.robots.length}`);
+          
+          let simulationData = {
+            timestamp: Date.now(),
+            factory: config.factoryId,
+            status: 'running',
+            production: {
+              totalUnits: 0,
+              efficiency: 85.5,
+              quality: 98.2,
+              oee: 84.1
+            },
+            lines: config.productionLines.map(line => ({
+              ...line,
+              currentSpeed: Math.random() * 100,
+              efficiency: 80 + Math.random() * 20,
+              output: Math.floor(Math.random() * 1000)
+            })),
+            robots: config.robots.map(robot => ({
+              ...robot,
+              load: Math.random() * 100,
+              cycles: Math.floor(Math.random() * 10000),
+              errors: Math.floor(Math.random() * 5)
+            }))
+          };
+          
+          // Simulation loop
+          setInterval(() => {
+            // Update factory data
+            simulationData.timestamp = Date.now();
+            simulationData.production.totalUnits += Math.floor(Math.random() * 10);
+            simulationData.production.efficiency = Math.max(70, Math.min(100, simulationData.production.efficiency + (Math.random() - 0.5) * 5));
+            
+            // Update lines
+            simulationData.lines.forEach(line => {
+              line.currentSpeed = Math.max(0, Math.min(100, line.currentSpeed + (Math.random() - 0.5) * 10));
+              line.output += Math.floor(Math.random() * 5);
+              
+              // Generate sensor data
+              line.sensors.forEach(sensor => {
+                let value;
+                switch(sensor.type) {
+                  case 'temperature': value = 20 + Math.random() * 60; break;
+                  case 'pressure': value = 10 + Math.random() * 50; break;
+                  case 'vibration': value = Math.random() * 100; break;
+                  case 'speed': value = Math.random() * 1000; break;
+                  case 'weight': value = 0.5 + Math.random() * 10; break;
+                  default: value = Math.random() * 100;
+                }
+                
+                // Store in InfluxDB
+                influx.writePoints([{
+                  measurement: 'sensors',
+                  tags: { 
+                    sensorId: sensor.id, 
+                    machineId: line.machines[0].id,
+                    lineId: line.id,
+                    type: sensor.type 
+                  },
+                  fields: { value, status: 'ok' }
+                }]).catch(err => console.error('InfluxDB Error:', err));
+                
+                // Store in Redis for real-time access
+                redisClient.setEx(`sensor:${sensor.id}`, 300, JSON.stringify({
+                  value, unit: sensor.unit, timestamp: Date.now()
+                })).catch(console.error);
+              });
+            });
+            
+            // Update robots
+            simulationData.robots.forEach(robot => {
+              robot.cycles += Math.floor(Math.random() * 3);
+              robot.load = Math.max(0, Math.min(100, robot.load + (Math.random() - 0.5) * 20));
+              
+              // Robot movement simulation
+              if (robot.type === 'Autonomous Guided Vehicle') {
+                robot.coordinates.x = Math.max(0, Math.min(1000, robot.coordinates.x + (Math.random() - 0.5) * 20));
+                robot.coordinates.y = Math.max(0, Math.min(500, robot.coordinates.y + (Math.random() - 0.5) * 20));
+              }
+            });
+            
+            // Broadcast updates via WebSocket
+            io.emit('factoryUpdate', simulationData);
+            
+            // Store current state in Redis
+            redisClient.setEx('factory:current', 60, JSON.stringify(simulationData)).catch(console.error);
+            
+          }, config.simulation.dataInterval);
+          
+          // REST API Endpoints
+          app.get('/api/status', (req, res) => {
+            res.json({status: 'running', factory: config.factoryId, timestamp: Date.now()});
+          });
+          
+          app.get('/api/factory', (req, res) => {
+            res.json(simulationData);
+          });
+          
+          app.get('/api/lines', (req, res) => {
+            res.json(simulationData.lines);
+          });
+          
+          app.get('/api/robots', (req, res) => {
+            res.json(simulationData.robots);
+          });
+          
+          // WebSocket connections
+          io.on('connection', (socket) => {
+            console.log('Client connected');
+            socket.emit('factoryUpdate', simulationData);
+            
+            socket.on('disconnect', () => {
+              console.log('Client disconnected');
+            });
+          });
+          
+          // Health check
+          app.get('/health', (req, res) => res.json({status: 'healthy'}));
+          
+          server.listen(8080, () => {
+            console.log('🏭 Factory Simulator running on port 8080');
+          });
+          
+          // WebSocket server on separate port
+          const wsServer = http.createServer();
+          const wsIo = socketIo(wsServer);
+          wsIo.on('connection', (socket) => {
+            console.log('WebSocket client connected');
+            setInterval(() => socket.emit('data', simulationData), 1000);
+          });
+          wsServer.listen(8081, () => {
+            console.log('🔌 WebSocket server running on port 8081');  
+          });
+          EOF
+          
+          node server.js
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: factory-config
+        configMap:
+          name: factory-config
+      - name: factory-data
+        persistentVolumeClaim:
+          claimName: factory-data-pvc
+
+---
+# Robot Controller Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: robot-controller
+  namespace: smart-factory
+  labels:
+    app: robot-controller
+    component: control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: robot-controller
+  template:
+    metadata:
+      labels:
+        app: robot-controller
+        component: control
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: robot-controller
+        image: node:18-alpine
+        ports:
+        - containerPort: 8082
+        - containerPort: 8083
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        volumeMounts:
+        - name: robot-config
+          mountPath: /app/config
+        - name: robot-data
+          mountPath: /app/data
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          cd /app
+          cat > package.json << 'EOF'
+          {
+            "name": "robot-controller",
+            "version": "1.0.0",
+            "main": "robot-server.js", 
+            "dependencies": {
+              "express": "^4.18.0",
+              "socket.io": "^4.7.0",
+              "redis": "^4.6.0",
+              "uuid": "^9.0.0",
+              "robotjs": "^0.6.0"
+            }
+          }
+          EOF
+          
+          npm install || npm install --omit=optional
+          
+          cat > robot-server.js << 'EOF'
+          const express = require('express');
+          const http = require('http');
+          const socketIo = require('socket.io');
+          const redis = require('redis');
+          const fs = require('fs');
+          
+          const app = express();
+          const server = http.createServer(app);
+          const io = socketIo(server);
+          
+          app.use(express.json());
+          
+          // Robot configuration
+          const robotConfig = JSON.parse(fs.readFileSync('/app/config/robot-control.json', 'utf8'));
+          
+          // Redis connection
+          const redisClient = redis.createClient({url: process.env.REDIS_URL});
+          redisClient.connect().catch(console.error);
+          
+          console.log('🤖 Robot Controller Starting...');
+          console.log(`Controllers: ${robotConfig.robotControllers.length}`);
+          
+          let robotStates = robotConfig.robotControllers.map(controller => ({
+            ...controller,
+            status: 'ready',
+            position: {x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0},
+            speed: 0,
+            load: 0,
+            errors: [],
+            currentProgram: null,
+            lastUpdate: Date.now()
+          }));
+          
+          // Robot control simulation
+          setInterval(() => {
+            robotStates.forEach(robot => {
+              robot.lastUpdate = Date.now();
+              robot.speed = Math.random() * robot.maxSpeed;
+              robot.load = Math.random() * robot.payload;
+              
+              // Simulate robot movement
+              robot.position.x += (Math.random() - 0.5) * 10;
+              robot.position.y += (Math.random() - 0.5) * 10;
+              robot.position.z = Math.max(0, robot.position.z + (Math.random() - 0.5) * 5);
+              
+              // Simulate program execution
+              if (robot.currentProgram && Math.random() > 0.95) {
+                robot.currentProgram = null;
+                robot.status = 'ready';
+              }
+              
+              // Store robot state
+              redisClient.setEx(`robot:${robot.robotId}`, 60, JSON.stringify(robot))
+                .catch(console.error);
+            });
+            
+            // Broadcast robot updates
+            io.emit('robotUpdate', robotStates);
+          }, 1000);
+          
+          // API Endpoints
+          app.get('/api/robots', (req, res) => {
+            res.json(robotStates);
+          });
+          
+          app.get('/api/robots/:id', (req, res) => {
+            const robot = robotStates.find(r => r.robotId === req.params.id);
+            if (robot) {
+              res.json(robot);
+            } else {
+              res.status(404).json({error: 'Robot not found'});
+            }
+          });
+          
+          app.post('/api/robots/:id/program', (req, res) => {
+            const robot = robotStates.find(r => r.robotId === req.params.id);
+            if (robot) {
+              const {programName} = req.body;
+              const program = robot.programs.find(p => p.name === programName);
+              if (program) {
+                robot.currentProgram = programName;
+                robot.status = 'running';
+                res.json({success: true, message: `Program ${programName} started`});
+              } else {
+                res.status(400).json({error: 'Program not found'});
+              }
+            } else {
+              res.status(404).json({error: 'Robot not found'});
+            }
+          });
+          
+          app.post('/api/robots/:id/stop', (req, res) => {
+            const robot = robotStates.find(r => r.robotId === req.params.id);
+            if (robot) {
+              robot.currentProgram = null;
+              robot.status = 'stopped';
+              res.json({success: true, message: 'Robot stopped'});
+            } else {
+              res.status(404).json({error: 'Robot not found'});
+            }
+          });
+          
+          app.post('/api/robots/:id/move', (req, res) => {
+            const robot = robotStates.find(r => r.robotId === req.params.id);
+            if (robot) {
+              const {x, y, z, rx, ry, rz} = req.body;
+              robot.position = {x: x || robot.position.x, y: y || robot.position.y, 
+                              z: z || robot.position.z, rx: rx || robot.position.rx,
+                              ry: ry || robot.position.ry, rz: rz || robot.position.rz};
+              res.json({success: true, position: robot.position});
+            } else {
+              res.status(404).json({error: 'Robot not found'});
+            }
+          });
+          
+          // WebSocket handling
+          io.on('connection', (socket) => {
+            console.log('Robot control client connected');
+            socket.emit('robotUpdate', robotStates);
+            
+            socket.on('robotCommand', (data) => {
+              console.log('Robot command received:', data);
+              // Handle real-time robot commands
+            });
+          });
+          
+          app.get('/health', (req, res) => res.json({status: 'healthy'}));
+          
+          server.listen(8082, () => {
+            console.log('🤖 Robot Controller running on port 8082');
+          });
+          
+          // API server on separate port
+          const apiServer = express();
+          apiServer.use(express.json());
+          apiServer.get('/status', (req, res) => {
+            res.json({
+              controller: 'robot-controller',
+              robots: robotStates.length,
+              active: robotStates.filter(r => r.status === 'running').length,
+              timestamp: Date.now()
+            });
+          });
+          apiServer.listen(8083, () => {
+            console.log('🔌 Robot API server running on port 8083');
+          });
+          EOF
+          
+          node robot-server.js
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+      volumes:
+      - name: robot-config
+        configMap:
+          name: factory-config
+      - name: robot-data
+        persistentVolumeClaim:
+          claimName: robot-data-pvc
+
+---
+# SCADA Dashboard Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scada-dashboard
+  namespace: smart-factory
+  labels:
+    app: scada-dashboard
+    component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scada-dashboard
+  template:
+    metadata:
+      labels:
+        app: scada-dashboard
+        component: monitoring
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: scada-dashboard
+        image: nginx:alpine
+        ports:
+        - containerPort: 8084
+        volumeMounts:
+        - name: scada-content
+          mountPath: /usr/share/nginx/html
+        - name: scada-config
+          mountPath: /etc/nginx/conf.d
+      - name: scada-backend
+        image: node:18-alpine
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        - name: INFLUXDB_URL
+          value: "http://influxdb:8086"
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          cat > /tmp/scada-backend.js << 'EOF'
+          const http = require('http');
+          const url = require('url');
+          const redis = require('redis');
+          
+          const redisClient = redis.createClient({url: process.env.REDIS_URL});
+          redisClient.connect().catch(console.error);
+          
+          const server = http.createServer(async (req, res) => {
+            const pathname = url.parse(req.url).pathname;
+            
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Content-Type', 'application/json');
+            
+            if (pathname === '/api/factory-data') {
+              try {
+                const data = await redisClient.get('factory:current');
+                res.end(data || '{"error": "No data available"}');
+              } catch (err) {
+                res.end('{"error": "Redis connection failed"}');
+              }
+            } else {
+              res.statusCode = 404;
+              res.end('{"error": "Not found"}');
+            }
+          });
+          
+          server.listen(3000);
+          console.log('SCADA Backend running on port 3000');
+          EOF
+          
+          cd /tmp && npm init -y && npm install redis
+          node scada-backend.js
+      volumes:
+      - name: scada-content
+        configMap:
+          name: scada-html
+      - name: scada-config
+        configMap:
+          name: scada-nginx-config
+
+---
+# InfluxDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: smart-factory
+  labels:
+    app: influxdb
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+        component: database
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:1.8-alpine
+        ports:
+        - containerPort: 8086
+        env:
+        - name: INFLUXDB_DB
+          value: "factory_data"
+        - name: INFLUXDB_USER
+          value: "admin"
+        - name: INFLUXDB_USER_PASSWORD
+          value: "smartfactory2024"
+        volumeMounts:
+        - name: influxdb-data
+          mountPath: /var/lib/influxdb
+        - name: influxdb-config
+          mountPath: /etc/influxdb
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi" 
+            cpu: "500m"
+      volumes:
+      - name: influxdb-data
+        persistentVolumeClaim:
+          claimName: influxdb-data-pvc
+      - name: influxdb-config
+        configMap:
+          name: influxdb-config
+
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment  
+metadata:
+  name: redis
+  namespace: smart-factory
+  labels:
+    app: redis
+    component: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+        component: cache
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-config
+          mountPath: /etc/redis
+        command: ["redis-server", "/etc/redis/redis.conf"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m" 
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: redis-data-pvc
+      - name: redis-config
+        configMap:
+          name: redis-config

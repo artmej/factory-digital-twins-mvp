@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smart-factory
+  labels:
+    environment: edge
+    location: on-premises
+    azure-local: "true"
+    version: "1.0"
+---
+apiVersion: v1  
+kind: Namespace
+metadata:
+  name: smart-factory-system
+  labels:
+    environment: edge
+    location: on-premises
+    azure-local: "true"
+    type: system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smart-factory-monitoring
+  labels:
+    environment: edge
+    location: on-premises
+    azure-local: "true"
+    type: monitoring

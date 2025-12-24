@@ -1,0 +1,14 @@
+{
+  "name": "smart-factory-mobile-server",
+  "version": "1.0.0",
+  "description": "Mobile server for Smart Factory application",
+  "main": "mobile-server.js",
+  "scripts": {
+    "start": "node mobile-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "author": "Smart Factory Team",
+  "license": "MIT"
+}

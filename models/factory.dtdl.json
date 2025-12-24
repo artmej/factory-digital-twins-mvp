@@ -1,6 +1,6 @@
 {
   "@context": "dtmi:dtdl:context;3",
-  "@id": "dtmi:mx:factory;1",
+  "@id": "dtmi:smartfactory:Factory;1",
   "@type": "Interface",
   "displayName": "Factory",
   "description": "A factory that contains production lines",

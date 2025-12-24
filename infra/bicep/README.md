@@ -1,6 +1,42 @@
-# Factory Digital Twins MVP - Bicep Infrastructure
+# Smart Factory - Infrastructure as Code
 
-Esta carpeta contiene la infraestructura como código (IaC) para el MVP de Factory Digital Twins.
+## 🏗️ **Bicep Templates - Final Version**
+
+### **Core Infrastructure (Production Ready)**
+- **`main.bicep`** - Principal entry point para deployment
+- **`core-infrastructure.bicep`** - Azure Digital Twins + IoT Hub + Functions
+- **`ml-infrastructure.bicep`** - Machine Learning services
+
+### **Edge Computing (Hybrid Demo)**  
+- **`arc-simple.bicep`** - VM para Azure Local simulation (ACTUAL)
+- **`aks-edge-simulation.bicep`** - Kubernetes Edge deployment
+- **`vm-infrastructure.bicep`** - VM infrastructure utilities
+
+### **Legacy (Compatibility)**
+- **`azure-local-simple.bicep`** - Basic Azure Local setup
+- **`azure-local-simplified.bicep`** - Simplified deployment
+
+## 🎯 **Current Deployment**
+```bash
+# Deploy main infrastructure
+az deployment group create \
+  --resource-group factory-rg \
+  --template-file main.bicep
+
+# Deploy edge computing demo (current)  
+az deployment group create \
+  --resource-group rg-arc-simple \
+  --template-file arc-simple.bicep \
+  --parameters @arc-simple.parameters.json
+```
+
+## ✅ **Cleaned Up**
+Removed 20+ duplicate/experimental files:
+- All arc-* attempts (jumpstart, win-ssh, automated, etc.)
+- All azure-local-* duplicates (complete, auto, working, etc.)
+- All setup/deploy scripts (consolidated in main deployment)
+
+**Only production-ready templates remain.**
 
 ## Recursos Desplegados
 

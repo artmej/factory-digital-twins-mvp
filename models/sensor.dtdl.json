@@ -1,6 +1,6 @@
 {
   "@context": "dtmi:dtdl:context;3",
-  "@id": "dtmi:mx:factory:sensor;1",
+  "@id": "dtmi:smartfactory:Sensor;1",
   "@type": "Interface",
   "displayName": "Sensor",
   "description": "A sensor attached to manufacturing equipment",

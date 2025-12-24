@@ -1,0 +1,185 @@
+---
+# Factory Simulator Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: factory-config
+  namespace: smart-factory
+data:
+  factory.json: |
+    {
+      "factoryId": "SmartFactory-AzureLocal-001",
+      "location": "On-Premises Edge",
+      "productionLines": [
+        {
+          "id": "line-01",
+          "name": "Assembly Line Alpha",
+          "machines": [
+            {"id": "machine-01", "type": "CNC", "status": "running"},
+            {"id": "machine-02", "type": "Robot Arm", "status": "running"},
+            {"id": "machine-03", "type": "Quality Inspector", "status": "running"}
+          ],
+          "sensors": [
+            {"id": "temp-01", "type": "temperature", "unit": "celsius"},
+            {"id": "vibration-01", "type": "vibration", "unit": "hz"},
+            {"id": "pressure-01", "type": "pressure", "unit": "psi"}
+          ]
+        },
+        {
+          "id": "line-02", 
+          "name": "Packaging Line Beta",
+          "machines": [
+            {"id": "machine-04", "type": "Conveyor", "status": "running"},
+            {"id": "machine-05", "type": "Packaging Robot", "status": "running"},
+            {"id": "machine-06", "type": "Label Printer", "status": "running"}
+          ],
+          "sensors": [
+            {"id": "speed-01", "type": "speed", "unit": "mpm"},
+            {"id": "weight-01", "type": "weight", "unit": "kg"},
+            {"id": "count-01", "type": "counter", "unit": "units"}
+          ]
+        }
+      ],
+      "robots": [
+        {
+          "id": "robot-arm-01",
+          "type": "6-axis Industrial Arm", 
+          "model": "KUKA KR 10 R1100",
+          "location": "line-01",
+          "capabilities": ["welding", "pick-place", "assembly"],
+          "status": "operational",
+          "coordinates": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}
+        },
+        {
+          "id": "robot-arm-02",
+          "type": "Collaborative Robot",
+          "model": "Universal Robots UR5e", 
+          "location": "line-02",
+          "capabilities": ["packaging", "palletizing", "quality-check"],
+          "status": "operational", 
+          "coordinates": {"x": 0, "y": 0, "z": 0, "rx": 0, "ry": 0, "rz": 0}
+        },
+        {
+          "id": "agv-01",
+          "type": "Autonomous Guided Vehicle",
+          "model": "Mobile Industrial Robot MiR250",
+          "location": "warehouse",
+          "capabilities": ["transport", "navigation", "loading"],
+          "status": "idle",
+          "coordinates": {"x": 100, "y": 50, "z": 0, "heading": 90}
+        }
+      ],
+      "simulation": {
+        "tickRate": 1000,
+        "dataInterval": 5000,
+        "anomalyRate": 0.05,
+        "maintenanceSchedule": "daily"
+      }
+    }
+  
+  robot-control.json: |
+    {
+      "robotControllers": [
+        {
+          "robotId": "robot-arm-01",
+          "controllerType": "KUKA KRC4",
+          "programLanguage": "KRL",
+          "safetyLevel": "SIL3",
+          "maxSpeed": 2.0,
+          "payload": 10.0,
+          "reach": 1100.0,
+          "programs": [
+            {"name": "weld_sequence_01", "status": "ready"},
+            {"name": "pick_place_cycle", "status": "ready"},
+            {"name": "quality_inspection", "status": "ready"}
+          ]
+        },
+        {
+          "robotId": "robot-arm-02", 
+          "controllerType": "Universal Robots UR",
+          "programLanguage": "URScript",
+          "safetyLevel": "SIL3",
+          "maxSpeed": 1.0,
+          "payload": 5.0,
+          "reach": 850.0,
+          "programs": [
+            {"name": "package_routine", "status": "ready"},
+            {"name": "palletize_boxes", "status": "ready"},
+            {"name": "visual_inspection", "status": "ready"}
+          ]
+        },
+        {
+          "robotId": "agv-01",
+          "controllerType": "MiR Fleet",
+          "programLanguage": "REST API", 
+          "safetyLevel": "SIL2",
+          "maxSpeed": 1.5,
+          "payload": 250.0,
+          "batteryLevel": 95.0,
+          "missions": [
+            {"name": "warehouse_to_line01", "status": "ready"},
+            {"name": "line02_to_shipping", "status": "ready"},
+            {"name": "return_to_dock", "status": "ready"}
+          ]
+        }
+      ],
+      "safetyZones": [
+        {"id": "zone_welding", "type": "restricted", "robots": ["robot-arm-01"]},
+        {"id": "zone_packaging", "type": "collaborative", "robots": ["robot-arm-02"]},
+        {"id": "zone_transport", "type": "traffic", "robots": ["agv-01"]}
+      ]
+    }
+
+---
+# InfluxDB Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: influxdb-config
+  namespace: smart-factory
+data:
+  influxdb.conf: |
+    [meta]
+      dir = "/var/lib/influxdb/meta"
+    
+    [data]  
+      dir = "/var/lib/influxdb/data"
+      engine = "tsm1"
+      wal-dir = "/var/lib/influxdb/wal"
+    
+    [coordinator]
+      write-timeout = "10s"
+      max-concurrent-queries = 0
+      query-timeout = "0s"
+    
+    [http]
+      enabled = true
+      bind-address = ":8086"
+      auth-enabled = false
+      log-enabled = true
+      
+    [[graphite]]
+      enabled = false
+      
+    [[collectd]]
+      enabled = false
+
+---
+# Redis Configuration
+apiVersion: v1
+kind: ConfigMap  
+metadata:
+  name: redis-config
+  namespace: smart-factory
+data:
+  redis.conf: |
+    maxmemory 1gb
+    maxmemory-policy allkeys-lru
+    save 900 1
+    save 300 10
+    save 60 10000
+    rdbcompression yes
+    dbfilename dump.rdb
+    dir /data
+    appendonly yes
+    appendfsync everysec

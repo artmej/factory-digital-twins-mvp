@@ -1,17 +1,23 @@
-# Factory Digital Twins MVP
+# Smart Factory Digital Twins - Complete Solution
 
 [![CI/CD](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml/badge.svg)](https://github.com/artmej/factory-digital-twins-mvp/actions/workflows/ci-cd-oidc.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Un MVP (Minimum Viable Product) completo de **Azure Digital Twins** para monitoreo de fábrica con IoT, incluyendo CI/CD automatizado con GitHub Actions.
+**Solución completa de Digital Twins** para Smart Factory con Edge Computing, IoT, IA y visualización 3D. Incluye migración VMware → Azure Local con capacidades híbridas.
 
-## 🏭 **Arquitectura**
+## 🏭 **Arquitectura Híbrida**
 
 ```
-IoT Devices → IoT Hub → Azure Function → Digital Twins → Power BI
-     ↓
-Device Simulator (para testing)
+🏭 Edge Computing (Azure Local) → 📡 IoT Hub → ⚡ Azure Functions → 🔗 Digital Twins → 📊 Power BI
+     ↓                                ↓                    ↓                    ↓
+📱 Local Dashboard              🤖 AI Processing     📐 DTDL Models      🎮 3D Visualization
 ```
+
+## 🎯 **Current Status: Stage 2 Complete**
+- ✅ **Edge Infrastructure**: Azure VM con Windows Server 2022 + Hyper-V
+- ✅ **Local Processing**: PLC Simulator + Real-time Dashboard  
+- ✅ **Data Persistence**: Local logging + telemetry tracking
+- 🔄 **Next**: IoT Hub integration + Digital Twins activation
 
 ## 🚀 **Componentes**
 
