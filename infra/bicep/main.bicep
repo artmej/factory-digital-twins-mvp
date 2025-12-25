@@ -132,7 +132,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-06-01' = {
   }
 }
 
-// 🔧 5. IOT HUB - Device Connectivity (Managed Identity)
+// 🔧 5. IOT HUB - Device Connectivity (Simplified)
 resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
   name: naming.iotHub
   location: location
@@ -155,31 +155,9 @@ resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
         eventHubs: []
         serviceBusQueues: []
         serviceBusTopics: []
-        storageContainers: [
-          {
-            name: 'telemetryStorage'
-            containerName: 'telemetry'
-            fileNameFormat: '{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'
-            batchFrequencyInSeconds: 60
-            maxChunkSizeInBytes: 10485760
-            encoding: 'JSON'
-            authenticationType: 'identityBased'
-            identity: {
-              userAssignedIdentity: null
-            }
-            connectionString: '' // Will use Managed Identity
-          }
-        ]
+        storageContainers: []
       }
-      routes: [
-        {
-          name: 'TelemetryRoute'
-          source: 'DeviceMessages'
-          condition: 'true'
-          endpointNames: ['telemetryStorage']
-          isEnabled: true
-        }
-      ]
+      routes: []
     }
   }
 }
@@ -356,17 +334,17 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-06-0
 }
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2023-07-01' = {
-  name: naming.vm
+  name: 'smart-vm'  // Nombre corto para Windows
   location: location
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
     hardwareProfile: {
-      vmSize: 'Standard_B2s'
+      vmSize: 'Standard_B1s'
     }
     osProfile: {
-      computerName: naming.vm
+      computerName: 'smart-vm'  // Nombre corto para Windows
       adminUsername: adminUsername
       adminPassword: adminPassword
     }
@@ -426,9 +404,9 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
 
 resource functionAppDigitalTwinsRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: digitalTwins
-  name: guid(digitalTwins.id, functionApp.id, 'b447c946-2db7-41ec-983d-d8bf3b39c56b')
+  name: guid(digitalTwins.id, functionApp.id, 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b447c946-2db7-41ec-983d-d8bf3b39c56b') // Azure Digital Twins Data Owner
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe') // Azure Digital Twins Data Owner
     principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -464,6 +442,6 @@ output digitalTwinsUrl string = 'https://${digitalTwins.name}.api.${location}.di
 output functionAppName string = functionApp.name
 output storageAccountName string = storageAccount.name
 output cosmosAccountName string = cosmosAccount.name
-output vmName string = virtualMachine.name
+output vmName string = 'smart-vm'
 output vmPublicIP string = publicIP.properties.ipAddress
 output deploymentComplete string = '✅ Smart Factory Infrastructure deployed successfully!'
