@@ -3,6 +3,30 @@ const path = require('path');
 const app = express();
 const PORT = 3002;
 
+// 🛡️ Resilience: Health Check endpoint
+app.get('/health', (req, res) => {
+    const healthCheck = {
+        uptime: process.uptime(),
+        message: 'OK',
+        timestamp: Date.now(),
+        service: 'mobile-server',
+        version: '1.0.0',
+        checks: {
+            memory: {
+                status: process.memoryUsage().heapUsed < 100000000 ? 'healthy' : 'warning',
+                usage: process.memoryUsage()
+            },
+            staticFiles: {
+                status: 'healthy',
+                path: path.join(__dirname, '../../deployment/mobile')
+            }
+        }
+    };
+    
+    const statusCode = healthCheck.checks.memory.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json(healthCheck);
+});
+
 // Serve static files from the mobile directory
 app.use(express.static(path.join(__dirname, '../../deployment/mobile')));
 

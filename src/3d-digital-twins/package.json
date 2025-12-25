@@ -1,0 +1,35 @@
+{
+  "name": "smart-factory-3d-twins",
+  "version": "1.0.0",
+  "description": "3D Digital Twins visualization for Smart Factory",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "@azure/digital-twins-core": "^1.1.0",
+    "@azure/identity": "^3.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.7",
+    "socket.io": "^4.7.2",
+    "three": "^0.158.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "keywords": [
+    "digital-twins",
+    "3d",
+    "threejs",
+    "azure",
+    "iot"
+  ],
+  "author": "Smart Factory Team",
+  "license": "MIT"
+}

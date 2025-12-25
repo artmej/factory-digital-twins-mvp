@@ -1,0 +1,821 @@
+openapi: 3.0.3
+info:
+  title: Smart Factory API
+  description: |
+    RESTful API for Smart Factory IoT solution providing device management,
+    telemetry access, analytics, and alert management capabilities.
+    
+    ## Features
+    - Device lifecycle management
+    - Real-time telemetry streaming
+    - Historical data analytics
+    - OEE calculation and monitoring
+    - Alert configuration and notifications
+    - Machine learning model integration
+    
+  version: 1.0.0
+  contact:
+    name: Azure Solutions Team
+    email: azure-solutions@company.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://factory-prod-webapp.azurewebsites.net/api/v1
+    description: Production environment
+  - url: https://factory-dev-webapp.azurewebsites.net/api/v1
+    description: Development environment
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+tags:
+  - name: Devices
+    description: Device management operations
+  - name: Telemetry
+    description: Sensor data and telemetry
+  - name: Analytics
+    description: OEE and performance analytics
+  - name: Alerts
+    description: Alert management
+  - name: Maintenance
+    description: Maintenance scheduling and tracking
+
+paths:
+  # Device Management
+  /devices:
+    get:
+      tags: [Devices]
+      summary: List all devices
+      description: Retrieve a paginated list of all registered devices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: facilityId
+          in: query
+          schema:
+            type: string
+          description: Filter by facility ID
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/OperationalStatus'
+          description: Filter by device status
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Machine'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags: [Devices]
+      summary: Register a new device
+      description: Register a new manufacturing device in the system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMachineRequest'
+      responses:
+        '201':
+          description: Device created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Device already exists
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devices/{deviceId}:
+    get:
+      tags: [Devices]
+      summary: Get device by ID
+      description: Retrieve detailed information about a specific device
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+      responses:
+        '200':
+          description: Device information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      tags: [Devices]
+      summary: Update device
+      description: Update device configuration and metadata
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMachineRequest'
+      responses:
+        '200':
+          description: Device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags: [Devices]
+      summary: Decommission device
+      description: Remove device from active monitoring (soft delete)
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+      responses:
+        '204':
+          description: Device decommissioned successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot decommission device with active alerts
+
+  # Telemetry
+  /telemetry/{deviceId}:
+    get:
+      tags: [Telemetry]
+      summary: Get device telemetry
+      description: Retrieve telemetry data for a specific device
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Start time for telemetry data
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End time for telemetry data (default: now)
+        - name: sensorType
+          in: query
+          schema:
+            $ref: '#/components/schemas/SensorType'
+          description: Filter by sensor type
+        - name: aggregation
+          in: query
+          schema:
+            type: string
+            enum: [raw, minute, hour, day]
+            default: raw
+          description: Data aggregation level
+      responses:
+        '200':
+          description: Telemetry data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deviceId:
+                    type: string
+                  period:
+                    $ref: '#/components/schemas/TimePeriod'
+                  dataPoints:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TelemetryDataPoint'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /telemetry/{deviceId}/live:
+    get:
+      tags: [Telemetry]
+      summary: Get live telemetry stream
+      description: WebSocket endpoint for real-time telemetry data
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+      responses:
+        '101':
+          description: WebSocket connection established
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Analytics
+  /analytics/oee/{lineId}:
+    get:
+      tags: [Analytics]
+      summary: Get OEE metrics
+      description: Calculate and retrieve OEE metrics for a production line
+      parameters:
+        - name: lineId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Production line ID
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [shift, day, week, month]
+            default: day
+          description: Calculation period
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Specific date (default: today)
+      responses:
+        '200':
+          description: OEE metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OEEMetrics'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /analytics/predictions/{deviceId}:
+    get:
+      tags: [Analytics]
+      summary: Get ML predictions
+      description: Retrieve machine learning predictions for device maintenance
+      parameters:
+        - $ref: '#/components/parameters/DeviceIdParam'
+        - name: predictionType
+          in: query
+          schema:
+            type: string
+            enum: [maintenance, failure, quality]
+          description: Type of prediction
+      responses:
+        '200':
+          description: ML predictions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MLPrediction'
+
+  # Alerts
+  /alerts:
+    get:
+      tags: [Alerts]
+      summary: List alerts
+      description: Retrieve alerts with filtering and pagination
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: severity
+          in: query
+          schema:
+            $ref: '#/components/schemas/AlertSeverity'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, acknowledged, resolved]
+        - name: deviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Alert'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+
+    post:
+      tags: [Alerts]
+      summary: Create manual alert
+      description: Create a manual alert for a device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertRequest'
+      responses:
+        '201':
+          description: Alert created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+
+  /alerts/{alertId}/acknowledge:
+    post:
+      tags: [Alerts]
+      summary: Acknowledge alert
+      description: Mark an alert as acknowledged
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                acknowledgedBy:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Alert acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  parameters:
+    DeviceIdParam:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique device identifier
+
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page
+
+  schemas:
+    Machine:
+      type: object
+      properties:
+        machineId:
+          type: string
+          description: Unique machine identifier
+        lineId:
+          type: string
+          description: Production line ID
+        type:
+          $ref: '#/components/schemas/MachineType'
+        status:
+          $ref: '#/components/schemas/OperationalStatus'
+        location:
+          $ref: '#/components/schemas/Location'
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+        maintenanceSchedule:
+          $ref: '#/components/schemas/MaintenanceSchedule'
+        specifications:
+          $ref: '#/components/schemas/MachineSpecifications'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - machineId
+        - lineId
+        - type
+        - status
+
+    MachineType:
+      type: string
+      enum:
+        - cnc-milling
+        - robotic-arm
+        - assembly-line
+        - quality-control
+        - packaging
+      description: Type of manufacturing machine
+
+    OperationalStatus:
+      type: string
+      enum:
+        - operational
+        - warning
+        - critical
+        - maintenance
+        - offline
+      description: Current operational status
+
+    Sensor:
+      type: object
+      properties:
+        sensorId:
+          type: string
+        machineId:
+          type: string
+        type:
+          $ref: '#/components/schemas/SensorType'
+        value:
+          type: number
+        unit:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        quality:
+          $ref: '#/components/schemas/QualityIndicator'
+        thresholds:
+          $ref: '#/components/schemas/SensorThresholds'
+
+    SensorType:
+      type: string
+      enum:
+        - temperature
+        - vibration
+        - pressure
+        - humidity
+        - power-consumption
+        - rotation-speed
+        - cycle-count
+
+    QualityIndicator:
+      type: string
+      enum:
+        - good
+        - uncertain
+        - bad
+
+    Alert:
+      type: object
+      properties:
+        alertId:
+          type: string
+        machineId:
+          type: string
+        type:
+          $ref: '#/components/schemas/AlertType'
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        acknowledged:
+          type: boolean
+        acknowledgedBy:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        mlPrediction:
+          $ref: '#/components/schemas/MLPrediction'
+
+    AlertType:
+      type: string
+      enum:
+        - anomaly-detection
+        - threshold-violation
+        - predictive-maintenance
+        - system-failure
+        - quality-issue
+
+    AlertSeverity:
+      type: string
+      enum:
+        - info
+        - warning
+        - critical
+        - emergency
+
+    OEEMetrics:
+      type: object
+      properties:
+        availability:
+          type: number
+          minimum: 0
+          maximum: 1
+        performance:
+          type: number
+          minimum: 0
+          maximum: 1
+        quality:
+          type: number
+          minimum: 0
+          maximum: 1
+        overall:
+          type: number
+          minimum: 0
+          maximum: 1
+        calculatedAt:
+          type: string
+          format: date-time
+        period:
+          $ref: '#/components/schemas/TimePeriod'
+
+    MLPrediction:
+      type: object
+      properties:
+        predictionId:
+          type: string
+        model:
+          type: string
+        version:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        prediction:
+          type: object
+        features:
+          type: object
+          additionalProperties:
+            type: number
+        timestamp:
+          type: string
+          format: date-time
+
+    Location:
+      type: object
+      properties:
+        facilityId:
+          type: string
+        floor:
+          type: string
+        zone:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+            z:
+              type: number
+
+    SensorThresholds:
+      type: object
+      properties:
+        min:
+          type: number
+        max:
+          type: number
+        warningLow:
+          type: number
+        warningHigh:
+          type: number
+
+    MaintenanceSchedule:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [preventive, predictive]
+        interval:
+          type: integer
+          description: Maintenance interval in hours
+        lastMaintenance:
+          type: string
+          format: date-time
+        nextMaintenance:
+          type: string
+          format: date-time
+        estimatedDuration:
+          type: integer
+          description: Estimated maintenance duration in hours
+
+    MachineSpecifications:
+      type: object
+      properties:
+        manufacturer:
+          type: string
+        model:
+          type: string
+        yearInstalled:
+          type: integer
+        maxCapacity:
+          type: number
+        powerRating:
+          type: number
+          description: Power rating in kW
+        dimensions:
+          type: object
+          properties:
+            length:
+              type: number
+            width:
+              type: number
+            height:
+              type: number
+
+    TimePeriod:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: Duration in milliseconds
+
+    TelemetryDataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        sensorId:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+        quality:
+          $ref: '#/components/schemas/QualityIndicator'
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    CreateMachineRequest:
+      type: object
+      properties:
+        machineId:
+          type: string
+        lineId:
+          type: string
+        type:
+          $ref: '#/components/schemas/MachineType'
+        location:
+          $ref: '#/components/schemas/Location'
+        specifications:
+          $ref: '#/components/schemas/MachineSpecifications'
+      required:
+        - machineId
+        - lineId
+        - type
+
+    UpdateMachineRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/OperationalStatus'
+        location:
+          $ref: '#/components/schemas/Location'
+        specifications:
+          $ref: '#/components/schemas/MachineSpecifications'
+        maintenanceSchedule:
+          $ref: '#/components/schemas/MaintenanceSchedule'
+
+    CreateAlertRequest:
+      type: object
+      properties:
+        machineId:
+          type: string
+        type:
+          $ref: '#/components/schemas/AlertType'
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        message:
+          type: string
+      required:
+        - machineId
+        - type
+        - severity
+        - message
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            traceId:
+              type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

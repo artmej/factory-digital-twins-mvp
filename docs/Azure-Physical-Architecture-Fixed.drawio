@@ -1,0 +1,194 @@
+<mxfile host="app.diagrams.net" modified="2025-12-24T12:00:00.000Z" agent="5.0" etag="xxx" version="24.7.17">
+  <diagram name="Azure Physical Architecture" id="azure-physical-arch">
+    <mxGraphModel dx="2074" dy="1066" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Azure Cloud Region -->
+        <mxCell id="azure-cloud" value="Azure Cloud - East US" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#01579B;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1560" height="700" as="geometry" />
+        </mxCell>
+        
+        <!-- Resource Group -->
+        <mxCell id="rg-container" value="Resource Group: rg-smartfactory-demo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#4A148C;strokeWidth=2;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="1480" height="620" as="geometry" />
+        </mxCell>
+        
+        <!-- Virtual Network -->
+        <mxCell id="vnet-container" value="Virtual Network: azlocal-vnet (10.0.0.0/16)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#2E7D32;strokeWidth=2;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="120" width="1400" height="560" as="geometry" />
+        </mxCell>
+        
+        <!-- VM Subnet -->
+        <mxCell id="vm-subnet" value="VM Subnet (10.0.1.0/24)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#E65100;strokeWidth=2;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="160" y="160" width="400" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- Azure VM -->
+        <mxCell id="azure-vm" value="VM: arc-simple&#xa;130.131.248.173&#xa;Auto-shutdown: 12:00" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4FC3F7;strokeColor=#0277BD;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="200" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Azure Arc -->
+        <mxCell id="azure-arc" value="Azure Arc&#xa;Hybrid Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#C62828;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="280" width="150" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- IoT Subnet -->
+        <mxCell id="iot-subnet" value="IoT Subnet (10.0.2.0/24)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="400" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- IoT Hub -->
+        <mxCell id="iot-hub" value="IoT Hub&#xa;Device Management&#xa;Message Routing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#388E3C;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="640" y="200" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Event Hub -->
+        <mxCell id="event-hub" value="Event Hub&#xa;Telemetry Stream&#xa;Real-time Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFB74D;strokeColor=#F57C00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="820" y="200" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Functions Subnet -->
+        <mxCell id="functions-subnet" value="Functions Subnet (10.0.3.0/24)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;strokeWidth=2;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="160" width="400" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- Azure Functions -->
+        <mxCell id="azure-functions" value="Azure Functions&#xa;ADT Projection&#xa;Data Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BA68C8;strokeColor=#7B1FA2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="200" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Logic Apps -->
+        <mxCell id="logic-apps" value="Logic Apps&#xa;Workflow Automation&#xa;Alert Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4FC3F7;strokeColor=#0277BD;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="200" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Digital Twins -->
+        <mxCell id="digital-twins" value="Azure Digital Twins&#xa;Factory Model&#xa;Real-time Graph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFB74D;strokeColor=#F57C00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="420" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Storage Account -->
+        <mxCell id="storage" value="Storage Account&#xa;Blob, Table, Queue&#xa;Data Lake Gen2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFB74D;strokeColor=#F57C00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="380" y="420" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Machine Learning -->
+        <mxCell id="ml-workspace" value="ML Workspace&#xa;Predictive Models&#xa;94.7% Accuracy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BA68C8;strokeColor=#7B1FA2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="560" y="420" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Vault -->
+        <mxCell id="keyvault" value="Key Vault&#xa;Secrets Management&#xa;Certificate Store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#C62828;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="420" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Application Insights -->
+        <mxCell id="app-insights" value="Application Insights&#xa;APM &amp; Monitoring&#xa;Performance Analytics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BA68C8;strokeColor=#7B1FA2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="920" y="420" width="150" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- On-Premises -->
+        <mxCell id="on-premises" value="Factory Floor - On-Premises" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="780" width="760" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- CNC Machine -->
+        <mxCell id="machine1" value="CNC Machine&#xa;Temp: 45°C&#xa;Vibration: Normal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="820" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Assembly Robot -->
+        <mxCell id="machine2" value="Assembly Robot&#xa;Status: Active&#xa;Cycle: 30s" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="220" y="820" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Quality Scanner -->
+        <mxCell id="machine3" value="Quality Scanner&#xa;Defect Rate: 0.2%&#xa;Throughput: High" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="360" y="820" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Edge Gateway -->
+        <mxCell id="edge-gateway" value="Azure Stack Edge&#xa;Local Processing&#xa;Edge AI Models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#388E3C;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="820" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- IoT Edge Runtime -->
+        <mxCell id="edge-runtime" value="IoT Edge Runtime&#xa;Container Management&#xa;Module Deployment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#388E3C;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="820" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Applications -->
+        <mxCell id="apps-layer" value="Applications Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;spacingTop=15;" vertex="1" parent="1">
+          <mxGeometry x="840" y="780" width="760" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- 3D Viewer -->
+        <mxCell id="webapp" value="3D Digital Twin Viewer&#xa;Real-time Visualization&#xa;Interactive Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#8E24AA;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="820" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Mobile App -->
+        <mxCell id="mobile-app" value="Mobile Server&#xa;Field Engineer App&#xa;Maintenance Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#8E24AA;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="820" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- HoloLens -->
+        <mxCell id="hololens" value="HoloLens 2&#xa;Mixed Reality&#xa;Spatial Computing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#AD1457;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="820" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Remote Rendering -->
+        <mxCell id="remote-render" value="Remote Rendering&#xa;Cloud Rendering&#xa;Immersive Training" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#AD1457;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="820" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Performance Metrics -->
+        <mxCell id="metrics-box" value="Performance Metrics&#xa;• ML Accuracy: 94.7%&#xa;• Downtime Reduction: 38%&#xa;• ROI: $2.2M annually&#xa;• Processing Latency: &lt;100ms&#xa;• Availability: 99.9%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#2E7D32;strokeWidth=2;fontSize=11;fontStyle=1;align=left;verticalAlign=top;spacingTop=10;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="120" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <mxCell id="connection1" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#1976D2;strokeWidth=2;" edge="1" parent="1" source="azure-vm" target="iot-hub">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="connection2" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#558B2F;strokeWidth=2;" edge="1" parent="1" source="iot-hub" target="azure-functions">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="800" y="300" as="sourcePoint" />
+            <mxPoint x="850" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="connection3" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FF5722;strokeWidth=2;" edge="1" parent="1" source="edge-gateway" target="iot-hub">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="600" y="700" as="sourcePoint" />
+            <mxPoint x="650" y="650" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="580" y="600" />
+              <mxPoint x="715" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="connection4" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FF5722;strokeWidth=2;" edge="1" parent="1" source="machine1" target="edge-gateway">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="900" as="sourcePoint" />
+            <mxPoint x="350" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Title -->
+        <mxCell id="title" value="Smart Factory - Physical Architecture with Azure Services" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="10" width="600" height="30" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,29 +1,30 @@
-# Smart Factory - GitHub Actions CI/CD
+# Smart Factory - GitHub Actions CI/CD (OIDC)
 
 ## 🚀 **Automated Deployment Pipeline**
 
 ### **Workflows Configurados**
-- **`azure-deploy.yml`** - Deploy completo de infraestructura Azure
-- **`vm-setup.yml`** - Configuración automática del Edge Gateway
+- **`azure-deploy.yml`** - Deploy completo de infraestructura Azure (OIDC)
+- **`vm-setup.yml`** - Configuración automática del Edge Gateway (OIDC)
 
-## 🔐 **Secrets Requeridos**
+## 🔐 **Secrets Requeridos (Solo IDs - Sin Contraseñas!)**
 
 Configurar en GitHub Repository → Settings → Secrets and Variables → Actions:
 
 ```bash
-AZURE_CREDENTIALS          # Service Principal JSON
-ADMIN_USERNAME              # VM admin username  
-ADMIN_PASSWORD              # VM admin password
+# OIDC Authentication (No passwords!)
+AZURE_CLIENT_ID             # App Registration ID: 1582684b-9c2e-454a-b542-e6453b435bef
+AZURE_TENANT_ID              # Tenant ID: 16b3c013-d300-468d-ac64-7eda0820b6d3
+AZURE_SUBSCRIPTION_ID        # Subscription ID: ab9fac11-f205-4caa-a081-9f71b839c5c0
+
+# Only VM password needed
+VM_ADMIN_PASSWORD           # VM admin password
 ALLOWED_IP_ADDRESS          # Tu IP pública (x.x.x.x/32)
 ```
 
-### **Crear Service Principal**
-```bash
-az ad sp create-for-rbac --name "smart-factory-deploy" \
-  --role contributor \
-  --scopes /subscriptions/{subscription-id} \
-  --sdk-auth
-```
+### **✅ OIDC ya configurado:**
+- **App Registration**: `smart-factory-github-oidc`
+- **Federated Credentials**: Main branch + Pull Requests
+- **Azure Role**: Contributor en subscription
 
 ## 🔄 **Pipeline Flow**
 
