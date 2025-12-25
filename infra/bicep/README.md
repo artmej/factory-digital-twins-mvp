@@ -1,53 +1,70 @@
-# Smart Factory - Infrastructure as Code
+# Smart Factory - Azure Infrastructure
 
-## 🏗️ **Bicep Templates - Final Version**
+## 🚀 Single Source of Truth
+- **File único**: `main.bicep` (versionado por Git)
+- **Sin secretos hardcoded**: Todo via Managed Identity + Key Vault
+- **Production Ready**: Secure by design
 
-### **Core Infrastructure (Production Ready)**
-- **`main.bicep`** - Principal entry point para deployment
-- **`core-infrastructure.bicep`** - Azure Digital Twins + IoT Hub + Functions
-- **`ml-infrastructure.bicep`** - Machine Learning services
-
-### **Edge Computing (Hybrid Demo)**  
-- **`arc-simple.bicep`** - VM para Azure Local simulation (ACTUAL)
-- **`aks-edge-simulation.bicep`** - Kubernetes Edge deployment
-- **`vm-infrastructure.bicep`** - VM infrastructure utilities
-
-### **Legacy (Compatibility)**
-- **`azure-local-simple.bicep`** - Basic Azure Local setup
-- **`azure-local-simplified.bicep`** - Simplified deployment
-
-## 🎯 **Current Deployment**
-```bash
-# Deploy main infrastructure
-az deployment group create \
-  --resource-group factory-rg \
-  --template-file main.bicep
-
-# Deploy edge computing demo (current)  
-az deployment group create \
-  --resource-group rg-arc-simple \
-  --template-file arc-simple.bicep \
-  --parameters @arc-simple.parameters.json
+## 📁 Estructura Limpia
+```
+infra/bicep/
+├── main.bicep              # ✅ Template principal
+├── main.parameters.json    # ✅ Parámetros de entorno
+└── README.md              # ✅ Esta documentación
 ```
 
-## ✅ **Cleaned Up**
-Removed 20+ duplicate/experimental files:
-- All arc-* attempts (jumpstart, win-ssh, automated, etc.)
-- All azure-local-* duplicates (complete, auto, working, etc.)
-- All setup/deploy scripts (consolidated in main deployment)
+## 🔐 Seguridad
+- ✅ **Managed Identity** para todos los servicios
+- ✅ **Key Vault** para secretos
+- ✅ **RBAC** assignments automáticos
+- ✅ **VNet Integration** para Functions
+- ❌ **No secrets** en outputs o git
 
-**Only production-ready templates remain.**
+## 🚀 Deploy Commands
 
-## Recursos Desplegados
+### 1. Crear Resource Group
+```powershell
+az group create --name "rg-smartfactory-prod" --location "East US"
+```
 
-El archivo `main.bicep` despliega los siguientes recursos de Azure:
+### 2. Deploy Infrastructure
+```powershell
+# Desde: C:\amapv2\infra\bicep\
+az deployment group create `
+  --resource-group "rg-smartfactory-prod" `
+  --template-file "main.bicep" `
+  --parameters "@main.parameters.json"
+```
 
-### Core Services
-- **Azure Digital Twins**: Instancia para el modelo de gemelo digital
-- **IoT Hub**: Para ingesta de telemetría de dispositivos  
-- **Azure Function App**: Para procesamiento de eventos y proyección a ADT
-- **Storage Account**: Para almacenar archivos de la Function App
-- **App Service Plan**: Plan de consumo para la Function App
+### 3. Verificar Deployment
+```powershell
+az deployment group show `
+  --resource-group "rg-smartfactory-prod" `
+  --name "main" `
+  --query "properties.provisioningState"
+```
+
+## 🏗️ Arquitectura Desplegada
+- **IoT Hub S1** - Device connectivity (Managed Identity)
+- **Digital Twins** - Factory digital model  
+- **Functions Premium** - Event processing (VNet integrated)
+- **Cosmos DB** - Telemetry storage (Standard tier)
+- **Storage Account** - Data Lake (HNS enabled)
+- **Key Vault** - Secrets management
+- **VM Standard_B2s** - Edge gateway
+- **VNet** - Secure networking
+
+## 🔄 Versionado
+- Usar **Git tags** para versiones: `git tag v1.0.0`
+- **Semantic versioning**: Major.Minor.Patch
+- **Branch strategy**: main = production ready
+
+## 🎯 Best Practices
+- Un solo archivo Bicep master
+- Parámetros en archivo separado
+- Managed Identity everywhere
+- Secrets en Key Vault únicamente
+- RBAC assignments automáticos
 
 ### Security & Access
 - **Managed Identity**: Identity del sistema para la Function App
