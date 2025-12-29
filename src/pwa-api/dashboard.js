@@ -18,14 +18,44 @@ async function getFactoryDashboardData(timeRange, context) {
     context.log(`📊 Getting factory data for range: ${timeRange}`);
     
     try {
-        // For now, return mock data since we're focusing on API structure
-        // This will be replaced with real Cosmos DB queries
+        // Return data in the format expected by PWA
+        const factoryEfficiency = 87.5 + Math.random() * 5; // 87.5-92.5%
+        const linePerformance = 85 + Math.random() * 10; // 85-95%
+        const machineTemperature = 42.3 + Math.random() * 3; // 42.3-45.3°C
+        
         const mockData = {
-            factoryEfficiency: 87.5,
-            totalProduction: 12543,
-            activeLines: 8,
-            totalLines: 10,
-            temperature: 42.3,
+            timestamp: new Date().toISOString(),
+            summary: {
+                factoryEfficiency,
+                linePerformance,
+                machineTemperature,
+                totalSensors: 3,
+                dataPoints: Math.floor(350 + Math.random() * 50)
+            },
+            sensors: [
+                { 
+                    id: 'factory-main', 
+                    latest: { 
+                        value: factoryEfficiency, 
+                        timestamp: new Date().toISOString() 
+                    }
+                },
+                { 
+                    id: 'line1-main', 
+                    latest: { 
+                        value: linePerformance, 
+                        timestamp: new Date().toISOString() 
+                    }
+                },
+                { 
+                    id: 'machine1', 
+                    latest: { 
+                        value: machineTemperature, 
+                        timestamp: new Date().toISOString() 
+                    }
+                }
+            ],
+            status: getStatus(factoryEfficiency, linePerformance, machineTemperature),
             alerts: [],
             lastUpdated: new Date().toISOString(),
             systemStatus: "operational"
@@ -38,6 +68,13 @@ async function getFactoryDashboardData(timeRange, context) {
         context.log.error('❌ Error getting dashboard data:', error);
         throw error;
     }
+}
+
+function getStatus(factory, line, temp) {
+    if (temp > 50 || factory < 50 || line < 50) return 'critical';
+    if (temp > 45 || factory < 70 || line < 75) return 'warning';
+    if (factory > 85 && line > 85 && temp < 40) return 'optimal';
+    return 'good';
 }
 
 app.http('dashboard', {
