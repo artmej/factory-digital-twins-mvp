@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-dt-aligned
+  namespace: arc
+  labels:
+    app: sensor-dt-aligned
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-dt-aligned
+  template:
+    metadata:
+      labels:
+        app: sensor-dt-aligned
+    spec:
+      containers:
+      - name: simulator
+        image: node:18-alpine
+        workingDir: /app
+        command: ["sh", "-c"]
+        args:
+          - |
+            npm init -y &&
+            npm install mqtt &&
+            cat > index.js << 'EOF' &&
+            const mqtt = require('mqtt');
+            
+            console.log('🏭 Smart Factory Digital Twins Sensor Simulator');
+            console.log('📍 Aligned with DTDL: Factory, Line, Machine, Sensor');
+            
+            const client = mqtt.connect('mqtt://mqtt-broker:1883');
+            
+            client.on('connect', () => {
+              console.log('✅ Connected to MQTT broker');
+              
+              setInterval(() => {
+                const now = new Date().toISOString();
+                
+                const sensors = [
+                  {
+                    topic: 'dt/factory/telemetry',
+                    payload: {
+                      sensorId: 'factory-main',
+                      dtmiType: 'dtmi:smartfactory:Factory;1',
+                      efficiency: 85 + Math.random() * 10,
+                      energyConsumption: 150 + Math.random() * 50,
+                      timestamp: now
+                    }
+                  },
+                  {
+                    topic: 'dt/line1/telemetry', 
+                    payload: {
+                      sensorId: 'line1-main',
+                      dtmiType: 'dtmi:smartfactory:Line;1',
+                      efficiency: 80 + Math.random() * 15,
+                      throughput: 100 + Math.random() * 25,
+                      timestamp: now
+                    }
+                  },
+                  {
+                    topic: 'dt/machine1/telemetry',
+                    payload: {
+                      sensorId: 'machine1',
+                      dtmiType: 'dtmi:smartfactory:Machine;1',
+                      temperature: 20 + Math.random() * 15,
+                      pressure: 100 + Math.random() * 50,
+                      status: Math.random() > 0.1 ? 'running' : 'maintenance',
+                      timestamp: now
+                    }
+                  },
+                  {
+                    topic: 'dt/sensors/temp001/telemetry',
+                    payload: {
+                      sensorId: 'temp-001',
+                      dtmiType: 'dtmi:smartfactory:Sensor;1',
+                      sensorType: 'temperature',
+                      value: 22 + Math.random() * 8,
+                      unit: 'celsius',
+                      timestamp: now
+                    }
+                  }
+                ];
+                
+                sensors.forEach(sensor => {
+                  client.publish(sensor.topic, JSON.stringify(sensor.payload));
+                  console.log(`📊 [${sensor.payload.dtmiType.split(':').pop()}] ${sensor.payload.sensorId} published`);
+                });
+                
+                console.log(`🔄 ${sensors.length} Digital Twin telemetry messages sent`);
+              }, 15000);
+            });
+            
+            client.on('error', (err) => {
+              console.error('❌ MQTT Error:', err);
+            });
+            EOF
+            node index.js
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service  
+metadata:
+  name: sensor-dt-aligned
+  namespace: arc
+  labels:
+    app: sensor-dt-aligned
+spec:
+  selector:
+    app: sensor-dt-aligned
+  ports:
+  - port: 80
+    targetPort: 3000

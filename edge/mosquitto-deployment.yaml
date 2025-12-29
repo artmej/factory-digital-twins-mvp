@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto-mqtt
+  namespace: arc
+  labels:
+    app: mosquitto-mqtt
+    component: iot-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto-mqtt
+  template:
+    metadata:
+      labels:
+        app: mosquitto-mqtt
+    spec:
+      containers:
+      - name: mosquitto
+        image: eclipse-mosquitto:2.0.18
+        ports:
+        - containerPort: 1883
+          name: mqtt
+        - containerPort: 9001
+          name: websockets
+        volumeMounts:
+        - name: mosquitto-config
+          mountPath: /mosquitto/config
+        - name: mosquitto-data
+          mountPath: /mosquitto/data
+        - name: mosquitto-log
+          mountPath: /mosquitto/log
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: mosquitto-config
+        configMap:
+          name: mosquitto-config
+      - name: mosquitto-data
+        persistentVolumeClaim:
+          claimName: mosquitto-data-pvc
+      - name: mosquitto-log
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto-mqtt
+  namespace: arc
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 1883
+    targetPort: 1883
+    name: mqtt
+  - port: 9001
+    targetPort: 9001
+    name: websockets
+  selector:
+    app: mosquitto-mqtt
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: arc
+data:
+  mosquitto.conf: |
+    # Mosquitto configuration for Smart Factory
+    listener 1883
+    protocol mqtt
+    
+    listener 9001
+    protocol websockets
+    
+    # Authentication (desarrollo - cambiar en producción)
+    allow_anonymous true
+    
+    # Logging
+    log_dest stdout
+    log_type all
+    
+    # Persistence
+    persistence true
+    persistence_location /mosquitto/data/
+    
+    # Smart Factory topics structure
+    # sensors/factory1/line1/machine1/temperature
+    # sensors/factory1/line1/machine1/pressure
+    # alerts/factory1/line1/machine1/anomaly
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mosquitto-data-pvc
+  namespace: arc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: managed-premium

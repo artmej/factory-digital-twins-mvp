@@ -1,0 +1,219 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-broker
+  namespace: arc
+  labels:
+    app: mqtt-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-broker
+  template:
+    metadata:
+      labels:
+        app: mqtt-broker
+    spec:
+      containers:
+      - name: mosquitto
+        image: eclipse-mosquitto:2.0.18
+        ports:
+        - containerPort: 1883
+          name: mqtt
+        - containerPort: 9001
+          name: websockets
+        volumeMounts:
+        - name: mosquitto-config
+          mountPath: /mosquitto/config/mosquitto.conf
+          subPath: mosquitto.conf
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: mosquitto-config
+        configMap:
+          name: mosquitto-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-broker
+  namespace: arc
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 1883
+    targetPort: 1883
+    name: mqtt
+  - port: 9001
+    targetPort: 9001
+    name: websockets
+  selector:
+    app: mqtt-broker
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+  namespace: arc
+data:
+  mosquitto.conf: |
+    # Smart Factory MQTT Broker
+    
+    # Network settings
+    listener 1883
+    protocol mqtt
+    
+    listener 9001
+    protocol websockets
+    
+    # Security (desarrollo)
+    allow_anonymous true
+    
+    # Logging
+    log_dest stdout
+    log_type all
+    log_timestamp true
+    
+    # Smart Factory topic structure
+    # Incoming: sensors/factory1/line1/machine1/temperature
+    # Outgoing: processed/factory1/line1/machine1/alert
+    
+    # Bridge to Azure IoT Hub (opcional)
+    # connection azure_bridge
+    # address smartfactory-prod-iot.azure-devices.net:8883
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-hub-connector
+  namespace: arc
+  labels:
+    app: iot-hub-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iot-hub-connector
+  template:
+    metadata:
+      labels:
+        app: iot-hub-connector
+    spec:
+      containers:
+      - name: connector
+        image: node:18-alpine
+        workingDir: /tmp
+        command: ["sh", "-c"]
+        args:
+          - |
+            cd /tmp &&
+            npm install azure-iot-device-mqtt mqtt &&
+            cat > app.js << 'EOF'
+            const mqtt = require('mqtt');
+            const { Client } = require('azure-iot-device-mqtt');
+            const { Message } = require('azure-iot-device');
+            
+            console.log('🔗 Starting IoT Hub Connector for Smart Factory');
+            
+            // Configuración
+            const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883';
+            const IOT_CONNECTION = process.env.IOT_HUB_CONNECTION;
+            
+            if (!IOT_CONNECTION) {
+              console.error('❌ IOT_HUB_CONNECTION env var required');
+              process.exit(1);
+            }
+            
+            // Cliente Azure IoT Hub
+            const deviceClient = Client.fromConnectionString(IOT_CONNECTION);
+            
+            // Cliente MQTT Local
+            const localMqtt = mqtt.connect(MQTT_BROKER);
+            
+            // Conectar a IoT Hub
+            deviceClient.open((err) => {
+              if (err) {
+                console.error('❌ Error connecting to IoT Hub:', err);
+                return;
+              }
+              console.log('✅ Connected to IoT Hub');
+            });
+            
+            // Escuchar mensajes locales y reenviar a IoT Hub
+            localMqtt.on('connect', () => {
+              console.log('✅ Connected to local MQTT broker');
+              
+              // Suscribirse a sensores
+              localMqtt.subscribe('sensors/+/+/+/+', (err) => {
+                if (!err) {
+                  console.log('📡 Subscribed to sensor topics');
+                }
+              });
+              
+              // Suscribirse a alertas
+              localMqtt.subscribe('alerts/+/+/+/+', (err) => {
+                if (!err) {
+                  console.log('🚨 Subscribed to alert topics');
+                }
+              });
+            });
+            
+            localMqtt.on('message', (topic, message) => {
+              try {
+                const data = {
+                  topic: topic,
+                  payload: message.toString(),
+                  timestamp: new Date().toISOString(),
+                  source: 'edge'
+                };
+                
+                console.log(`📤 Sending to IoT Hub: ${topic}`);
+                
+                const iotMessage = new Message(JSON.stringify(data));
+                iotMessage.properties.add('messageType', 'telemetry');
+                iotMessage.properties.add('topic', topic);
+                
+                deviceClient.sendEvent(iotMessage, (err) => {
+                  if (err) {
+                    console.error('❌ Error sending to IoT Hub:', err);
+                  } else {
+                    console.log('✅ Message sent to IoT Hub');
+                  }
+                });
+                
+              } catch (error) {
+                console.error('❌ Error processing message:', error);
+              }
+            });
+            
+            // Graceful shutdown
+            process.on('SIGINT', () => {
+              console.log('🛑 Shutting down connector...');
+              localMqtt.end();
+              deviceClient.close();
+              process.exit(0);
+            });
+            EOF
+            
+            cd /tmp && node app.js
+        env:
+        - name: MQTT_BROKER
+          value: "mqtt://mqtt-broker:1883"
+        - name: IOT_HUB_CONNECTION
+          valueFrom:
+            secretKeyRef:
+              name: iot-edge-secrets
+              key: connection-string
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"

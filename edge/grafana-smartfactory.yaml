@@ -1,0 +1,290 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: arc
+data:
+  GF_SECURITY_ADMIN_USER: admin
+  GF_SECURITY_ADMIN_PASSWORD: SmartFactory2025!
+  GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-worldmap-panel,grafana-piechart-panel
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: arc
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+    - name: PostgreSQL-SmartFactory
+      type: postgres
+      access: proxy
+      url: postgres-smartfactory:5432
+      database: smartfactory
+      user: sfadmin
+      password: SmartFactory2024!
+      isDefault: true
+      jsonData:
+        sslmode: disable
+        postgresVersion: 1300
+        timescaledb: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-config
+  namespace: arc
+data:
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+    - name: 'smart-factory'
+      orgId: 1
+      folder: 'Smart Factory'
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 30
+      options:
+        path: /etc/grafana/provisioning/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smart-factory-dashboard
+  namespace: arc
+data:
+  smart-factory-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "🏭 Smart Factory Overview",
+        "tags": ["smart-factory", "iot", "manufacturing"],
+        "timezone": "browser",
+        "refresh": "5s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "🌡️ Machine Temperature",
+            "type": "timeseries",
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory",
+                "rawSql": "SELECT time_bucket('1m', timestamp) AS time, avg(value) as temperature FROM sensor_data WHERE sensor_id LIKE '%temperature%' AND $__timeFilter(timestamp) GROUP BY 1 ORDER BY 1",
+                "format": "time_series"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "celsius",
+                "min": 0,
+                "max": 50
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "📊 Machine Pressure",
+            "type": "timeseries",
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory",
+                "rawSql": "SELECT time_bucket('1m', timestamp) AS time, avg(value) as pressure FROM sensor_data WHERE sensor_id LIKE '%pressure%' AND $__timeFilter(timestamp) GROUP BY 1 ORDER BY 1",
+                "format": "time_series"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "unit": "pressurebar",
+                "min": 0,
+                "max": 200
+              }
+            }
+          },
+          {
+            "id": 3,
+            "title": "⚡ Machine RPM",
+            "type": "stat",
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory",
+                "rawSql": "SELECT avg(value) as rpm FROM sensor_data WHERE sensor_id LIKE '%rpm%' AND timestamp > now() - interval '5 minutes'",
+                "format": "table"
+              }
+            ],
+            "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8},
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "unit": "rpm",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 1000},
+                    {"color": "green", "value": 1500}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "🔺 Vibration Levels",
+            "type": "stat", 
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory",
+                "rawSql": "SELECT avg(value) as vibration FROM sensor_data WHERE sensor_id LIKE '%vibration%' AND timestamp > now() - interval '5 minutes'",
+                "format": "table"
+              }
+            ],
+            "gridPos": {"h": 4, "w": 6, "x": 6, "y": 8},
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "unit": "short",
+                "decimals": 3,
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 0.3},
+                    {"color": "red", "value": 0.5}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 5,
+            "title": "📈 Production Lines Status",
+            "type": "table",
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory",
+                "rawSql": "SELECT substring(sensor_id from 'factory1/(line[0-9]+)') as line, count(*) as sensor_count, max(timestamp) as last_update FROM sensor_data WHERE timestamp > now() - interval '10 minutes' GROUP BY 1 ORDER BY 1",
+                "format": "table"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 6,
+            "title": "🚨 Recent Alerts",
+            "type": "table",
+            "targets": [
+              {
+                "datasource": "PostgreSQL-SmartFactory", 
+                "rawSql": "SELECT timestamp, sensor_id, value, 'Alert' as status FROM sensor_data WHERE value > 35 AND sensor_id LIKE '%temperature%' AND timestamp > now() - interval '1 hour' ORDER BY timestamp DESC LIMIT 10",
+                "format": "table"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+          }
+        ]
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: arc
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: grafana-config
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: grafana-datasources
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-dashboards-config
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: smart-factory-dashboard
+          mountPath: /etc/grafana/provisioning/dashboards/smart-factory-overview.json
+          subPath: smart-factory-overview.json
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
+      - name: grafana-datasources
+        configMap:
+          name: grafana-datasources
+      - name: grafana-dashboards-config
+        configMap:
+          name: grafana-dashboards-config
+      - name: smart-factory-dashboard
+        configMap:
+          name: smart-factory-dashboard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: arc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: managed-premium
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: arc
+  labels:
+    app: grafana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: grafana

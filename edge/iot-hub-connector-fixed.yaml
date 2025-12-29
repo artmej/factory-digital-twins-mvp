@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iot-hub-connector-fixed
+  namespace: arc
+  labels:
+    app: iot-hub-connector-fixed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iot-hub-connector-fixed
+  template:
+    metadata:
+      labels:
+        app: iot-hub-connector-fixed
+    spec:
+      containers:
+      - name: connector
+        image: node:18-alpine
+        command:
+        - sh
+        - -c
+        - |
+          cd /tmp &&
+          npm install azure-iot-device-mqtt mqtt &&
+          cat > app.js << 'EOF'
+          const mqtt = require('mqtt');
+          const { Client } = require('azure-iot-device-mqtt');
+          const { Message } = require('azure-iot-device');
+
+          console.log('🔗 Starting IoT Hub Connector for Smart Factory (FIXED)');
+
+          const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883';
+          const IOT_CONNECTION = process.env.IOT_HUB_CONNECTION;
+
+          if (!IOT_CONNECTION) {
+            console.error('❌ IOT_HUB_CONNECTION env var required');
+            process.exit(1);
+          }
+
+          const deviceClient = Client.fromConnectionString(IOT_CONNECTION);
+          const localMqtt = mqtt.connect(MQTT_BROKER);
+          let messageCount = 0;
+
+          deviceClient.open((err) => {
+            if (err) {
+              console.error('❌ Error connecting to IoT Hub:', err);
+              return;
+            }
+            console.log('✅ Connected to IoT Hub');
+          });
+
+          localMqtt.on('connect', () => {
+            console.log('✅ Connected to local MQTT broker');
+            
+            // FIXED: Subscribe to correct topic
+            localMqtt.subscribe('dt/+/telemetry', (err) => {
+              if (!err) {
+                console.log('📡 Subscribed to: dt/+/telemetry (Digital Twins topic)');
+              }
+            });
+          });
+
+          localMqtt.on('message', (topic, message) => {
+            try {
+              messageCount++;
+              const telemetryData = JSON.parse(message.toString());
+              
+              console.log(`📤 [${messageCount}] ${telemetryData.sensorId}=${telemetryData.value} → IoT Hub`);
+
+              const iotMessage = new Message(JSON.stringify({
+                deviceId: 'smartfactory-edge',
+                telemetry: telemetryData,
+                timestamp: new Date().toISOString(),
+                source: 'edge',
+                messageId: messageCount
+              }));
+              
+              iotMessage.properties.add('messageType', 'telemetry');
+              iotMessage.properties.add('sensorId', telemetryData.sensorId);
+              iotMessage.properties.add('dtmiType', telemetryData.dtmiType);
+
+              deviceClient.sendEvent(iotMessage, (err) => {
+                if (err) {
+                  console.error('❌ Error sending to IoT Hub:', err);
+                } else {
+                  console.log(`✅ [${messageCount}] Sent to IoT Hub successfully`);
+                }
+              });
+
+            } catch (error) {
+              console.error('❌ Error processing message:', error);
+            }
+          });
+
+          process.on('SIGINT', () => {
+            console.log('🛑 Shutting down connector...');
+            localMqtt.end();
+            deviceClient.close();
+            process.exit(0);
+          });
+          EOF
+
+          cd /tmp && node app.js
+        env:
+        - name: MQTT_BROKER
+          value: "mqtt://mqtt-broker:1883"
+        - name: IOT_HUB_CONNECTION
+          valueFrom:
+            secretKeyRef:
+              name: iot-edge-secrets
+              key: connection-string
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "150m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iot-hub-connector-fixed
+  namespace: arc
+spec:
+  selector:
+    app: iot-hub-connector-fixed
+  ports:
+  - port: 80
+    targetPort: 8080

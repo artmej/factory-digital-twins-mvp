@@ -1,0 +1,94 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: influxdb-config
+data:
+  INFLUXDB_DB: smart_factory_metrics
+  INFLUXDB_USER: factory_user
+  INFLUXDB_USER_PASSWORD: SmartFactory2025!
+  INFLUXDB_ADMIN_USER: admin
+  INFLUXDB_ADMIN_PASSWORD: admin123
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: local-path
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  labels:
+    app: influxdb
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+        tier: database
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:1.8-alpine
+        ports:
+        - containerPort: 8086
+        envFrom:
+        - configMapRef:
+            name: influxdb-config
+        volumeMounts:
+        - name: influxdb-storage
+          mountPath: /var/lib/influxdb
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8086
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 8086
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: influxdb-storage
+        persistentVolumeClaim:
+          claimName: influxdb-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb-service
+  labels:
+    app: influxdb
+spec:
+  type: NodePort
+  ports:
+  - port: 8086
+    nodePort: 30086
+    protocol: TCP
+  selector:
+    app: influxdb

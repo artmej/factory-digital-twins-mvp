@@ -1,0 +1,199 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-simulator
+  namespace: arc
+  labels:
+    app: sensor-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-simulator
+  template:
+    metadata:
+      labels:
+        app: sensor-simulator
+    spec:
+      containers:
+      - name: simulator
+        image: node:18-alpine
+        workingDir: /tmp
+        command: ["sh", "-c"]
+        args:
+          - |
+            cd /tmp &&
+            npm install mqtt &&
+            cat > sensor-sim.js << 'EOF'
+            const mqtt = require('mqtt');
+            
+            console.log('🏭 Starting Smart Factory Digital Twins Sensor Simulator');
+            console.log('📍 Aligned with DTDL models: Factory, Line, Machine, Sensor');
+            
+            const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883';
+            const client = mqtt.connect(MQTT_BROKER);
+            
+            client.on('connect', () => {
+              console.log('✅ Connected to MQTT broker');
+              
+              // Simular sensores alineados con Digital Twins cada 10 segundos
+              setInterval(() => {
+                const now = new Date().toISOString();
+                
+                const sensors = [
+                  // Factory Level - dtmi:smartfactory:Factory;1
+                  {
+                    topic: 'factory/dtmi:smartfactory:Factory:1/telemetry',
+                    sensorId: 'factory-main',
+                    sensorType: 'efficiency',
+                    value: 85 + Math.random() * 10,
+                    unit: 'percent',
+                    dtmiType: 'Factory',
+                    timestamp: now
+                  },
+                  // Line Level sensors
+                  {
+                    topic: 'factory/line1/dtmi:smartfactory:Line:1/telemetry', 
+                    sensorId: 'line1-efficiency',
+                    sensorType: 'efficiency',
+                    value: 80 + Math.random() * 15,
+                    unit: 'percent',
+                    dtmiType: 'Line',
+                    timestamp: now
+                  },
+                  // Machine Level - dtmi:smartfactory:Machine;1
+                  {
+                    topic: 'factory/line1/machine1/dtmi:smartfactory:Machine:1/telemetry',
+                    sensorId: 'machine1-temperature',
+                    sensorType: 'temperature', 
+                    value: 20 + Math.random() * 15,
+                    unit: 'celsius',
+                    dtmiType: 'Machine',
+                    timestamp: now
+                  },
+                  {
+                    topic: 'factory/line1/machine1/dtmi:smartfactory:Machine:1/telemetry',
+                    sensorId: 'machine1-pressure',
+                    sensorType: 'pressure',
+                    value: 100 + Math.random() * 50,
+                    unit: 'psi',
+                    dtmiType: 'Machine', 
+                    timestamp: now
+                  },
+                  {
+                    topic: 'factory/line1/machine2/dtmi:smartfactory:Machine:1/telemetry',
+                    sensorId: 'machine2-vibration',
+                    sensorType: 'vibration',
+                    value: 0.1 + Math.random() * 0.3,
+                    unit: 'mm/s',
+                    dtmiType: 'Machine',
+                    timestamp: now
+                  },
+                  // Individual Sensors - dtmi:smartfactory:Sensor;1
+                  {
+                    topic: 'factory/line1/machine1/sensors/dtmi:smartfactory:Sensor:1/telemetry',
+                    sensorId: 'temp-001',
+                    sensorType: 'temperature',
+                    value: 22 + Math.random() * 8,
+                    unit: 'celsius',
+                    dtmiType: 'Sensor',
+                    timestamp: now
+                  },
+                  {
+                    topic: 'factory/line1/machine2/sensors/dtmi:smartfactory:Sensor:1/telemetry',
+                    sensorId: 'pressure-002',
+                    sensorType: 'pressure',
+                    value: 95 + Math.random() * 20,
+                    unit: 'bar',
+                    dtmiType: 'Sensor',
+                    timestamp: now
+                  }
+                ];
+                
+                sensors.forEach(sensor => {
+                  const message = JSON.stringify(sensor);
+                  client.publish(sensor.topic, message);
+                  console.log(`📊 [${sensor.dtmiType}] ${sensor.sensorId}: ${sensor.value.toFixed(2)} ${sensor.unit}`);
+                });
+                
+                console.log(`🔄 Published ${sensors.length} sensor readings aligned with Digital Twins`);
+              }, 10000);
+            });
+            
+            client.on('error', (error) => {
+              console.error('❌ MQTT Error:', error);
+              process.exit(1);
+            });
+            
+            process.on('SIGTERM', () => {
+              console.log('🛑 Shutting down sensor simulator');
+              client.end();
+              process.exit(0);
+            });
+            EOF
+                    value: 0.1 + Math.random() * 0.3
+                  },
+                  {
+                    topic: 'sensors/factory1/line2/machine3/rpm',
+                    value: 1500 + Math.random() * 500
+                  }
+                ];
+                
+                sensors.forEach(sensor => {
+                  const payload = {
+                    value: Math.round(sensor.value * 100) / 100,
+                    timestamp: new Date().toISOString(),
+                    unit: getUnit(sensor.topic),
+                    quality: 'good'
+                  };
+                  
+                  client.publish(sensor.topic, JSON.stringify(payload));
+                  console.log(`📡 ${sensor.topic}: ${payload.value} ${payload.unit}`);
+                });
+                
+                // Simular alertas ocasionalmente
+                if (Math.random() < 0.1) {
+                  const alert = {
+                    type: 'warning',
+                    message: 'Temperature slightly elevated',
+                    value: 38.5,
+                    timestamp: new Date().toISOString()
+                  };
+                  
+                  client.publish('alerts/factory1/line1/machine1/temperature', JSON.stringify(alert));
+                  console.log('🚨 Alert: Temperature warning');
+                }
+                
+              }, 10000);
+            });
+            
+            function getUnit(topic) {
+              if (topic.includes('temperature')) return '°C';
+              if (topic.includes('pressure')) return 'bar';
+              if (topic.includes('vibration')) return 'mm/s';
+              if (topic.includes('rpm')) return 'rpm';
+              return 'units';
+            }
+            
+            client.on('error', (err) => {
+              console.error('❌ MQTT Error:', err);
+            });
+            
+            process.on('SIGINT', () => {
+              console.log('🛑 Stopping sensor simulator...');
+              client.end();
+              process.exit(0);
+            });
+            EOF
+            
+            cd /tmp && node sensor-sim.js
+        env:
+        - name: MQTT_BROKER
+          value: "mqtt://mqtt-broker:1883"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"

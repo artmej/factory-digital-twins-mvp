@@ -1,0 +1,261 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-bridge-config
+  namespace: arc
+data:
+  config.json: |
+    {
+      "sources": {
+        "mqtt": {
+          "broker": "mqtt-broker:1883",
+          "topics": ["dt/+/telemetry"]
+        }
+      },
+      "ai": {
+        "batchSize": 5,
+        "intervalMs": 60000
+      },
+      "filters": {
+        "enableFiltering": false,
+        "sendAllData": true
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-bridge-nofilter
+  namespace: arc
+  labels:
+    app: ai-bridge-nofilter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-bridge-nofilter
+  template:
+    metadata:
+      labels:
+        app: ai-bridge-nofilter
+    spec:
+      containers:
+      - name: ai-bridge
+        image: node:18-alpine
+        env:
+        - name: NODE_ENV
+          value: "production"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        - name: app-code
+          mountPath: /app
+        command: ["/bin/sh"]
+        args: ["-c", "cd /app && npm install && node bridge.js"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+      volumes:
+      - name: config
+        configMap:
+          name: ai-bridge-config
+      - name: app-code
+        configMap:
+          name: ai-bridge-nofilter-code
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-bridge-nofilter-code
+  namespace: arc
+data:
+  package.json: |
+    {
+      "name": "smart-factory-ai-bridge-nofilter",
+      "version": "1.0.0",
+      "description": "Bridge between edge stack and Azure AI - ALL DATA",
+      "main": "bridge.js",
+      "dependencies": {
+        "mqtt": "^5.3.4",
+        "axios": "^1.6.5",
+        "moment": "^2.30.1"
+      }
+    }
+  bridge.js: |
+    const mqtt = require('mqtt');
+    const axios = require('axios');
+    const fs = require('fs');
+    const moment = require('moment');
+
+    console.log('🌉 Smart Factory AI Bridge (NO FILTER) starting...');
+
+    // Load configuration
+    const config = JSON.parse(fs.readFileSync('/app/config/config.json', 'utf8'));
+    console.log('📋 Configuration loaded:', {
+      mqttBroker: config.sources.mqtt.broker,
+      batchSize: config.ai.batchSize,
+      filtering: config.filters.enableFiltering
+    });
+
+    // State management
+    let messageBatch = [];
+    let lastProcessTime = Date.now();
+    let messageCount = 0;
+
+    // MQTT Client
+    const mqttClient = mqtt.connect(`mqtt://${config.sources.mqtt.broker}`);
+
+    mqttClient.on('connect', () => {
+      console.log('🔗 Connected to MQTT broker');
+      config.sources.mqtt.topics.forEach(topic => {
+        mqttClient.subscribe(topic);
+        console.log(`📡 Subscribed to: ${topic} (NO FILTERING - ALL DATA TO AI)`);
+      });
+    });
+
+    // Message processing - NO FILTERING
+    mqttClient.on('message', async (topic, message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        messageCount++;
+        console.log(`📊 [${messageCount}] ALL DATA: ${data.sensorId} = ${data.value} → AI Queue`);
+
+        // Add ALL messages to batch for AI processing
+        messageBatch.push({
+          ...data,
+          receivedAt: moment().toISOString(),
+          topic: topic,
+          messageId: messageCount
+        });
+
+        // Send batch when full OR on timer
+        if (messageBatch.length >= config.ai.batchSize) {
+          await processBatchToAI('BATCH_FULL');
+        }
+
+      } catch (error) {
+        console.error('❌ Message processing error:', error);
+      }
+    });
+
+    // Periodic batch processing
+    setInterval(async () => {
+      const timeSinceLastProcess = Date.now() - lastProcessTime;
+      if (messageBatch.length > 0 && timeSinceLastProcess >= config.ai.intervalMs) {
+        await processBatchToAI('TIMER');
+      }
+    }, config.ai.intervalMs);
+
+    async function processBatchToAI(trigger) {
+      if (messageBatch.length === 0) return;
+
+      try {
+        console.log(`🧠 [${trigger}] Sending ${messageBatch.length} messages to AI processing...`);
+
+        // Prepare AI payload with ALL data
+        const aiPayload = {
+          trigger: trigger,
+          totalMessages: messageBatch.length,
+          telemetryBatch: messageBatch,
+          timestamp: moment().toISOString(),
+          factoryStatus: analyzeFactoryStatus(messageBatch)
+        };
+
+        // Log summary for monitoring
+        logBatchSummary(messageBatch);
+
+        // In production, this would call Azure OpenAI Function
+        await callAIFunction(aiPayload);
+
+        // Clear batch
+        messageBatch = [];
+        lastProcessTime = Date.now();
+
+        console.log('✅ ALL DATA batch processed successfully');
+
+      } catch (error) {
+        console.error('❌ AI processing error:', error);
+        // Keep messages for retry
+      }
+    }
+
+    function logBatchSummary(batch) {
+      const summary = {};
+      batch.forEach(msg => {
+        if (!summary[msg.sensorId]) {
+          summary[msg.sensorId] = { count: 0, values: [] };
+        }
+        summary[msg.sensorId].count++;
+        summary[msg.sensorId].values.push(msg.value);
+      });
+
+      console.log('📈 BATCH SUMMARY:');
+      Object.entries(summary).forEach(([sensor, data]) => {
+        const avg = (data.values.reduce((a, b) => a + b, 0) / data.values.length).toFixed(2);
+        console.log(`   ${sensor}: ${data.count} messages, avg: ${avg}`);
+      });
+    }
+
+    function analyzeFactoryStatus(batch) {
+      const latest = batch.reduce((acc, msg) => {
+        acc[msg.sensorId] = msg.value;
+        return acc;
+      }, {});
+
+      return {
+        factoryEfficiency: latest['factory-main'] || 0,
+        linePerformance: latest['line1-main'] || 0,
+        machineTemperature: latest['machine1'] || 0,
+        overallStatus: getOverallStatus(latest),
+        lastUpdate: moment().toISOString()
+      };
+    }
+
+    function getOverallStatus(latest) {
+      const factory = latest['factory-main'] || 0;
+      const line = latest['line1-main'] || 0;
+      const temp = latest['machine1'] || 0;
+
+      if (factory > 85 && line > 85 && temp < 45) return 'OPTIMAL';
+      if (factory > 70 && line > 70 && temp < 55) return 'GOOD';
+      if (temp > 60 || factory < 50 || line < 50) return 'ALERT';
+      return 'NORMAL';
+    }
+
+    async function callAIFunction(payload) {
+      try {
+        // Mock AI function call for now
+        console.log('🤖 AI Analysis Request:', {
+          messages: payload.totalMessages,
+          status: payload.factoryStatus.overallStatus,
+          efficiency: payload.factoryStatus.factoryEfficiency,
+          temperature: payload.factoryStatus.machineTemperature
+        });
+
+        // When Azure OpenAI is ready, uncomment:
+        /*
+        const response = await axios.post('AZURE_FUNCTION_URL/api/factoryInsights', {
+          telemetryBatch: payload.telemetryBatch,
+          factoryStatus: payload.factoryStatus,
+          question: 'Analyze current factory performance and provide insights'
+        });
+        console.log('🤖 AI Response:', response.data);
+        */
+
+      } catch (error) {
+        console.log('⏳ AI Function not available yet:', error.message);
+      }
+    }
+
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('🔄 Shutting down AI bridge...');
+      mqttClient.end();
+      process.exit(0);
+    });
+
+    console.log('🌉 AI Bridge (NO FILTER) initialized and running...');

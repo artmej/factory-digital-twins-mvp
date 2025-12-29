@@ -1,0 +1,231 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-collector
+  namespace: arc
+  labels:
+    app: data-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-collector
+  template:
+    metadata:
+      labels:
+        app: data-collector
+    spec:
+      containers:
+      - name: collector
+        image: node:18-alpine
+        workingDir: /tmp
+        command: ["sh", "-c"]
+        args:
+          - |
+            cd /tmp &&
+            npm install mqtt pg &&
+            cat > data-collector.js << 'EOF'
+            const mqtt = require('mqtt');
+            const { Client } = require('pg');
+            
+            console.log('💾 Starting Data Collector for Smart Factory');
+            
+            // Configuración
+            const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883';
+            const PG_CONFIG = {
+              host: process.env.POSTGRES_HOST || 'postgres-smartfactory',
+              port: process.env.POSTGRES_PORT || 5432,
+              database: process.env.POSTGRES_DB || 'smartfactory',
+              user: process.env.POSTGRES_USER || 'sfadmin', 
+              password: process.env.POSTGRES_PASSWORD || 'SmartFactory2024!'
+            };
+            
+            // Cliente PostgreSQL
+            const pgClient = new Client(PG_CONFIG);
+            
+            // Cliente MQTT
+            const mqttClient = mqtt.connect(MQTT_BROKER);
+            
+            // Conectar a PostgreSQL
+            async function initDatabase() {
+              try {
+                await pgClient.connect();
+                console.log('✅ Connected to PostgreSQL');
+                
+                // Crear tabla si no existe
+                await pgClient.query(`
+                  CREATE TABLE IF NOT EXISTS sensor_data (
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMPTZ DEFAULT NOW(),
+                    sensor_id TEXT NOT NULL,
+                    topic TEXT NOT NULL,
+                    value NUMERIC,
+                    unit TEXT,
+                    quality TEXT DEFAULT 'good',
+                    metadata JSONB
+                  )
+                `);
+                
+                // Crear hypertable para TimescaleDB
+                await pgClient.query(`
+                  SELECT create_hypertable('sensor_data', 'timestamp', if_not_exists => TRUE)
+                `).catch(() => {
+                  console.log('ℹ️ Table already a hypertable or TimescaleDB not available');
+                });
+                
+                console.log('✅ Database schema ready');
+                
+              } catch (error) {
+                console.error('❌ Database connection error:', error.message);
+                setTimeout(initDatabase, 5000); // Retry
+              }
+            }
+            
+            // Conectar a MQTT
+            mqttClient.on('connect', () => {
+              console.log('✅ Connected to MQTT broker');
+              
+              // Suscribirse a todos los sensores Digital Twins
+              mqttClient.subscribe('dt/+/telemetry', (err) => {
+                if (!err) {
+                  console.log('📡 Subscribed to Digital Twins telemetry topics');
+                }
+              });
+              
+              // Suscribirse a topics ML (futuro)
+              mqttClient.subscribe('ml/+/+', (err) => {
+                if (!err) {
+                  console.log('🤖 Subscribed to ML topics');
+                }
+              });
+            });
+            
+            mqttClient.on('message', async (topic, message) => {
+              try {
+                const data = JSON.parse(message.toString());
+                console.log(`📊 Received data from ${topic}: ${data.sensorId}`);
+                
+                // Extraer información de Digital Twin
+                const sensorId = data.sensorId || 'unknown';
+                const dtmiType = data.dtmiType || 'unknown';
+                
+                // Insertar en base de datos con estructura Digital Twins
+                const query = `
+                  INSERT INTO sensor_data (sensor_id, topic, value, unit, quality, metadata)
+                  VALUES ($1, $2, $3, $4, $5, $6)
+                `;
+                
+                // Insertar múltiples valores si los hay
+                if (data.efficiency !== undefined) {
+                  await pgClient.query(query, [
+                    sensorId + '_efficiency',
+                    topic,
+                    data.efficiency,
+                    'percent',
+                    'good',
+                    JSON.stringify({dtmiType, timestamp: data.timestamp})
+                  ]);
+                }
+                
+                if (data.temperature !== undefined) {
+                  await pgClient.query(query, [
+                    sensorId + '_temperature', 
+                    topic,
+                    data.temperature,
+                    'celsius',
+                    'good',
+                    JSON.stringify({dtmiType, timestamp: data.timestamp})
+                  ]);
+                }
+                
+                if (data.pressure !== undefined) {
+                  await pgClient.query(query, [
+                    sensorId + '_pressure',
+                    topic, 
+                    data.pressure,
+                    'psi',
+                    'good',
+                    JSON.stringify({dtmiType, timestamp: data.timestamp})
+                  ]);
+                }
+                
+                if (data.value !== undefined) {
+                  await pgClient.query(query, [
+                    sensorId,
+                    topic,
+                    data.value,
+                    data.unit || 'unknown',
+                    'good',
+                    JSON.stringify({dtmiType, sensorType: data.sensorType, timestamp: data.timestamp})
+                  ]);
+                }
+                
+                console.log(`💾 Stored data from ${sensorId} (${dtmiType})`);
+                
+              } catch (error) {
+                console.error(`❌ Error processing message from ${topic}:`, error);
+              }
+            });
+            
+            // Inicializar
+            initDatabase();
+            
+            // Manejo de señales de cierre
+            process.on('SIGTERM', async () => {
+              console.log('🛑 Shutting down data collector');
+              await pgClient.end();
+              mqttClient.end();
+              process.exit(0);
+            });
+            EOF
+            
+            npm install pg mqtt &&
+            node index.js
+                  JSON.stringify(data)
+                ];
+                
+                await pgClient.query(query, values);
+                console.log(`💾 Stored: ${sensorId} = ${data.value} ${data.unit || ''}`);
+                
+              } catch (error) {
+                console.error('❌ Error storing data:', error.message);
+              }
+            });
+            
+            mqttClient.on('error', (err) => {
+              console.error('❌ MQTT Error:', err);
+            });
+            
+            // Inicializar base de datos
+            initDatabase();
+            
+            // Graceful shutdown
+            process.on('SIGINT', () => {
+              console.log('🛑 Shutting down data collector...');
+              mqttClient.end();
+              pgClient.end();
+              process.exit(0);
+            });
+            EOF
+            
+            cd /tmp && node data-collector.js
+        env:
+        - name: MQTT_BROKER
+          value: "mqtt://mqtt-broker:1883"
+        - name: POSTGRES_HOST
+          value: "postgres-smartfactory"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "smartfactory"
+        - name: POSTGRES_USER
+          value: "sfadmin"
+        - name: POSTGRES_PASSWORD
+          value: "SmartFactory2024!"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"

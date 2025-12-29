@@ -1,0 +1,217 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iotedge-runtime
+  namespace: arc
+  labels:
+    app: iotedge-runtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iotedge-runtime
+  template:
+    metadata:
+      labels:
+        app: iotedge-runtime
+    spec:
+      containers:
+      - name: iotedge
+        image: mcr.microsoft.com/azureiotedge-agent:1.4
+        env:
+        - name: EdgeHubConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: iot-edge-secrets
+              key: connection-string
+        - name: EdgeModuleHubServerCAChainCert
+          value: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+        - name: iot-edge-config
+          mountPath: /etc/iotedge
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+      - name: iot-edge-config
+        configMap:
+          name: iot-edge-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iot-edge-config
+  namespace: arc
+data:
+  config.yaml: |
+    # Azure IoT Edge Smart Factory Configuration
+    
+    # Hostname y dispositivo
+    hostname: "smart-factory-edge"
+    parent_hostname: "smart-factory-gateway"
+    
+    # Certificados y seguridad
+    certificates:
+      device_ca_cert: "/etc/iotedge/certs/device-ca.pem"
+      device_ca_pk: "/etc/iotedge/certs/device-ca-key.pem"
+      trusted_ca_certs: "/etc/iotedge/certs/ca.pem"
+    
+    # Módulos de Edge
+    agent:
+      name: "edgeAgent"
+      type: "docker"
+      env:
+        RuntimeLogLevel: "info"
+      config:
+        image: "mcr.microsoft.com/azureiotedge-agent:1.4"
+        
+    # Hub de Edge
+    hub:
+      name: "edgeHub"
+      type: "docker"
+      status: "running"
+      restartPolicy: "always"
+      config:
+        image: "mcr.microsoft.com/azureiotedge-hub:1.4"
+        createOptions: >
+          {
+            "HostConfig": {
+              "PortBindings": {
+                "8883/tcp": [{"HostPort": "8883"}],
+                "443/tcp": [{"HostPort": "443"}],
+                "5671/tcp": [{"HostPort": "5671"}]
+              }
+            }
+          }
+      env:
+        - name: "RuntimeLogLevel"
+          value: "info"
+          
+    # Módulos Smart Factory
+    modules:
+      # MQTT Broker Local
+      MqttBroker:
+        version: "1.0"
+        type: "docker"
+        status: "running"
+        restartPolicy: "always"
+        settings:
+          image: "eclipse-mosquitto:2.0.18"
+          createOptions: >
+            {
+              "HostConfig": {
+                "PortBindings": {
+                  "1883/tcp": [{"HostPort": "1883"}],
+                  "9001/tcp": [{"HostPort": "9001"}]
+                }
+              }
+            }
+        env:
+          MOSQUITTO_USERNAME: "factory"
+          MOSQUITTO_PASSWORD: "SmartFactory2025!"
+          
+      # ML Inference Local
+      MLInference:
+        version: "1.0"
+        type: "docker"
+        status: "running"
+        restartPolicy: "always"
+        settings:
+          image: "tensorflow/serving:latest"
+          createOptions: >
+            {
+              "HostConfig": {
+                "PortBindings": {
+                  "8501/tcp": [{"HostPort": "8501"}]
+                }
+              }
+            }
+        env:
+          MODEL_NAME: "factory_predictive_maintenance"
+          MODEL_BASE_PATH: "/models"
+          
+      # Data Collector para PostgreSQL
+      DataCollector:
+        version: "1.0"  
+        type: "docker"
+        status: "running"
+        restartPolicy: "always"
+        settings:
+          image: "node:18-alpine"
+          createOptions: >
+            {
+              "Cmd": [
+                "sh", "-c",
+                "npm install mqtt pg && node /app/data-collector.js"
+              ],
+              "WorkingDir": "/app"
+            }
+        env:
+          MQTT_BROKER: "localhost:1883"
+          POSTGRES_HOST: "postgres-smartfactory.arc.svc.cluster.local"
+          POSTGRES_DB: "smart_factory"
+          POSTGRES_USER: "factory_user"
+          POSTGRES_PASSWORD: "SmartFactory2025!"
+          
+      # Cloud Sync Service
+      CloudSync:
+        version: "1.0"
+        type: "docker"
+        status: "running"
+        restartPolicy: "always"
+        settings:
+          image: "node:18-alpine"
+          createOptions: >
+            {
+              "Cmd": [
+                "sh", "-c", 
+                "npm install azure-iot-device-mqtt && node /app/cloud-sync.js"
+              ],
+              "WorkingDir": "/app"
+            }
+        env:
+          IOT_HUB_CONNECTION: "${IOT_HUB_CONNECTION}"
+          SYNC_INTERVAL: "60" # segundos
+          DATA_RETENTION_DAYS: "365"
+          SELECTIVE_SYNC: "true" # Solo alertas + aggregated data
+    
+    # Rutas de mensajes
+    routes:
+      # Sensores → MQTT Broker Local
+      SensorToMqtt: "FROM /messages/modules/SensorSimulator/outputs/telemetry INTO BrokeredEndpoint(\"/modules/MqttBroker/inputs/messages\")"
+      
+      # MQTT → PostgreSQL (almacenamiento local)
+      MqttToPostgres: "FROM /messages/modules/MqttBroker/outputs/telemetry INTO BrokeredEndpoint(\"/modules/DataCollector/inputs/postgres\")"
+      
+      # PostgreSQL → ML Inference (predicciones locales)
+      PostgresToML: "FROM /messages/modules/DataCollector/outputs/processed INTO BrokeredEndpoint(\"/modules/MLInference/inputs/data\")"
+      
+      # ML Predictions → Cloud Sync (solo alertas)
+      MLToCloud: "FROM /messages/modules/MLInference/outputs/predictions INTO BrokeredEndpoint(\"/modules/CloudSync/inputs/alerts\")"
+      
+      # Aggregated Data → Cloud (retención)
+      AggregatedToCloud: "FROM /messages/modules/DataCollector/outputs/aggregated INTO BrokeredEndpoint(\"/modules/CloudSync/inputs/retention\")"
+      
+      # All Telemetry → Cloud (backup selectivo)
+      TelemetryToCloud: "FROM /messages/* INTO $upstream"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: iot-edge-secrets
+  namespace: arc
+type: Opaque
+data:
+  # NOTA: Reemplazar con connection string real de IoT Hub
+  connection-string: SG9zdG5hbWU9c21hcnQtZmFjdG9yeS1pb3RodWI7RGV2aWNlSWQ9c21hcnQtZmFjdG9yeS1lZGdlO1NoYXJlZEFjY2Vzc0tleT1kZW1vLWtleQ==

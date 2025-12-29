@@ -1,0 +1,22 @@
+{
+  "name": "smartfactory-ai-functions",
+  "version": "1.0.0",
+  "description": "Smart Factory AI Processing Functions with Azure OpenAI integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "@azure/openai": "^1.0.0-beta.12",
+    "@azure/digital-twins-core": "^1.1.0",
+    "@azure/service-bus": "^7.9.4",
+    "@azure/event-hubs": "^5.12.0",
+    "axios": "^1.6.5",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@azure/functions-core-tools": "^4.0.5455"
+  }
+}

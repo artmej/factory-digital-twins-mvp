@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-smartfactory
+  namespace: arc
+  labels:
+    app: grafana-smartfactory
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-smartfactory
+  template:
+    metadata:
+      labels:
+        app: grafana-smartfactory
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "SmartFactory2025!"
+        - name: GF_INSTALL_PLUGINS
+          value: "grafana-clock-panel,grafana-simple-json-datasource"
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: datasource-config
+          mountPath: /etc/grafana/provisioning/datasources
+          readOnly: true
+        - name: dashboards-config
+          mountPath: /etc/grafana/provisioning/dashboards
+          readOnly: true
+        - name: dashboard-smartfactory
+          mountPath: /var/lib/grafana/dashboards
+          readOnly: true
+      volumes:
+      - name: grafana-storage
+        emptyDir: {}
+      - name: datasource-config
+        configMap:
+          name: grafana-datasource
+      - name: dashboards-config
+        configMap:
+          name: grafana-dashboards-config
+      - name: dashboard-smartfactory
+        configMap:
+          name: smartfactory-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-smartfactory
+  namespace: arc
+spec:
+  selector:
+    app: grafana-smartfactory
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30000
+  type: NodePort

@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-collector-simple
+  namespace: arc
+  labels:
+    app: data-collector-simple
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-collector-simple
+  template:
+    metadata:
+      labels:
+        app: data-collector-simple
+    spec:
+      containers:
+      - name: collector
+        image: node:18-alpine
+        workingDir: /app
+        command: ["sh", "-c"]
+        args:
+          - |
+            npm init -y &&
+            npm install pg mqtt &&
+            cat > index.js << 'EOF' &&
+            const { Client } = require('pg');
+            const mqtt = require('mqtt');
+            
+            console.log('💾 Smart Factory Data Collector (Simple)');
+            
+            const pgConfig = {
+              host: 'postgres-smartfactory',
+              port: 5432,
+              database: 'smartfactory',
+              user: 'sfadmin',
+              password: 'SmartFactory2024!'
+            };
+            
+            const pgClient = new Client(pgConfig);
+            const mqttClient = mqtt.connect('mqtt://mqtt-broker:1883');
+            
+            async function initDB() {
+              try {
+                await pgClient.connect();
+                console.log('✅ Connected to PostgreSQL');
+                
+                await pgClient.query(`
+                  CREATE TABLE IF NOT EXISTS sensor_data (
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMPTZ DEFAULT NOW(),
+                    sensor_id TEXT NOT NULL,
+                    topic TEXT NOT NULL,
+                    value NUMERIC,
+                    unit TEXT,
+                    quality TEXT DEFAULT 'good',
+                    metadata JSONB
+                  )
+                `);
+                console.log('✅ Database ready');
+              } catch (error) {
+                console.error('❌ Database error:', error);
+                setTimeout(initDB, 5000);
+              }
+            }
+            
+            mqttClient.on('connect', () => {
+              console.log('✅ Connected to MQTT');
+              mqttClient.subscribe('dt/+/telemetry');
+              console.log('📡 Subscribed to Digital Twin topics');
+            });
+            
+            mqttClient.on('message', async (topic, message) => {
+              try {
+                const data = JSON.parse(message.toString());
+                console.log(`📊 Processing: ${data.sensorId}`);
+                
+                // Simple insertion - one record per message
+                await pgClient.query(`
+                  INSERT INTO sensor_data (sensor_id, topic, value, unit, metadata)
+                  VALUES ($1, $2, $3, $4, $5)
+                `, [
+                  data.sensorId,
+                  topic,
+                  data.efficiency || data.temperature || data.pressure || data.value || 0,
+                  data.unit || 'units',
+                  JSON.stringify(data)
+                ]);
+                
+                console.log(`💾 Saved: ${data.sensorId}`);
+              } catch (error) {
+                console.error('❌ Error:', error.message);
+              }
+            });
+            
+            initDB();
+            
+            process.on('SIGTERM', async () => {
+              await pgClient.end();
+              mqttClient.end();
+              process.exit(0);
+            });
+            EOF
+            node index.js
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-collector-simple
+  namespace: arc
+  labels:
+    app: data-collector-simple
+spec:
+  selector:
+    app: data-collector-simple
+  ports:
+  - port: 80
+    targetPort: 3000
