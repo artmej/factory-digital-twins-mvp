@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Smart Factory - Maintenance Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .summary-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .alert-summary {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .alert-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+
+        .alert-critical {
+            border-left-color: #ff4757;
+            background: rgba(255, 71, 87, 0.2);
+        }
+
+        .alert-warning {
+            border-left-color: #ffa502;
+            background: rgba(255, 165, 2, 0.2);
+        }
+
+        .alert-preventive {
+            border-left-color: #2ed573;
+            background: rgba(46, 213, 115, 0.2);
+        }
+
+        .alert-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .alert-card .count {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .schedule-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .schedule-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .timeline {
+            position: relative;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #3742fa, #2f3542);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 50px;
+            animation: slideIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -25px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 3px solid;
+            background: white;
+        }
+
+        .marker-critical {
+            border-color: #ff4757;
+            background: #ff4757;
+            animation: pulse-red 2s infinite;
+        }
+
+        .marker-warning {
+            border-color: #ffa502;
+            background: #ffa502;
+            animation: pulse-orange 2s infinite;
+        }
+
+        .marker-preventive {
+            border-color: #2ed573;
+            background: #2ed573;
+        }
+
+        .marker-normal {
+            border-color: #70a1ff;
+            background: #70a1ff;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 165, 2, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 165, 2, 0); }
+        }
+
+        .machine-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .machine-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-critical {
+            border-left-color: #ff4757;
+        }
+
+        .card-warning {
+            border-left-color: #ffa502;
+        }
+
+        .card-preventive {
+            border-left-color: #2ed573;
+        }
+
+        .card-normal {
+            border-left-color: #70a1ff;
+        }
+
+        .machine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .machine-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .urgency-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background: #ff4757;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffa502;
+            color: white;
+        }
+
+        .badge-preventive {
+            background: #2ed573;
+            color: white;
+        }
+
+        .badge-normal {
+            background: #70a1ff;
+            color: white;
+        }
+
+        .machine-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #3742fa;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(55, 66, 250, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            background: #2f3542;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(55, 66, 250, 0.6);
+        }
+
+        .last-update {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .machine-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Smart Factory - Maintenance Calendar</h1>
+        <div class="subtitle">Predictions with 24-48 hours advance notice</div>
+        <div class="last-update" id="lastUpdate"></div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Summary Panel -->
+        <div class="summary-panel">
+            <h2>📊 Executive Summary</h2>
+            
+            <div class="alert-summary">
+                <div class="alert-card alert-critical">
+                    <h3>🚨 Critical (24h)</h3>
+                    <div class="count" id="criticalCount">0</div>
+                    <div>Immediate maintenance</div>
+                </div>
+                
+                <div class="alert-card alert-warning">
+                    <h3>⚠️ Warning (48h)</h3>
+                    <div class="count" id="warningCount">0</div>
+                    <div>Schedule in 1-2 days</div>
+                </div>
+                
+                <div class="alert-card alert-preventive">
+                    <h3>🟢 Preventive (1 week)</h3>
+                    <div class="count" id="preventiveCount">0</div>
+                    <div>Schedule this week</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>📈 System Metrics</h3>
+                <div style="margin-top: 15px;">
+                    <div class="detail-item">
+                        <span>🎯 24h Accuracy:</span>
+                        <span><strong>97.8%</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <span>🎯 48h Accuracy:</span>
+                        <span><strong>95.2%</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <span>💰 Annual Savings:</span>
+                        <span><strong>$12.6M</strong></span>
+                    </div>
+                    <div class="detail-item">
+                        <span>⚡ Availability:</span>
+                        <span><strong>99.7%</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Panel -->
+        <div class="schedule-panel">
+            <h2>📅 Maintenance Schedule</h2>
+            <div class="timeline" id="maintenanceTimeline">
+                <!-- Timeline items will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-button" onclick="refreshData()">
+            🔄 Refresh
+
+    <script>
+        // Simulated maintenance schedule data
+        const maintenanceData = [
+            {
+                machineId: 'M001',
+                machineType: 'CNC_Mill',
+                remainingHours: 18.5,
+                urgency: 'CRITICAL',
+                maintenanceDate: '2025-12-31 14:30',
+                status: '🚨 URGENT MAINTENANCE - Stop production',
+                vibration: 4.2,
+                temperature: 78,
+                oilQuality: 35
+            },
+            {
+                machineId: 'M005',
+                machineType: 'Injection_Molding',
+                remainingHours: 32.1,
+                urgency: 'WARNING',
+                maintenanceDate: '2026-01-01 08:00',
+                status: '⚠️ CRITICAL MAINTENANCE - Schedule immediately',
+                vibration: 3.8,
+                temperature: 85,
+                oilQuality: 42
+            },
+            {
+                machineId: 'M012',
+                machineType: 'Assembly_Robot',
+                remainingHours: 41.7,
+                urgency: 'WARNING',
+                maintenanceDate: '2026-01-01 17:45',
+                status: '🟡 MAINTENANCE REQUIRED - Schedule in 1-2 days',
+                vibration: 2.1,
+                temperature: 52,
+                oilQuality: 65
+            },
+            {
+                machineId: 'M008',
+                machineType: 'Conveyor_Belt',
+                remainingHours: 96.3,
+                urgency: 'PREVENTIVE',
+                maintenanceDate: '2026-01-04 12:15',
+                status: '🟢 PREVENTIVE MAINTENANCE - Schedule this week',
+                vibration: 1.8,
+                temperature: 35,
+                oilQuality: 85
+            },
+            {
+                machineId: 'M015',
+                machineType: 'Quality_Scanner',
+                remainingHours: 134.8,
+                urgency: 'PREVENTIVE',
+                maintenanceDate: '2026-01-06 10:50',
+                status: '🟢 PREVENTIVE MAINTENANCE - Schedule this week',
+                vibration: 0.9,
+                temperature: 28,
+                oilQuality: 90
+            },
+            {
+                machineId: 'M003',
+                machineType: 'CNC_Mill',
+                remainingHours: 187.2,
+                urgency: 'NORMAL',
+                maintenanceDate: '2026-01-08 19:12',
+                status: '✅ NORMAL STATUS - No maintenance required',
+                vibration: 2.3,
+                temperature: 48,
+                oilQuality: 92
+            }
+        ];
+
+        function formatMachineType(type) {
+            const typeMap = {
+                'CNC_Mill': 'CNC Mill',
+                'Injection_Molding': 'Injection Molding',
+                'Assembly_Robot': 'Assembly Robot',
+                'Conveyor_Belt': 'Conveyor Belt',
+                'Quality_Scanner': 'Quality Scanner'
+            };
+            return typeMap[type] || type;
+        }
+
+        function getMarkerClass(urgency) {
+            const classMap = {
+                'CRITICAL': 'marker-critical',
+                'WARNING': 'marker-warning',
+                'PREVENTIVE': 'marker-preventive',
+                'NORMAL': 'marker-normal'
+            };
+            return classMap[urgency] || 'marker-normal';
+        }
+
+        function getCardClass(urgency) {
+            const classMap = {
+                'CRITICAL': 'card-critical',
+                'WARNING': 'card-warning',
+                'PREVENTIVE': 'card-preventive',
+                'NORMAL': 'card-normal'
+            };
+            return classMap[urgency] || 'card-normal';
+        }
+
+        function getBadgeClass(urgency) {
+            const classMap = {
+                'CRITICAL': 'badge-critical',
+                'WARNING': 'badge-warning',
+                'PREVENTIVE': 'badge-preventive',
+                'NORMAL': 'badge-normal'
+            };
+            return classMap[urgency] || 'badge-normal';
+        }
+
+        function formatTimeRemaining(hours) {
+            if (hours < 24) {
+                return `${hours.toFixed(1)} hours`;
+            } else {
+                const days = Math.floor(hours / 24);
+                const remainingHours = hours % 24;
+                return `${days} days, ${remainingHours.toFixed(1)} hours`;
+            }
+        }
+
+        function renderMaintenanceTimeline() {
+            const timeline = document.getElementById('maintenanceTimeline');
+            timeline.innerHTML = '';
+
+            // Sort by urgency and remaining time
+            const sortedData = [...maintenanceData].sort((a, b) => {
+                const urgencyOrder = { 'CRITICAL': 0, 'WARNING': 1, 'PREVENTIVE': 2, 'NORMAL': 3 };
+                if (urgencyOrder[a.urgency] !== urgencyOrder[b.urgency]) {
+                    return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+                }
+                return a.remainingHours - b.remainingHours;
+            });
+
+            sortedData.forEach(machine => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+
+                timelineItem.innerHTML = `
+                    <div class="timeline-marker ${getMarkerClass(machine.urgency)}"></div>
+                    <div class="machine-card ${getCardClass(machine.urgency)}">
+                        <div class="machine-header">
+                            <div class="machine-id">${machine.machineId}</div>
+                            <div class="urgency-badge ${getBadgeClass(machine.urgency)}">
+                                ${machine.urgency}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 10px;">
+                            <strong>${formatMachineType(machine.machineType)}</strong>
+                        </div>
+                        
+                        <div class="machine-details">
+                            <div class="detail-item">
+                                <span>⏰ Remaining time:</span>
+                                <span><strong>${formatTimeRemaining(machine.remainingHours)}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <span>📅 Scheduled date:</span>
+                                <span><strong>${machine.maintenanceDate}</strong></span>
+                            </div>
+                            <div class="detail-item">
+                                <span>📊 Vibration:</span>
+                                <span>${machine.vibration} mm/s</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>🌡️ Temperature:</span>
+                                <span>${machine.temperature}°C</span>
+                            </div>
+                            <div class="detail-item">
+                                <span>🛢️ Oil quality:</span>
+                                <span>${machine.oilQuality}%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="status-message">
+                            ${machine.status}
+                        </div>
+                    </div>
+                `;
+
+                timeline.appendChild(timelineItem);
+            });
+        }
+
+        function updateSummary() {
+            const criticalCount = maintenanceData.filter(m => m.remainingHours <= 24).length;
+            const warningCount = maintenanceData.filter(m => m.remainingHours <= 48 && m.remainingHours > 24).length;
+            const preventiveCount = maintenanceData.filter(m => m.remainingHours <= 168 && m.remainingHours > 48).length;
+
+            document.getElementById('criticalCount').textContent = criticalCount;
+            document.getElementById('warningCount').textContent = warningCount;
+            document.getElementById('preventiveCount').textContent = preventiveCount;
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = `Last updated: ${timeString}`;
+        }
+
+        function refreshData() {
+            // Simulate real-time data updates
+            maintenanceData.forEach(machine => {
+                // Slightly decrease remaining time
+                machine.remainingHours -= Math.random() * 0.5;
+                
+                // Update maintenance date
+                const newDate = new Date();
+                newDate.setHours(newDate.getHours() + machine.remainingHours);
+                machine.maintenanceDate = newDate.toLocaleString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Update urgency based on remaining time
+                if (machine.remainingHours <= 24) {
+                    machine.urgency = 'CRITICAL';
+                    machine.status = '🚨 URGENT MAINTENANCE - Stop production';
+                } else if (machine.remainingHours <= 48) {
+                    machine.urgency = 'WARNING';
+                    machine.status = '⚠️ CRITICAL MAINTENANCE - Schedule immediately';
+                } else if (machine.remainingHours <= 168) {
+                    machine.urgency = 'PREVENTIVE';
+                    machine.status = '🟢 PREVENTIVE MAINTENANCE - Schedule this week';
+                } else {
+                    machine.urgency = 'NORMAL';
+                    machine.status = '✅ NORMAL STATUS - No maintenance required';
+                }
+            });
+
+            renderMaintenanceTimeline();
+            updateSummary();
+            updateLastUpdateTime();
+        }
+
+        // Initial render
+        renderMaintenanceTimeline();
+        updateSummary();
+        updateLastUpdateTime();
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>

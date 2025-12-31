@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏭 Smart Factory Control Dashboard</title>
+    <title>🏭 Smart Factory 3D Digital Twins</title>
     <style>
         * {
             margin: 0;
@@ -14,251 +14,240 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
+            overflow: hidden;
             color: white;
-            min-height: 100vh;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #threejs-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* HUD Overlay */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
             padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+            min-width: 300px;
         }
         
-        .dashboard {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
+        .hud-title {
+            font-size: 18px;
+            font-weight: bold;
             color: #00ff88;
-        }
-        
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.8;
-        }
-        
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .service-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .service-icon {
-            font-size: 4em;
             margin-bottom: 15px;
         }
         
-        .service-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .service-description {
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-        
-        .service-buttons {
+        .metric {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
         
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
+        .metric-label {
+            color: #ccc;
+        }
+        
+        .metric-value {
+            color: #fff;
             font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
         }
         
-        .btn-primary {
-            background: #00ff88;
-            color: #000;
-        }
+        .metric-value.good { color: #00ff88; }
+        .metric-value.warning { color: #ffaa00; }
+        .metric-value.critical { color: #ff4444; }
         
-        .btn-primary:hover {
-            background: #00cc6a;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-online {
-            background: #00ff88;
-            box-shadow: 0 0 10px #00ff88;
-        }
-        
-        .status-offline {
-            background: #ff6b6b;
-        }
-        
-        .demo-flow {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-        }
-        
-        .demo-step {
-            margin: 15px 0;
+        /* User Info */
+        #user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            border-left: 4px solid #00ff88;
+            border: 1px solid #00ff88;
+            text-align: center;
+        }
+        
+        .logout-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .logout-btn:hover {
+            background: #cc3333;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>🏭 Smart Factory Dashboard</h1>
-            <p>Azure Master Program Capstone - Case Study #36</p>
-        </div>
+    <div id="container">
+        <div id="threejs-container"></div>
         
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-icon">🎮</div>
-                <div class="service-title">3D Digital Twins</div>
-                <div class="service-description">
-                    <span class="status-indicator status-online"></span>
-                    Immersive 3D factory visualization with real-time machine monitoring
-                </div>
-                <div class="service-buttons">
-                    <a href="http://localhost:3003" target="_blank" class="btn btn-primary">
-                        🚀 Open 3D Factory Viewer
-                    </a>
-                    <a href="http://localhost:3003/debug" target="_blank" class="btn btn-secondary">
-                        🔍 Debug Info
-                    </a>
-                </div>
+        <div id="hud">
+            <div class="hud-title">🏭 Factory Status</div>
+            <div class="metric">
+                <span class="metric-label">Production:</span>
+                <span class="metric-value good" id="production">98.5%</span>
             </div>
-            
-            <div class="service-card">
-                <div class="service-icon">📡</div>
-                <div class="service-title">Digital Twins API</div>
-                <div class="service-description">
-                    <span class="status-indicator status-online"></span>
-                    Azure Digital Twins connector with ML predictions
-                </div>
-                <div class="service-buttons">
-                    <a href="http://localhost:3004/api/twins/factory" target="_blank" class="btn btn-primary">
-                        📊 View Factory Data
-                    </a>
-                    <a href="http://localhost:3004/api/status" target="_blank" class="btn btn-secondary">
-                        🏥 Service Status
-                    </a>
-                </div>
+            <div class="metric">
+                <span class="metric-label">Efficiency:</span>
+                <span class="metric-value good" id="efficiency">94.2%</span>
             </div>
-            
-            <div class="service-card">
-                <div class="service-icon">📱</div>
-                <div class="service-title">Mobile Interface</div>
-                <div class="service-description">
-                    <span class="status-indicator status-online"></span>
-                    Worker-friendly maintenance dashboard
-                </div>
-                <div class="service-buttons">
-                    <a href="http://localhost:3002" target="_blank" class="btn btn-primary">
-                        📱 Open Mobile App
-                    </a>
-                    <a href="http://localhost:3002/health" target="_blank" class="btn btn-secondary">
-                        🏥 Health Check
-                    </a>
-                </div>
+            <div class="metric">
+                <span class="metric-label">Temperature:</span>
+                <span class="metric-value" id="temperature">72°C</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Alerts:</span>
+                <span class="metric-value" id="alerts">2 Active</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Machines Online:</span>
+                <span class="metric-value good" id="machines">12/12</span>
             </div>
         </div>
         
-        <div class="demo-flow">
-            <h2 style="margin-bottom: 20px; color: #00ff88;">🎭 Demo Presentation Flow</h2>
-            
-            <div class="demo-step">
-                <strong>1. Business Problem</strong> → Open Mobile Interface to show traditional reactive maintenance
-            </div>
-            
-            <div class="demo-step">
-                <strong>2. Data Foundation</strong> → Open Digital Twins API to show real-time telemetry
-            </div>
-            
-            <div class="demo-step">
-                <strong>3. 3D Innovation</strong> → Open 3D Factory Viewer for immersive experience
-            </div>
-            
-            <div class="demo-step">
-                <strong>4. AI Predictions</strong> → Click machines in 3D viewer to show ML insights
-            </div>
-            
-            <div class="demo-step">
-                <strong>5. Business Impact</strong> → Demonstrate $2.2M ROI and 94.7% ML accuracy
-            </div>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; opacity: 0.7;">
-            <p>🏆 Well-Architected Framework Score: 90/100 | 💰 ROI: $2.2M | 🤖 ML Accuracy: 94.7%</p>
+        <div id="user-info">
+            <div>👤 <span id="user-name">Loading...</span></div>
+            <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;" id="user-email">Loading...</div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="factory-3d.js"></script>
     
     <script>
-        // Auto-refresh status indicators every 30 seconds
-        setInterval(async () => {
-            const services = [
-                { url: 'http://localhost:3003/debug', card: 0 },
-                { url: 'http://localhost:3004/api/status', card: 1 },
-                { url: 'http://localhost:3002/health', card: 2 }
-            ];
+        // Check authentication
+        function checkAuth() {
+            const authData = localStorage.getItem('smartfactory_auth');
+            if (!authData) {
+                window.location.href = 'login.html';
+                return;
+            }
             
-            services.forEach(async (service) => {
-                try {
-                    const response = await fetch(service.url);
-                    const indicator = document.querySelectorAll('.status-indicator')[service.card];
-                    if (response.ok) {
-                        indicator.className = 'status-indicator status-online';
-                    } else {
-                        indicator.className = 'status-indicator status-offline';
-                    }
-                } catch (error) {
-                    const indicator = document.querySelectorAll('.status-indicator')[service.card];
-                    indicator.className = 'status-indicator status-offline';
+            try {
+                const auth = JSON.parse(authData);
+                if (!auth.authenticated) {
+                    window.location.href = 'login.html';
+                    return;
                 }
+                
+                // Update user info
+                document.getElementById('user-name').textContent = auth.name || 'User';
+                document.getElementById('user-email').textContent = auth.user || '';
+                
+            } catch (e) {
+                localStorage.removeItem('smartfactory_auth');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('smartfactory_auth');
+            window.location.href = 'login.html';
+        }
+        
+        // Initialize
+        checkAuth();
+        
+        // Initialize 3D Scene (simplified for now)
+        function init3D() {
+            const container = document.getElementById('threejs-container');
+            
+            // Scene
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1e3c72);
+            
+            // Camera
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 10, 20);
+            
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 50, 50);
+            scene.add(directionalLight);
+            
+            // Simple factory floor
+            const floorGeometry = new THREE.PlaneGeometry(40, 40);
+            const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x444444 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+            
+            // Add some factory machines (cubes for now)
+            for (let i = 0; i < 6; i++) {
+                const geometry = new THREE.BoxGeometry(2, 3, 2);
+                const material = new THREE.MeshLambertMaterial({ color: Math.random() * 0x00ff88 + 0x004400 });
+                const machine = new THREE.Mesh(geometry, material);
+                machine.position.x = (i % 3 - 1) * 8;
+                machine.position.y = 1.5;
+                machine.position.z = Math.floor(i / 3) * 8 - 4;
+                scene.add(machine);
+            }
+            
+            // Controls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
             });
-        }, 30000);
+        }
+        
+        // Start 3D scene
+        init3D();
+        
+        // Update metrics periodically
+        setInterval(() => {
+            document.getElementById('production').textContent = (95 + Math.random() * 5).toFixed(1) + '%';
+            document.getElementById('efficiency').textContent = (90 + Math.random() * 8).toFixed(1) + '%';
+            document.getElementById('temperature').textContent = (70 + Math.random() * 5).toFixed(0) + '°C';
+        }, 3000);
     </script>
 </body>
 </html>

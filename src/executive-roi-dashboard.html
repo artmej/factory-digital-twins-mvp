@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Factory - Executive ROI Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .dashboard-container {
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3, #FF9800, #E91E63);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .metric-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        .metric-change {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .metric-change.positive {
+            color: #27ae60;
+        }
+        
+        .metric-change.negative {
+            color: #e74c3c;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .models-performance {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .model-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .model-accuracy {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .model-savings {
+            color: #27ae60;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .competitive-analysis {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .competitive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .competitive-metric {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+        
+        .scenario-planning {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .scenario-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .scenario-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .scenario-btn.active {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+        
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard-container {
+                padding: 1rem;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header" data-aos="fade-down">
+            <h1><i class="fas fa-industry"></i> Smart Factory ROI Dashboard</h1>
+            <p>Executive Analytics & Business Intelligence</p>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card" data-aos="zoom-in" data-aos-delay="100">
+                <div class="metric-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="metric-value gradient-text" id="annual-savings">$15.6M</div>
+                <div class="metric-label">Annual Savings</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> +8,089% ROI
+                </div>
+            </div>
+
+            <div class="metric-card" data-aos="zoom-in" data-aos-delay="200">
+                <div class="metric-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-value gradient-text" id="payback-period">0.4</div>
+                <div class="metric-label">Payback Period (Months)</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-rocket"></i> 2 weeks only!
+                </div>
+            </div>
+
+            <div class="metric-card" data-aos="zoom-in" data-aos-delay="300">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-value gradient-text" id="oee-improvement">83%</div>
+                <div class="metric-label">OEE with AI</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i> +18% vs industry
+                </div>
+            </div>
+
+            <div class="metric-card" data-aos="zoom-in" data-aos-delay="400">
+                <div class="metric-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="metric-value gradient-text" id="downtime-reduction">35%</div>
+                <div class="metric-label">Downtime Reduction</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-wrench"></i> $12.6M saved
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-container" data-aos="fade-right">
+                <h3 class="chart-title">📈 ROI Projection (3 Years)</h3>
+                <canvas id="roiChart" width="400" height="200"></canvas>
+            </div>
+            
+            <div class="chart-container" data-aos="fade-left">
+                <h3 class="chart-title">🎯 Model Performance</h3>
+                <canvas id="performanceChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- ML Models Performance -->
+        <div class="models-performance" data-aos="fade-up">
+            <div class="model-card pulse" style="border-left: 4px solid #4CAF50;">
+                <div class="model-name">🔧 PREDICTIVE MAINTENANCE</div>
+                <div class="model-accuracy gradient-text">99.7%</div>
+                <div class="model-savings">$12.6M Annual Savings</div>
+            </div>
+            
+            <div class="model-card pulse" style="border-left: 4px solid #2196F3;">
+                <div class="model-name">📊 QUALITY PREDICTION</div>
+                <div class="model-accuracy gradient-text">94.0%</div>
+                <div class="model-savings">$902K Annual Savings</div>
+            </div>
+            
+            <div class="model-card pulse" style="border-left: 4px solid #FF9800;">
+                <div class="model-name">⚡ ENERGY OPTIMIZATION</div>
+                <div class="model-accuracy gradient-text">20.0%</div>
+                <div class="model-savings">$360K Annual Savings</div>
+            </div>
+            
+            <div class="model-card pulse" style="border-left: 4px solid #E91E63;">
+                <div class="model-name">🚨 ANOMALY DETECTION</div>
+                <div class="model-accuracy gradient-text">96.3%</div>
+                <div class="model-savings">$1.7M Annual Savings</div>
+            </div>
+        </div>
+
+        <!-- Competitive Analysis -->
+        <div class="competitive-analysis" data-aos="fade-up">
+            <h3 class="chart-title">🏆 Competitive Advantage Analysis</h3>
+            <div class="competitive-grid">
+                <div class="competitive-metric">
+                    <h4>Industry Benchmark OEE</h4>
+                    <div style="font-size: 2rem; color: #e74c3c; font-weight: 700;">65%</div>
+                </div>
+                <div class="competitive-metric">
+                    <h4>Smart Factory OEE (with AI)</h4>
+                    <div style="font-size: 2rem; color: #27ae60; font-weight: 700;">83%</div>
+                </div>
+                <div class="competitive-metric">
+                    <h4>Competitive Gap Closure</h4>
+                    <div style="font-size: 2rem; color: #3498db; font-weight: 700;">+18pts</div>
+                </div>
+                <div class="competitive-metric">
+                    <h4>Market Leadership Position</h4>
+                    <div style="font-size: 1.5rem; color: #9b59b6; font-weight: 700;">TOP 5%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenario Planning -->
+        <div class="scenario-planning" data-aos="fade-up">
+            <h3 class="chart-title">🔮 What-If Scenario Planning</h3>
+            <div class="scenario-buttons">
+                <button class="scenario-btn active" onclick="showScenario('conservative')">Conservative</button>
+                <button class="scenario-btn" onclick="showScenario('aggressive')">Aggressive</button>
+                <button class="scenario-btn" onclick="showScenario('recession')">Economic Downturn</button>
+                <button class="scenario-btn" onclick="showScenario('expansion')">Market Expansion</button>
+            </div>
+            <canvas id="scenarioChart" width="800" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // ML Results Data (from our training)
+        const mlResults = {
+            "total_annual_savings": 15558514,
+            "implementation_cost": 570000,
+            "payback_period": 0.44,
+            "roi_3_year": 8089,
+            "models": {
+                "predictive_maintenance": { "accuracy": 0.997, "savings": 12562200 },
+                "quality_prediction": { "accuracy": 0.9395, "savings": 901920 },
+                "energy_optimization": { "savings_percent": 20.03, "savings": 360454 },
+                "anomaly_detection": { "accuracy": 0.9633, "savings": 1733940 }
+            }
+        };
+
+        // ROI Projection Chart
+        const roiCtx = document.getElementById('roiChart').getContext('2d');
+        const roiChart = new Chart(roiCtx, {
+            type: 'line',
+            data: {
+                labels: ['Year 0', 'Year 1', 'Year 2', 'Year 3'],
+                datasets: [{
+                    label: 'Cumulative ROI ($M)',
+                    data: [-0.57, 15.0, 30.6, 46.1],
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4CAF50',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Millions USD'
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverRadius: 8
+                    }
+                }
+            }
+        });
+
+        // Model Performance Doughnut Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Predictive Maintenance', 'Quality Prediction', 'Energy Optimization', 'Anomaly Detection'],
+                datasets: [{
+                    data: [80.7, 5.8, 2.3, 11.2], // Percentage of total savings
+                    backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Scenario Planning Chart
+        let scenarioChart;
+        
+        function initScenarioChart() {
+            const scenarioCtx = document.getElementById('scenarioChart').getContext('2d');
+            scenarioChart = new Chart(scenarioCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Predictive Maintenance', 'Quality Prediction', 'Energy Optimization', 'Anomaly Detection'],
+                    datasets: [{
+                        label: 'Annual Savings ($M)',
+                        data: [12.6, 0.9, 0.36, 1.7],
+                        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Millions USD'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showScenario(scenario) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            let multiplier = 1;
+            let title = 'Conservative Scenario';
+
+            switch(scenario) {
+                case 'conservative':
+                    multiplier = 0.8;
+                    title = 'Conservative Scenario (80% of projected)';
+                    break;
+                case 'aggressive':
+                    multiplier = 1.3;
+                    title = 'Aggressive Growth (130% of projected)';
+                    break;
+                case 'recession':
+                    multiplier = 0.5;
+                    title = 'Economic Downturn (50% of projected)';
+                    break;
+                case 'expansion':
+                    multiplier = 1.8;
+                    title = 'Market Expansion (180% of projected)';
+                    break;
+            }
+
+            // Update chart data
+            scenarioChart.data.datasets[0].data = [
+                12.6 * multiplier,
+                0.9 * multiplier,
+                0.36 * multiplier,
+                1.7 * multiplier
+            ];
+            scenarioChart.data.datasets[0].label = title;
+            scenarioChart.update('active');
+
+            // Update main metrics
+            const totalSavings = (15.6 * multiplier).toFixed(1);
+            document.getElementById('annual-savings').textContent = `$${totalSavings}M`;
+        }
+
+        // Animate counters
+        function animateCounter(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = progress * (end - start) + start;
+                
+                if (element.id === 'annual-savings') {
+                    element.textContent = `$${(value/1000000).toFixed(1)}M`;
+                } else if (element.id === 'payback-period') {
+                    element.textContent = value.toFixed(1);
+                } else if (element.id === 'oee-improvement' || element.id === 'downtime-reduction') {
+                    element.textContent = `${Math.round(value)}%`;
+                }
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize scenario chart
+            initScenarioChart();
+            
+            // Animate main metrics
+            setTimeout(() => {
+                animateCounter(document.getElementById('annual-savings'), 0, mlResults.total_annual_savings, 2000);
+                animateCounter(document.getElementById('payback-period'), 0, mlResults.payback_period, 1500);
+                animateCounter(document.getElementById('oee-improvement'), 65, 83, 1800);
+                animateCounter(document.getElementById('downtime-reduction'), 0, 35, 2000);
+            }, 500);
+
+            // Update metrics periodically (simulate real-time)
+            setInterval(() => {
+                const variation = (Math.random() - 0.5) * 0.02; // ±1%
+                const currentSavings = mlResults.total_annual_savings * (1 + variation);
+                document.getElementById('annual-savings').textContent = 
+                    `$${(currentSavings/1000000).toFixed(1)}M`;
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

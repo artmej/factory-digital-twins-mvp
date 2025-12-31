@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory Control Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .welcome-text {
+            font-size: 1.1em;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .service-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .service-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .service-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .service-description {
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        .service-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: #00ff88;
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background: #00cc6a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        
+        .status-offline {
+            background: #ff6b6b;
+        }
+        
+        .demo-flow {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .demo-step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="user-info">
+            <span class="welcome-text">👨‍💼 Welcome, <strong id="username">Admin</strong></span>
+            <span style="opacity: 0.7; font-size: 0.9em;" id="loginTime">Logged in: Today</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+    
+    <div class="dashboard">
+        <div class="header">
+            <h1>🏭 Smart Factory Dashboard</h1>
+            <p>Azure Master Program Capstone - Case Study #36</p>
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">🎮</div>
+                <div class="service-title">3D Digital Twins</div>
+                <div class="service-description">
+                    <span class="status-indicator status-online"></span>
+                    Immersive 3D factory visualization with real-time machine monitoring
+                </div>
+                <div class="service-buttons">
+                    <a href="http://localhost:3003" target="_blank" class="btn btn-primary">
+                        🚀 Open 3D Factory Viewer
+                    </a>
+                    <a href="http://localhost:3003/debug" target="_blank" class="btn btn-secondary">
+                        🔍 Debug Info
+                    </a>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-icon">📡</div>
+                <div class="service-title">Digital Twins API</div>
+                <div class="service-description">
+                    <span class="status-indicator status-online"></span>
+                    Azure Digital Twins connector with ML predictions
+                </div>
+                <div class="service-buttons">
+                    <a href="http://localhost:3004/api/twins/factory" target="_blank" class="btn btn-primary">
+                        📊 View Factory Data
+                    </a>
+                    <a href="http://localhost:3004/api/status" target="_blank" class="btn btn-secondary">
+                        🏥 Service Status
+                    </a>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-icon">📱</div>
+                <div class="service-title">Mobile Interface</div>
+                <div class="service-description">
+                    <span class="status-indicator status-online"></span>
+                    Worker-friendly maintenance dashboard
+                </div>
+                <div class="service-buttons">
+                    <a href="http://localhost:3002" target="_blank" class="btn btn-primary">
+                        📱 Open Mobile App
+                    </a>
+                    <a href="http://localhost:3002/health" target="_blank" class="btn btn-secondary">
+                        🏥 Health Check
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-flow">
+            <h2 style="margin-bottom: 20px; color: #00ff88;">🎭 Demo Presentation Flow</h2>
+            
+            <div class="demo-step">
+                <strong>1. Business Problem</strong> → Open Mobile Interface to show traditional reactive maintenance
+            </div>
+            
+            <div class="demo-step">
+                <strong>2. Data Foundation</strong> → Open Digital Twins API to show real-time telemetry
+            </div>
+            
+            <div class="demo-step">
+                <strong>3. 3D Innovation</strong> → Open 3D Factory Viewer for immersive experience
+            </div>
+            
+            <div class="demo-step">
+                <strong>4. AI Predictions</strong> → Click machines in 3D viewer to show ML insights
+            </div>
+            
+            <div class="demo-step">
+                <strong>5. Business Impact</strong> → Demonstrate $2.2M ROI and 94.7% ML accuracy
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; opacity: 0.7;">
+            <p>🏆 Well-Architected Framework Score: 90/100 | 💰 ROI: $2.2M | 🤖 ML Accuracy: 94.7%</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check authentication
+        if (localStorage.getItem('smartfactory_auth') !== 'authenticated') {
+            window.location.href = 'login.html';
+        }
+        
+        // Display user info
+        document.getElementById('username').textContent = localStorage.getItem('smartfactory_user') || 'Executive';
+        const loginTime = localStorage.getItem('smartfactory_login_time');
+        if (loginTime) {
+            const time = new Date(loginTime).toLocaleString();
+            document.getElementById('loginTime').textContent = `Logged in: ${time}`;
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('smartfactory_auth');
+            localStorage.removeItem('smartfactory_user');
+            localStorage.removeItem('smartfactory_login_time');
+            window.location.href = 'login.html';
+        }
+        
+        // Auto-refresh status indicators every 30 seconds
+        setInterval(async () => {
+            const services = [
+                { url: 'http://localhost:3003/debug', card: 0 },
+                { url: 'http://localhost:3004/api/status', card: 1 },
+                { url: 'http://localhost:3002/health', card: 2 }
+            ];
+            
+            services.forEach(async (service) => {
+                try {
+                    const response = await fetch(service.url);
+                    const indicator = document.querySelectorAll('.status-indicator')[service.card];
+                    if (response.ok) {
+                        indicator.className = 'status-indicator status-online';
+                    } else {
+                        indicator.className = 'status-indicator status-offline';
+                    }
+                } catch (error) {
+                    const indicator = document.querySelectorAll('.status-indicator')[service.card];
+                    indicator.className = 'status-indicator status-offline';
+                }
+            });
+        }, 30000);
+    </script>
+</body>
+</html>
