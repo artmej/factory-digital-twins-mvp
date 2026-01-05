@@ -2,8 +2,17 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// 🧠 Smart Factory ML Training - Node.js Implementation
-// Implementación directa de Azure ML sin dependencias Python complejas
+/**
+ * 🧠 Smart Factory ML Training Engine - Node.js Implementation
+ * Direct Azure ML implementation without complex Python dependencies
+ * 
+ * This class provides machine learning capabilities for the Smart Factory
+ * including predictive maintenance, quality control, and production optimization.
+ * 
+ * @author Smart Factory Team
+ * @version 1.0.0
+ * @since 2026-01-03
+ */
 
 class SmartFactoryMLEngine {
   constructor() {

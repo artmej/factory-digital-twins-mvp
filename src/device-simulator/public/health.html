@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🏭 Smart Factory - Health Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-healthy { background-color: #4CAF50; }
+        .status-degraded { background-color: #FF9800; }
+        .status-unhealthy { background-color: #F44336; }
+        .status-unknown { background-color: #9E9E9E; }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .summary-card {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .service-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+        }
+
+        .service-healthy { border-left-color: #4CAF50; }
+        .service-degraded { border-left-color: #FF9800; }
+        .service-unhealthy { border-left-color: #F44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Smart Factory Health Dashboard</h1>
+            <p>Real-time system monitoring and health status</p>
+        </div>
+
+        <button class="refresh-btn" onclick="refreshHealth()">🔄 Refresh Status</button>
+
+        <div id="healthDashboard" class="dashboard">
+            <div class="card loading">
+                <div class="pulse">⚡ Loading system health...</div>
+            </div>
+        </div>
+
+        <div class="timestamp" id="lastUpdate">
+            Last updated: Loading...
+        </div>
+    </div>
+
+    <script>
+        let healthData = null;
+        
+        async function loadHealthData() {
+            try {
+                // Try to get health data from the function endpoint
+                const response = await fetch('/api/health');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                healthData = await response.json();
+                renderHealthDashboard();
+                
+            } catch (error) {
+                console.error('Failed to load health data:', error);
+                renderErrorState(error.message);
+            }
+        }
+        
+        function renderHealthDashboard() {
+            const dashboard = document.getElementById('healthDashboard');
+            
+            if (!healthData) {
+                renderErrorState('No health data available');
+                return;
+            }
+            
+            dashboard.innerHTML = '';
+            
+            // Summary card
+            const summaryCard = document.createElement('div');
+            summaryCard.className = `card summary-card`;
+            summaryCard.innerHTML = `
+                <h3>
+                    <span class="status-indicator status-${healthData.status}"></span>
+                    System Status: ${healthData.status.toUpperCase()}
+                </h3>
+                <div class="metric">
+                    <span>Overall Health:</span>
+                    <span class="metric-value">${healthData.summary || 'System operational'}</span>
+                </div>
+                <div class="metric">
+                    <span>Environment:</span>
+                    <span class="metric-value">${healthData.environment || 'Unknown'}</span>
+                </div>
+                <div class="metric">
+                    <span>Version:</span>
+                    <span class="metric-value">${healthData.version || 'Unknown'}</span>
+                </div>
+                <div class="metric">
+                    <span>Uptime:</span>
+                    <span class="metric-value">${formatUptime(healthData.uptime)}</span>
+                </div>
+            `;
+            dashboard.appendChild(summaryCard);
+            
+            // Service checks
+            if (healthData.checks) {
+                Object.entries(healthData.checks).forEach(([service, check]) => {
+                    const serviceCard = document.createElement('div');
+                    serviceCard.className = 'card';
+                    serviceCard.innerHTML = `
+                        <h3>
+                            <span class="status-indicator status-${check.status}"></span>
+                            ${formatServiceName(service)}
+                        </h3>
+                        <div class="metric">
+                            <span>Status:</span>
+                            <span class="metric-value">${check.status.toUpperCase()}</span>
+                        </div>
+                        <div class="metric">
+                            <span>Response Time:</span>
+                            <span class="metric-value">${check.responseTime}ms</span>
+                        </div>
+                        <div class="metric">
+                            <span>Message:</span>
+                            <span class="metric-value">${check.message || check.error || 'OK'}</span>
+                        </div>
+                        ${check.error ? `<div class="error">Error: ${check.error}</div>` : ''}
+                    `;
+                    dashboard.appendChild(serviceCard);
+                });
+            }
+            
+            // Update timestamp
+            document.getElementById('lastUpdate').textContent = 
+                `Last updated: ${new Date(healthData.timestamp).toLocaleString()}`;
+        }
+        
+        function renderErrorState(errorMessage) {
+            const dashboard = document.getElementById('healthDashboard');
+            dashboard.innerHTML = `
+                <div class="card">
+                    <h3>
+                        <span class="status-indicator status-unhealthy"></span>
+                        ❌ Health Check Failed
+                    </h3>
+                    <div class="error">
+                        Unable to retrieve system health: ${errorMessage}
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <strong>Possible causes:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Function app not deployed</li>
+                            <li>Health endpoint not configured</li>
+                            <li>Network connectivity issues</li>
+                            <li>Authentication problems</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('lastUpdate').textContent = 
+                `Last update attempt: ${new Date().toLocaleString()}`;
+        }
+        
+        function formatServiceName(service) {
+            const serviceNames = {
+                'cosmosdb': '🗄️ Cosmos DB',
+                'iothub': '🌐 IoT Hub',
+                'storage': '💾 Storage Account',
+                'digitaltwins': '👥 Digital Twins',
+                'keyvault': '🔐 Key Vault',
+                'openai': '🤖 OpenAI',
+                'ml': '🧠 Machine Learning',
+                'search': '🔍 Cognitive Search'
+            };
+            
+            return serviceNames[service] || `🔧 ${service.charAt(0).toUpperCase() + service.slice(1)}`;
+        }
+        
+        function formatUptime(seconds) {
+            if (!seconds) return 'Unknown';
+            
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+        
+        function refreshHealth() {
+            const button = document.querySelector('.refresh-btn');
+            button.textContent = '🔄 Refreshing...';
+            button.disabled = true;
+            
+            loadHealthData().finally(() => {
+                button.textContent = '🔄 Refresh Status';
+                button.disabled = false;
+            });
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadHealthData, 30000);
+        
+        // Initial load
+        loadHealthData();
+    </script>
+</body>
+</html>

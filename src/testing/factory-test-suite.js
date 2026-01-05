@@ -1,7 +1,26 @@
+/**
+ * 🧪 Smart Factory Testing Framework
+ * Comprehensive testing suite for Smart Factory components
+ * 
+ * This testing framework validates all aspects of the Smart Factory system
+ * including ML model accuracy, API endpoints, real-time data flow,
+ * security measures, and end-to-end integration scenarios.
+ * 
+ * Test Coverage:
+ * - ML model accuracy (>95% target)
+ * - API response times (<100ms)
+ * - Data pipeline integrity
+ * - Security vulnerability assessment
+ * - Load testing and performance
+ * 
+ * @class FactoryTestSuite
+ * @author Smart Factory Team
+ * @version 1.0.0
+ * @since 2026-01-03
+ */
+
 const fs = require('fs');
 const path = require('path');
-
-// 🧪 Smart Factory Testing Framework
 class FactoryTestSuite {
   constructor() {
     this.testResults = [];

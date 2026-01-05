@@ -1,0 +1,14 @@
+{
+  "devDependencies": {},
+  "name": "function-adt-projection",
+  "dependencies": {},
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo 'No build step required'",
+    "lint": "echo 'No linting configured'",
+    "test": "echo 'No tests specified'"
+  },
+  "description": "Smart Factory component",
+  "main": "index.js",
+  "version": "1.0.0"
+}

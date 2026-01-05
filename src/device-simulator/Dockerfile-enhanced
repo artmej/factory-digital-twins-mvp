@@ -1,0 +1,37 @@
+# 🐳 Smart Factory Edge Device Simulator - Docker Configuration
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S simulator && \\
+    adduser -S simulator -u 1001
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Create public directory for web interface
+RUN mkdir -p public
+
+# Change ownership to non-root user
+RUN chown -R simulator:simulator /app
+
+# Switch to non-root user
+USER simulator
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \\
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Start command
+CMD ["node", "simulator-enhanced.js"]

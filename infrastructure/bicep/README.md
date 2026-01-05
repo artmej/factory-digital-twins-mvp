@@ -1,13 +1,41 @@
-# Smart Factory - Infrastructure as Code
+/**
+ * 🏢 Smart Factory Infrastructure - Bicep Templates
+ * Infrastructure as Code for Smart Factory Azure Deployment
+ * 
+ * This directory contains Azure Bicep templates for deploying the complete
+ * Smart Factory infrastructure in a cost-optimized manner.
+ * 
+ * Current Architecture:
+ * - Azure Arc VM: Standard_B2s ($30-50/month)
+ * - K3s Kubernetes cluster for container orchestration
+ * - Azure IoT Hub for device communication
+ * - Azure ML Workspace for machine learning
+ * - Cosmos DB for telemetry data storage
+ * - Azure Functions for serverless processing
+ * - Static Web Apps for PWA hosting
+ * 
+ * Cost Optimization:
+ * - Replaced ArcBox ($800-1200/month) with simple Arc VM
+ * - Uses lightweight K3s instead of full AKS
+ * - Optimized resource SKUs for development/testing
+ * - Regional deployment to minimize latency costs
+ * 
+ * @author Smart Factory Team
+ * @version 1.0.0
+ * @since 2026-01-03
+ */
 
-## 🏗️ **Bicep Templates - Final Version**
+# Smart Factory Infrastructure - Infrastructure as Code
 
-### **Core Infrastructure (Production Ready)**
-- **`main.bicep`** - Principal entry point para deployment
+## 🏢 **Bicep Templates - Production Ready**
+
+### **Core Infrastructure Components**
+- **`main.bicep`** - Main entry point for complete deployment
 - **`core-infrastructure.bicep`** - Azure Digital Twins + IoT Hub + Functions
-- **`ml-infrastructure.bicep`** - Machine Learning services
+- **`ml-infrastructure.bicep`** - Machine Learning services and workspace
+- **`arc-simple.bicep`** - Azure Arc VM for edge computing
 
-### **Edge Computing (Hybrid Demo)**  
+### **Cost-Optimized Architecture**
 - **`arc-simple.bicep`** - VM para Azure Local simulation (ACTUAL)
 - **`aks-edge-simulation.bicep`** - Kubernetes Edge deployment
 - **`vm-infrastructure.bicep`** - VM infrastructure utilities

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory Edge Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: #ffffff; }
+        
+        .header { background: linear-gradient(135deg, #1a73e8, #34a853); padding: 1rem; text-align: center; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .card { background: #1e2328; border: 1px solid #333; border-radius: 8px; padding: 1rem; }
+        .card h3 { color: #1a73e8; margin-bottom: 1rem; }
+        
+        .production-line { border-left: 4px solid #34a853; margin-bottom: 1rem; padding: 1rem; }
+        .production-line.warning { border-left-color: #fbbc04; }
+        .production-line.error { border-left-color: #ea4335; }
+        
+        .device-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; }
+        .device { background: #2a2d32; padding: 0.5rem; border-radius: 4px; text-align: center; }
+        .device.operational { border-left: 3px solid #34a853; }
+        .device.maintenance { border-left: 3px solid #fbbc04; }
+        .device.offline { border-left: 3px solid #ea4335; }
+        
+        .metric { text-align: center; margin-bottom: 1rem; }
+        .metric-value { font-size: 2rem; font-weight: bold; }
+        .metric-label { color: #9aa0a6; font-size: 0.9rem; }
+        
+        .alert { padding: 0.75rem; margin: 0.5rem 0; border-radius: 4px; border-left: 4px solid; }
+        .alert.high { background: #3d1a1a; border-color: #ea4335; }
+        .alert.medium { background: #3d2f1a; border-color: #fbbc04; }
+        .alert.low { background: #1a3d2f; border-color: #34a853; }
+        
+        .button { padding: 0.75rem 1.5rem; margin: 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .button.primary { background: #1a73e8; color: white; }
+        .button.success { background: #34a853; color: white; }
+        .button.danger { background: #ea4335; color: white; }
+        .button:hover { transform: translateY(-2px); }
+        
+        .live-indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 0.5rem; }
+        .live-indicator.active { background: #34a853; animation: pulse 2s infinite; }
+        .live-indicator.inactive { background: #ea4335; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .edge-status { background: #0f1419; border: 2px solid #1a73e8; padding: 1rem; border-radius: 8px; }
+        .ml-model { background: #1e2328; margin: 0.5rem 0; padding: 0.75rem; border-radius: 4px; border-left: 3px solid; }
+        .ml-model.active { border-color: #34a853; }
+        .ml-model.inactive { border-color: #ea4335; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏭 Smart Factory Edge Demo</h1>
+        <p>Demostración IoT Edge - Procesamiento Local en Tiempo Real</p>
+    </div>
+    
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="card">
+            <h3>🎛️ Control de Simulación Edge</h3>
+            <div class="edge-status">
+                <span class="live-indicator" id="edge-indicator"></span>
+                <span id="edge-status">Conectando...</span>
+                <div style="margin-top: 1rem;">
+                    <button id="start-btn" class="button success">▶️ Iniciar Simulación</button>
+                    <button id="stop-btn" class="button danger">⏹️ Detener Simulación</button>
+                    <button id="refresh-btn" class="button primary">🔄 Actualizar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Lines -->
+        <div class="grid">
+            <div class="card">
+                <h3>🏭 Líneas de Producción</h3>
+                <div id="production-lines">
+                    <!-- Production lines will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 Métricas en Tiempo Real</h3>
+                <div class="grid">
+                    <div class="metric">
+                        <div id="total-devices" class="metric-value">0</div>
+                        <div class="metric-label">Dispositivos Totales</div>
+                    </div>
+                    <div class="metric">
+                        <div id="active-devices" class="metric-value">0</div>
+                        <div class="metric-label">Dispositivos Activos</div>
+                    </div>
+                    <div class="metric">
+                        <div id="total-production" class="metric-value">0</div>
+                        <div class="metric-label">Producción Total</div>
+                    </div>
+                    <div class="metric">
+                        <div id="avg-efficiency" class="metric-value">0%</div>
+                        <div class="metric-label">Eficiencia Promedio</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Status and ML -->
+        <div class="grid">
+            <div class="card">
+                <h3>🔌 Estado de Dispositivos por Línea</h3>
+                <div id="devices-status">
+                    <!-- Device status will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🤖 Machine Learning Edge</h3>
+                <div id="ml-models">
+                    <!-- ML models status will be loaded here -->
+                </div>
+                <div id="ml-predictions" style="margin-top: 1rem;">
+                    <!-- Recent predictions will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts and Edge Processing -->
+        <div class="grid">
+            <div class="card">
+                <h3>🚨 Alertas del Sistema</h3>
+                <div id="alerts">
+                    <!-- Alerts will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📡 Procesamiento Edge</h3>
+                <div class="metric">
+                    <div id="messages-processed" class="metric-value">0</div>
+                    <div class="metric-label">Mensajes Procesados</div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <h4>🔗 Conectividad:</h4>
+                    <div id="connectivity-status">
+                        <div>📡 IoT Edge Runtime: <span id="iot-edge-status">Verificando...</span></div>
+                        <div>🗄️ PostgreSQL Edge: <span id="postgres-status">Verificando...</span></div>
+                        <div>📊 Grafana Edge: <span id="grafana-status">Verificando...</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let simulationActive = false;
+        let refreshInterval = null;
+
+        // DOM Elements
+        const edgeIndicator = document.getElementById('edge-indicator');
+        const edgeStatus = document.getElementById('edge-status');
+        const productionLinesDiv = document.getElementById('production-lines');
+        const devicesStatusDiv = document.getElementById('devices-status');
+        const mlModelsDiv = document.getElementById('ml-models');
+        const mlPredictionsDiv = document.getElementById('ml-predictions');
+        const alertsDiv = document.getElementById('alerts');
+
+        // Button events
+        document.getElementById('start-btn').addEventListener('click', startSimulation);
+        document.getElementById('stop-btn').addEventListener('click', stopSimulation);
+        document.getElementById('refresh-btn').addEventListener('click', refreshData);
+
+        // API Functions
+        async function startSimulation() {
+            try {
+                const response = await fetch('/api/simulation/start', { method: 'POST' });
+                const result = await response.json();
+                console.log('✅ Simulación iniciada:', result.message);
+                refreshData();
+            } catch (error) {
+                console.error('❌ Error al iniciar simulación:', error);
+            }
+        }
+
+        async function stopSimulation() {
+            try {
+                const response = await fetch('/api/simulation/stop', { method: 'POST' });
+                const result = await response.json();
+                console.log('⏹️ Simulación detenida:', result.message);
+                refreshData();
+            } catch (error) {
+                console.error('❌ Error al detener simulación:', error);
+            }
+        }
+
+        async function refreshData() {
+            try {
+                // Get production lines data
+                const linesResponse = await fetch('/api/production-lines');
+                const linesData = await linesResponse.json();
+                updateProductionLines(linesData);
+
+                // Get devices data
+                const devicesResponse = await fetch('/api/devices');
+                const devicesData = await devicesResponse.json();
+                updateDevicesStatus(devicesData);
+
+                // Get ML data
+                const mlResponse = await fetch('/api/ml/predictions');
+                const mlData = await mlResponse.json();
+                updateMLStatus(mlData);
+
+                // Get alerts data
+                const alertsResponse = await fetch('/api/alerts');
+                const alertsData = await alertsResponse.json();
+                updateAlerts(alertsData);
+
+                // Get health data
+                const healthResponse = await fetch('/api/health');
+                const healthData = await healthResponse.json();
+                updateEdgeStatus(healthData);
+
+            } catch (error) {
+                console.error('❌ Error refreshing data:', error);
+                edgeIndicator.className = 'live-indicator inactive';
+                edgeStatus.textContent = 'Error de conexión';
+            }
+        }
+
+        function updateProductionLines(data) {
+            productionLinesDiv.innerHTML = '';
+            
+            if (!data.lines || data.lines.length === 0) {
+                productionLinesDiv.innerHTML = '<p>No hay líneas de producción configuradas</p>';
+                return;
+            }
+
+            let totalProduction = 0;
+            let totalEfficiency = 0;
+            let totalDevices = 0;
+            let activeDevices = 0;
+
+            data.lines.forEach(line => {
+                const efficiency = Math.round(line.efficiency);
+                const statusClass = efficiency > 90 ? '' : efficiency > 70 ? 'warning' : 'error';
+                
+                totalProduction += line.currentProduction;
+                totalEfficiency += line.efficiency;
+                totalDevices += line.deviceCount;
+                activeDevices += line.operationalDevices;
+
+                const lineDiv = document.createElement('div');
+                lineDiv.className = `production-line ${statusClass}`;
+                lineDiv.innerHTML = `
+                    <h4>${line.name} (${line.lineId})</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+                        <div>📊 Producción: ${line.currentProduction}/${line.targetProduction}</div>
+                        <div>⚡ Eficiencia: ${efficiency}%</div>
+                        <div>🔌 Dispositivos: ${line.operationalDevices}/${line.deviceCount}</div>
+                    </div>
+                `;
+                productionLinesDiv.appendChild(lineDiv);
+            });
+
+            // Update metrics
+            document.getElementById('total-devices').textContent = totalDevices;
+            document.getElementById('active-devices').textContent = activeDevices;
+            document.getElementById('total-production').textContent = totalProduction;
+            document.getElementById('avg-efficiency').textContent = Math.round(totalEfficiency / data.lines.length) + '%';
+        }
+
+        function updateDevicesStatus(data) {
+            devicesStatusDiv.innerHTML = '';
+
+            if (!data.devices || data.devices.length === 0) {
+                devicesStatusDiv.innerHTML = '<p>No hay dispositivos disponibles</p>';
+                return;
+            }
+
+            // Group devices by line
+            const devicesByLine = {};
+            data.devices.forEach(device => {
+                if (!devicesByLine[device.lineId]) {
+                    devicesByLine[device.lineId] = [];
+                }
+                devicesByLine[device.lineId].push(device);
+            });
+
+            Object.entries(devicesByLine).forEach(([lineId, devices]) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.innerHTML = `<h5>${lineId}</h5>`;
+                
+                const deviceGrid = document.createElement('div');
+                deviceGrid.className = 'device-grid';
+                
+                devices.forEach(device => {
+                    const deviceDiv = document.createElement('div');
+                    deviceDiv.className = `device ${device.status}`;
+                    deviceDiv.innerHTML = `
+                        <div style="font-size: 0.8rem; font-weight: bold;">${device.type}</div>
+                        <div style="font-size: 0.7rem;">${device.id.split('-').pop()}</div>
+                    `;
+                    deviceGrid.appendChild(deviceDiv);
+                });
+                
+                lineDiv.appendChild(deviceGrid);
+                devicesStatusDiv.appendChild(lineDiv);
+            });
+        }
+
+        function updateMLStatus(data) {
+            mlModelsDiv.innerHTML = '';
+            
+            if (data.models) {
+                data.models.forEach(model => {
+                    const modelDiv = document.createElement('div');
+                    modelDiv.className = `ml-model ${model.status}`;
+                    modelDiv.innerHTML = `
+                        <div style="font-weight: bold;">${model.name}</div>
+                        <div style="font-size: 0.8rem; color: #9aa0a6;">
+                            Estado: ${model.status} 
+                            ${model.accuracy > 0 ? `| Precisión: ${model.accuracy}%` : ''}
+                        </div>
+                    `;
+                    mlModelsDiv.appendChild(modelDiv);
+                });
+            }
+
+            mlPredictionsDiv.innerHTML = '<h5>Predicciones Recientes:</h5>';
+            if (data.predictions && data.predictions.length > 0) {
+                data.predictions.slice(-5).forEach(prediction => {
+                    const predDiv = document.createElement('div');
+                    predDiv.className = `alert ${prediction.alert_level.toLowerCase()}`;
+                    predDiv.innerHTML = `
+                        <strong>${prediction.type}</strong><br>
+                        <small>${prediction.deviceId} | Confianza: ${Math.round(prediction.confidence * 100)}%</small>
+                    `;
+                    mlPredictionsDiv.appendChild(predDiv);
+                });
+            } else {
+                mlPredictionsDiv.innerHTML += '<p style="color: #9aa0a6;">No hay predicciones recientes</p>';
+            }
+        }
+
+        function updateAlerts(data) {
+            alertsDiv.innerHTML = '';
+            
+            if (!data.alerts || data.alerts.length === 0) {
+                alertsDiv.innerHTML = '<p style="color: #34a853;">✅ No hay alertas activas</p>';
+                return;
+            }
+
+            data.alerts.slice(-5).forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert ${alert.level.toLowerCase()}`;
+                alertDiv.innerHTML = `
+                    <div style="font-weight: bold;">${alert.type}</div>
+                    <div style="font-size: 0.9rem;">${alert.message}</div>
+                    <div style="font-size: 0.8rem; color: #9aa0a6; margin-top: 0.5rem;">
+                        ${alert.deviceId} | ${new Date(alert.timestamp).toLocaleTimeString()}
+                    </div>
+                `;
+                alertsDiv.appendChild(alertDiv);
+            });
+        }
+
+        function updateEdgeStatus(data) {
+            simulationActive = data.simulation.active;
+            
+            if (simulationActive) {
+                edgeIndicator.className = 'live-indicator active';
+                edgeStatus.textContent = `Edge Activo - Tiempo: ${data.simulation.uptime}s`;
+            } else {
+                edgeIndicator.className = 'live-indicator inactive';
+                edgeStatus.textContent = 'Edge Inactivo';
+            }
+
+            document.getElementById('messages-processed').textContent = data.simulation.totalMessages;
+
+            // Update connectivity status (simulated)
+            document.getElementById('iot-edge-status').textContent = '✅ Conectado';
+            document.getElementById('iot-edge-status').style.color = '#34a853';
+            document.getElementById('postgres-status').textContent = '✅ Operacional';
+            document.getElementById('postgres-status').style.color = '#34a853';
+            document.getElementById('grafana-status').textContent = '✅ Dashboard Activo';
+            document.getElementById('grafana-status').style.color = '#34a853';
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            refreshInterval = setInterval(refreshData, 3000); // 3 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Smart Factory Edge Demo Initialized');
+            refreshData();
+            startAutoRefresh();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', stopAutoRefresh);
+    </script>
+</body>
+</html>

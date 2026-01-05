@@ -1,0 +1,14 @@
+Smart Factory Health Check Results
+Generated: 01/04/2026 15:56:34
+Resource Group: smart-factory-v2-rg
+
+SUMMARY:
+- Overall Status: POOR
+- Tests Passed: 3/12 (25%)
+- Security: 0/3
+- Reliability: 2/5  
+- Performance: 1/2
+- Operational: 0/2
+- Integration: 0/0
+
+STATUS: NEEDS ATTENTION

@@ -43,7 +43,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   properties: {
     sku: {
       family: 'A'
-      name: 'standard'
+      name: 'premium'
     }
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
@@ -84,7 +84,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: naming.storageAccount
   location: location
   sku: {
-    name: 'Standard_LRS'
+    name: 'Standard_ZRS'
   }
   kind: 'StorageV2'
   identity: {
@@ -132,12 +132,12 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-06-01' = {
   }
 }
 
-// 🔧 5. IOT HUB - Device Connectivity (Simplified)
+// 🔧 5. IOT HUB - Device Connectivity (S2 Upgrade for WAF)
 resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
   name: naming.iotHub
   location: location
   sku: {
-    name: 'S1'
+    name: 'S2'
     capacity: 1
   }
   identity: {
@@ -239,15 +239,22 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   }
   properties: {
     consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
+      defaultConsistencyLevel: 'ConsistentPrefix'
     }
     locations: [
       {
         locationName: location
         failoverPriority: 0
-        isZoneRedundant: false
+        isZoneRedundant: true
+      }
+      {
+        locationName: 'westus2'
+        failoverPriority: 1
+        isZoneRedundant: true
       }
     ]
+    enableMultipleWriteLocations: true
+    enableAutomaticFailover: true
     databaseAccountOfferType: 'Standard'
   }
 }

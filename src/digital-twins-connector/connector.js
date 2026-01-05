@@ -3,6 +3,24 @@
 
 require('dotenv').config();
 const { DigitalTwinsClient } = require('@azure/digital-twins-core');
+/**
+ * 🔗 Azure Digital Twins Connector
+ * Real-time synchronization between physical factory and digital twins
+ * 
+ * This module handles bidirectional data flow between the physical factory
+ * sensors/machines and their corresponding Azure Digital Twin representations.
+ * 
+ * Features:
+ * - Real-time telemetry streaming
+ * - Twin property updates
+ * - Command execution
+ * - Relationship management
+ * 
+ * @author Smart Factory Team
+ * @version 1.0.0
+ * @since 2026-01-03
+ */
+
 const { DefaultAzureCredential } = require('@azure/identity');
 const express = require('express');
 const cors = require('cors');

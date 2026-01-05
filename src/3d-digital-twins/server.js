@@ -2,6 +2,25 @@
 // Connected to Azure Functions API + Cosmos DB + Real-time ML
 
 require('dotenv').config();
+/**
+ * 🎮 3D Digital Twins Visualization Server
+ * Advanced 3D visualization server for Smart Factory Digital Twins
+ * 
+ * This server provides 3D visualization capabilities for the Smart Factory
+ * including real-time machine status, production flow visualization,
+ * and interactive factory floor representation.
+ * 
+ * Technologies:
+ * - Three.js for 3D rendering
+ * - WebGL for GPU acceleration
+ * - WebSockets for real-time updates
+ * - Azure Digital Twins integration
+ * 
+ * @author Smart Factory Team
+ * @version 1.0.0
+ * @since 2026-01-03
+ */
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
