@@ -3,11 +3,19 @@
 
 const express = require('express');
 const path = require('path');
+const mqtt = require('mqtt');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// 🔧 Edge Configuration
+// � MQTT Client
+let mqttClient;
+const mqttConfig = {
+    broker: process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883',
+    clientId: `factory-simulator-${Math.random().toString(16).substr(2, 8)}`
+};
+
+// �🔧 Edge Configuration
 const edgeConfig = {
     productionLines: parseInt(process.env.PRODUCTION_LINES) || 3,
     edgeMode: process.env.EDGE_MODE === 'true',
@@ -128,7 +136,14 @@ function runMLInference(deviceData) {
 // 📡 Simulate IoT Edge message processing
 function processEdgeMessage(deviceId, lineId, telemetry) {
     // Simulate edge processing
-    console.log(`📡 Edge Processing: ${deviceId} -> IoT Hub`);
+    console.log(`📡 Edge Processing: ${deviceId} -> MQTT & IoT Hub`);
+    
+    // Publish sensor data to MQTT
+    if (mqttClient && mqttClient.connected) {
+        const sensorTopic = `factory/${lineId}/sensors`;
+        mqttClient.publish(sensorTopic, JSON.stringify(telemetry));
+        console.log(`📤 MQTT Published: ${sensorTopic}`);
+    }
     
     // Run ML inference
     const mlPredictions = runMLInference(telemetry.sensors);
@@ -140,18 +155,40 @@ function processEdgeMessage(deviceId, lineId, telemetry) {
             timestamp: new Date()
         })));
         
+        // Publish ML predictions to MQTT
+        if (mqttClient && mqttClient.connected) {
+            mlPredictions.forEach(prediction => {
+                const mlTopic = `factory/${lineId}/ml-predictions`;
+                mqttClient.publish(mlTopic, JSON.stringify({
+                    deviceId,
+                    lineId,
+                    ...prediction,
+                    timestamp: new Date()
+                }));
+            });
+        }
+        
         // Create alerts for high confidence predictions
         mlPredictions.filter(p => p.confidence > 0.8).forEach(prediction => {
-            global.simulationState.alerts.push({
+            const alert = {
                 id: Date.now() + Math.random(),
                 lineId,
                 deviceId,
                 type: prediction.type,
                 level: prediction.alert_level,
                 message: prediction.recommendation,
+                confidence: prediction.confidence,
                 timestamp: new Date(),
                 acknowledged: false
-            });
+            };
+            
+            global.simulationState.alerts.push(alert);
+            
+            // Publish alert to MQTT
+            if (mqttClient && mqttClient.connected) {
+                const alertTopic = `factory/${lineId}/alerts`;
+                mqttClient.publish(alertTopic, JSON.stringify(alert));
+            }
         });
     }
     
@@ -319,6 +356,32 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// 📡 Initialize MQTT Connection
+function connectToMQTT() {
+    mqttClient = mqtt.connect(mqttConfig.broker, {
+        clientId: mqttConfig.clientId,
+        clean: true,
+        connectTimeout: 4000,
+        reconnectPeriod: 1000
+    });
+
+    mqttClient.on('connect', () => {
+        console.log('✅ Connected to MQTT Broker:', mqttConfig.broker);
+    });
+
+    mqttClient.on('error', (error) => {
+        console.error('❌ MQTT Connection Error:', error);
+    });
+
+    mqttClient.on('offline', () => {
+        console.log('📴 MQTT Client offline');
+    });
+
+    mqttClient.on('reconnect', () => {
+        console.log('🔄 MQTT Reconnecting...');
+    });
+}
+
 // Start server
 app.listen(port, () => {
     console.log(`🏭 Smart Factory Edge Simulator running on port ${port}`);
@@ -329,6 +392,9 @@ app.listen(port, () => {
     if (edgeConfig.edgeMode) {
         console.log('🚀 Edge mode active - ready for IoT Edge deployment');
     }
+    
+    // Connect to MQTT
+    connectToMQTT();
 });
 
 // Graceful shutdown

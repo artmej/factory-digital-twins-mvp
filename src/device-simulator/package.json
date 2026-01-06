@@ -1,7 +1,10 @@
 {
   "devDependencies": {},
   "name": "device-simulator",
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.18.2",
+    "mqtt": "^4.3.7"
+  },
   "scripts": {
     "start": "node index.js",
     "build": "echo 'No build step required'",

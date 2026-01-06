@@ -1,0 +1,21 @@
+{
+  "name": "mqtt-postgres-processor",
+  "version": "1.0.0",
+  "description": "MQTT to PostgreSQL data pipeline for IoT Edge Smart Factory",
+  "main": "mqtt-postgres-processor.js",
+  "scripts": {
+    "start": "node mqtt-postgres-processor.js",
+    "dev": "nodemon mqtt-postgres-processor.js"
+  },
+  "dependencies": {
+    "mqtt": "^4.3.7",
+    "pg": "^8.11.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "keywords": ["iot", "mqtt", "postgresql", "edge", "factory"],
+  "author": "Smart Factory Team",
+  "license": "MIT"
+}

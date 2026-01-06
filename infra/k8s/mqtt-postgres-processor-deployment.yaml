@@ -1,0 +1,374 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-postgres-processor
+  namespace: smart-factory
+  labels:
+    app: mqtt-postgres-processor
+    component: iot-edge-module
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-postgres-processor
+  template:
+    metadata:
+      labels:
+        app: mqtt-postgres-processor
+        component: iot-edge-module
+    spec:
+      containers:
+      - name: mqtt-postgres-processor
+        image: node:18-alpine
+        ports:
+        - containerPort: 4000
+        env:
+        - name: MQTT_BROKER
+          value: "mqtt://mqtt-broker:1883"
+        - name: POSTGRES_HOST
+          value: "postgres"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "smartfactory"
+        - name: POSTGRES_USER
+          value: "factory_user"
+        - name: POSTGRES_PASSWORD
+          value: "SmartFactory123!"
+        - name: PORT
+          value: "4000"
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            cd /app && npm install && node mqtt-postgres-processor.js
+        volumeMounts:
+        - name: app-source
+          mountPath: /app
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 5
+      volumes:
+      - name: app-source
+        configMap:
+          name: mqtt-processor-source
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-postgres-processor
+  namespace: smart-factory
+  labels:
+    app: mqtt-postgres-processor
+spec:
+  selector:
+    app: mqtt-postgres-processor
+  ports:
+  - protocol: TCP
+    port: 4000
+    targetPort: 4000
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-processor-source
+  namespace: smart-factory
+data:
+  mqtt-postgres-processor.js: |
+    // 🔗 MQTT to PostgreSQL Data Pipeline
+    // Componente que consume datos de MQTT y los almacena en PostgreSQL
+
+    const mqtt = require('mqtt');
+    const { Client } = require('pg');
+
+    // 🔧 Configuración
+    const config = {
+        mqtt: {
+            broker: process.env.MQTT_BROKER || 'mqtt://mqtt-broker:1883',
+            topics: ['factory/+/sensors', 'factory/+/alerts', 'factory/+/ml-predictions']
+        },
+        postgres: {
+            host: process.env.POSTGRES_HOST || 'postgres',
+            port: process.env.POSTGRES_PORT || 5432,
+            database: process.env.POSTGRES_DB || 'smartfactory',
+            user: process.env.POSTGRES_USER || 'factory_user',
+            password: process.env.POSTGRES_PASSWORD || 'SmartFactory123!'
+        }
+    };
+
+    let pgClient;
+    let mqttClient;
+
+    // 🗄️ Inicializar Base de Datos
+    async function initializeDatabase() {
+        try {
+            pgClient = new Client(config.postgres);
+            await pgClient.connect();
+            console.log('✅ Conectado a PostgreSQL');
+
+            // Crear tablas si no existen
+            await createTables();
+            console.log('✅ Tablas de BD verificadas');
+        } catch (error) {
+            console.error('❌ Error conectando a PostgreSQL:', error);
+            process.exit(1);
+        }
+    }
+
+    // 📋 Crear estructura de tablas
+    async function createTables() {
+        const createTablesQueries = [
+            `CREATE TABLE IF NOT EXISTS sensor_data (
+                id SERIAL PRIMARY KEY,
+                device_id VARCHAR(100) NOT NULL,
+                line_id VARCHAR(50) NOT NULL,
+                sensor_type VARCHAR(50) NOT NULL,
+                value DECIMAL(10,2) NOT NULL,
+                unit VARCHAR(20),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+            
+            `CREATE TABLE IF NOT EXISTS production_lines (
+                id SERIAL PRIMARY KEY,
+                line_id VARCHAR(50) UNIQUE NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                status VARCHAR(20) DEFAULT 'ACTIVE',
+                target_production INTEGER DEFAULT 0,
+                current_production INTEGER DEFAULT 0,
+                efficiency DECIMAL(5,2) DEFAULT 0.0,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+            
+            `CREATE TABLE IF NOT EXISTS alerts (
+                id SERIAL PRIMARY KEY,
+                alert_id VARCHAR(100) UNIQUE NOT NULL,
+                line_id VARCHAR(50) NOT NULL,
+                device_id VARCHAR(100) NOT NULL,
+                alert_type VARCHAR(50) NOT NULL,
+                level VARCHAR(20) NOT NULL,
+                message TEXT,
+                confidence DECIMAL(4,3),
+                resolved BOOLEAN DEFAULT FALSE,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+            
+            `CREATE TABLE IF NOT EXISTS ml_predictions (
+                id SERIAL PRIMARY KEY,
+                device_id VARCHAR(100) NOT NULL,
+                line_id VARCHAR(50) NOT NULL,
+                prediction_type VARCHAR(50) NOT NULL,
+                confidence DECIMAL(4,3) NOT NULL,
+                recommendation TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`,
+
+            `CREATE INDEX IF NOT EXISTS idx_sensor_data_timestamp ON sensor_data(timestamp);`,
+            `CREATE INDEX IF NOT EXISTS idx_sensor_data_device ON sensor_data(device_id);`,
+            `CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON alerts(timestamp);`
+        ];
+
+        for (const query of createTablesQueries) {
+            await pgClient.query(query);
+        }
+    }
+
+    // 📡 Conectar a MQTT
+    function connectToMQTT() {
+        mqttClient = mqtt.connect(config.mqtt.broker);
+        
+        mqttClient.on('connect', () => {
+            console.log('✅ Conectado a MQTT Broker');
+            
+            // Suscribirse a todos los tópicos
+            config.mqtt.topics.forEach(topic => {
+                mqttClient.subscribe(topic, (err) => {
+                    if (err) {
+                        console.error(`❌ Error suscribiendo a ${topic}:`, err);
+                    } else {
+                        console.log(`📡 Suscrito a: ${topic}`);
+                    }
+                });
+            });
+        });
+
+        mqttClient.on('message', async (topic, message) => {
+            try {
+                const data = JSON.parse(message.toString());
+                console.log(`📨 Mensaje recibido en ${topic}:`, JSON.stringify(data, null, 2));
+                
+                // Procesar según el tipo de tópico
+                if (topic.includes('/sensors')) {
+                    await processSensorData(data);
+                } else if (topic.includes('/alerts')) {
+                    await processAlert(data);
+                } else if (topic.includes('/ml-predictions')) {
+                    await processMLPrediction(data);
+                }
+            } catch (error) {
+                console.error('❌ Error procesando mensaje:', error);
+            }
+        });
+
+        mqttClient.on('error', (error) => {
+            console.error('❌ Error MQTT:', error);
+        });
+    }
+
+    // 🔍 Procesar datos de sensores
+    async function processSensorData(data) {
+        try {
+            const { deviceId, lineId, sensors, timestamp } = data;
+            
+            // Insertar cada sensor por separado
+            for (const [sensorType, value] of Object.entries(sensors)) {
+                if (typeof value === 'number') {
+                    await pgClient.query(`
+                        INSERT INTO sensor_data (device_id, line_id, sensor_type, value, timestamp)
+                        VALUES ($1, $2, $3, $4, $5)
+                    `, [deviceId, lineId, sensorType, value, timestamp || new Date()]);
+                }
+            }
+            
+            console.log(`💾 Datos de sensor guardados: ${deviceId} (${Object.keys(sensors).length} sensores)`);
+        } catch (error) {
+            console.error('❌ Error guardando datos de sensor:', error);
+        }
+    }
+
+    // 🚨 Procesar alertas
+    async function processAlert(data) {
+        try {
+            const { id, lineId, deviceId, type, level, message, confidence, timestamp } = data;
+            
+            await pgClient.query(`
+                INSERT INTO alerts (alert_id, line_id, device_id, alert_type, level, message, confidence, timestamp)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                ON CONFLICT (alert_id) DO UPDATE SET
+                    level = $5,
+                    message = $6,
+                    confidence = $7,
+                    timestamp = $8
+            `, [id, lineId, deviceId, type, level, message, confidence, timestamp || new Date()]);
+            
+            console.log(`🚨 Alerta guardada: ${type} - ${level} para ${deviceId}`);
+        } catch (error) {
+            console.error('❌ Error guardando alerta:', error);
+        }
+    }
+
+    // 🤖 Procesar predicciones ML
+    async function processMLPrediction(data) {
+        try {
+            const { deviceId, lineId, type, confidence, recommendation, timestamp } = data;
+            
+            await pgClient.query(`
+                INSERT INTO ml_predictions (device_id, line_id, prediction_type, confidence, recommendation, timestamp)
+                VALUES ($1, $2, $3, $4, $5, $6)
+            `, [deviceId, lineId, type, confidence, recommendation, timestamp || new Date()]);
+            
+            console.log(`🤖 Predicción ML guardada: ${type} para ${deviceId} (confianza: ${confidence})`);
+        } catch (error) {
+            console.error('❌ Error guardando predicción ML:', error);
+        }
+    }
+
+    // 📊 Función para obtener estadísticas (para dashboard)
+    async function getStats() {
+        try {
+            const stats = await pgClient.query(`
+                SELECT 
+                    COUNT(*) as total_sensors,
+                    COUNT(DISTINCT device_id) as active_devices,
+                    COUNT(DISTINCT line_id) as production_lines,
+                    MAX(timestamp) as last_update
+                FROM sensor_data 
+                WHERE timestamp > NOW() - INTERVAL '1 hour'
+            `);
+            
+            return stats.rows[0];
+        } catch (error) {
+            console.error('❌ Error obteniendo estadísticas:', error);
+            return null;
+        }
+    }
+
+    // 🏁 Inicialización
+    async function start() {
+        console.log('🚀 Iniciando MQTT-PostgreSQL Data Processor...');
+        
+        await initializeDatabase();
+        connectToMQTT();
+        
+        // Endpoint de health check
+        const express = require('express');
+        const app = express();
+        const port = process.env.PORT || 4000;
+        
+        app.get('/health', async (req, res) => {
+            const stats = await getStats();
+            res.json({
+                status: 'healthy',
+                service: 'mqtt-postgres-processor',
+                stats,
+                timestamp: new Date()
+            });
+        });
+        
+        app.listen(port, () => {
+            console.log(`🏥 Health endpoint disponible en puerto ${port}`);
+        });
+    }
+
+    // Manejo de cierre graceful
+    process.on('SIGINT', async () => {
+        console.log('🛑 Cerrando conexiones...');
+        if (mqttClient) mqttClient.end();
+        if (pgClient) await pgClient.end();
+        process.exit(0);
+    });
+
+    // Iniciar el procesador
+    start().catch(console.error);
+
+    module.exports = { getStats, processSensorData, processAlert, processMLPrediction };
+  package.json: |
+    {
+      "name": "mqtt-postgres-processor",
+      "version": "1.0.0",
+      "description": "MQTT to PostgreSQL data pipeline for IoT Edge Smart Factory",
+      "main": "mqtt-postgres-processor.js",
+      "scripts": {
+        "start": "node mqtt-postgres-processor.js",
+        "dev": "nodemon mqtt-postgres-processor.js"
+      },
+      "dependencies": {
+        "mqtt": "^4.3.7",
+        "pg": "^8.11.3",
+        "express": "^4.18.2"
+      },
+      "devDependencies": {
+        "nodemon": "^2.0.22"
+      },
+      "keywords": ["iot", "mqtt", "postgresql", "edge", "factory"],
+      "author": "Smart Factory Team",
+      "license": "MIT"
+    }
