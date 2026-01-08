@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     name: 🚀 Deploy Smart Factory Maintenance
     needs: [test_predictive_models, build_factory_components]
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: 📥 Checkout code
@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     name: 📊 Setup Predictive Maintenance Monitoring
     needs: deploy_predictive_maintenance
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: 🔐 Azure Login

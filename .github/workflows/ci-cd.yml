@@ -308,7 +308,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [build, integration-tests]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     environment: 
       name: production
       url: https://smartfactory-web-app.azurewebsites.net

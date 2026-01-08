@@ -133,7 +133,7 @@ jobs:
   deploy-production:
     needs: [test, deploy-staging]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     environment: production
     
     steps:

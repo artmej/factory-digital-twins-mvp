@@ -190,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest 
     name: 🚀 Deploy to Azure
     needs: [build-test, validate-infrastructure]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     
     steps:
     - name: 📥 Checkout code
