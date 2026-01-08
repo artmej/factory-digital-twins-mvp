@@ -1,6 +1,7 @@
-name: Smart Factory CI/CD Pipeline
+name: Smart Factory CI/CD Pipeline (DISABLED - Missing Secrets)
 
-on:
+# DISABLED: Missing AZURE_CREDENTIALS secret
+# on:
   push:
     branches: [ master, develop ]
   pull_request:
@@ -33,17 +34,17 @@ jobs:
     - name: 📦 Install dependencies - Web App
       run: |
         cd src/web-app
-        npm ci
+        if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
     - name: 📦 Install dependencies - Function App
       run: |
         cd src/function-adt-projection
-        npm ci
+        if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
     - name: 📦 Install dependencies - Device Simulator
       run: |
         cd src/device-simulator
-        npm ci
+        if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
     - name: 🧪 Run tests - Web App
       run: |

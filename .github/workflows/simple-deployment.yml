@@ -23,8 +23,8 @@ jobs:
     - name: 📦 Install dependencies
       run: |
         echo "🏗️ Installing factory components..."
-        cd src/device-simulator && npm ci --only=production
-        cd ../function-adt-projection && npm ci --only=production
+        cd src/device-simulator && if [ -f package-lock.json ]; then npm ci --only=production; else npm install --only=production; fi
+        cd ../function-adt-projection && if [ -f package-lock.json ]; then npm ci --only=production; else npm install --only=production; fi
 
     - name: 🧪 Run validation tests
       run: |
