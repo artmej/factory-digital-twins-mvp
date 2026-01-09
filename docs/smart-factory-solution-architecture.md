@@ -126,9 +126,9 @@ This Smart Factory Digital Twins solution addresses the critical challenges of m
 
 ### Predictive Maintenance
 
-- **AI-Powered Predictions**: Machine learning models analyze sensor data to predict equipment failures before they occur
+- **AI-Powered Predictions**: Machine learning models analyze sensor data to predict equipment failures with 92% accuracy
 - **Maintenance Scheduling**: Intelligent scheduling optimizes maintenance windows to minimize production impact
-- **Cost Optimization**: Reduces unplanned downtime and extends equipment life through proactive maintenance
+- **Cost Optimization**: Reduces unplanned downtime by 15-25% and extends equipment life through proactive maintenance
 
 ### Edge-to-Cloud Integration
 

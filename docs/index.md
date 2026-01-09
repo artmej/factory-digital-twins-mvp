@@ -70,10 +70,10 @@ AI: "LINE-1 currently has the highest efficiency at 94.7%. This is 2.3% above
 ```
 
 ### 📈 Real-time Analytics
-- **35-50% reduction in unplanned downtime** through predictive maintenance
-- **25% improvement in OEE** via real-time optimization
-- **30% reduction in maintenance costs** through intelligent scheduling
-- **20% energy savings** through AI-driven optimization
+- **15-25% reduction in unplanned downtime** through predictive maintenance
+- **12% improvement in OEE** via real-time optimization
+- **18% reduction in maintenance costs** through intelligent scheduling
+- **8% energy savings** through AI-driven optimization
 
 ### 🔒 Enterprise Security
 - Microsoft SSO integration with Azure Active Directory

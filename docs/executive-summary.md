@@ -7,10 +7,10 @@
 ## Business Value Proposition
 
 ### Immediate ROI Drivers
-- **35-50% reduction in unplanned downtime** through predictive maintenance
-- **25% improvement in Overall Equipment Effectiveness (OEE)** via real-time optimization
-- **30% reduction in maintenance costs** through intelligent scheduling
-- **20% energy savings** through AI-driven optimization algorithms
+- **15-25% reduction in unplanned downtime** through predictive maintenance
+- **12% improvement in Overall Equipment Effectiveness (OEE)** via real-time optimization
+- **18% reduction in maintenance costs** through intelligent scheduling
+- **8% energy savings** through AI-driven optimization algorithms
 
 ### Strategic Advantages
 - **Digital Transformation**: Complete digitization of factory operations with real-time visibility
@@ -108,13 +108,13 @@ Local Sensors → MQTT Broker → Event Processing → Real-time Updates
 ### ROI Calculation (Annual)
 | Benefit Category | Annual Value (USD) |
 |------------------|-------------------|
-| Reduced Downtime | $850,000 |
-| Energy Savings | $180,000 |
-| Maintenance Optimization | $320,000 |
-| Quality Improvements | $240,000 |
-| **Total Benefits** | **$1,590,000** |
+| Reduced Downtime | $420,000 |
+| Energy Savings | $85,000 |
+| Maintenance Optimization | $280,000 |
+| Quality Improvements | $125,000 |
+| **Total Benefits** | **$910,000** |
 
-**Net ROI: 1,556% (First Year)**
+**Net ROI: 245% (3-Year Average)**
 
 ## Success Metrics & KPIs
 
