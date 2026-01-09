@@ -730,35 +730,44 @@
             <div class="chat-interface">
                 <div class="chat-messages" id="chat-messages">
                     <div class="message agent fade-in">
-                        <div class="message-header">Factory Copilot • Now</div>
+                        <div class="message-header">Factory Copilot • Ahora</div>
                         <div class="message-content">
-                            👋 Hello! I'm your Smart Factory Copilot. I'm monitoring all factory operations and ready to help with insights, recommendations, and automation. How can I assist you today?
+                            👋 ¡Hola! Soy tu Smart Factory Copilot. Estoy monitoreando todas las operaciones de la fábrica y listo para ayudarte con insights, recomendaciones y automatización. 
+                            
+                            Puedes preguntarme cosas como:
+                            • "¿En qué línea tengo el siguiente mantenimiento?"
+                            • "¿Cuándo es el próximo mantenimiento?"
+                            • "¿Cómo está funcionando la LÍNEA 2?"
+                            
+                            ¿En qué puedo ayudarte hoy?
                         </div>
                     </div>
                     
                     <div class="message agent fade-in">
-                        <div class="message-header">Factory Copilot • 2 min ago</div>
+                        <div class="message-header">Factory Copilot • Hace 2 min</div>
                         <div class="message-content">
-                            🚨 I've detected a temperature anomaly on LINE-2-CNC-02. The machine is running 15°C above normal. I recommend immediate inspection. Shall I schedule emergency maintenance?
+                            🚨 He detectado una anomalía de temperatura en LINE-2-CNC-02. La máquina está funcionando 15°C por encima de lo normal. Recomiendo inspección inmediata. ¿Programo mantenimiento de emergencia?
                         </div>
                     </div>
                 </div>
                 
                 <div class="quick-actions">
-                    <div class="quick-actions-title">Quick Commands:</div>
+                    <div class="quick-actions-title">Preguntas Rápidas:</div>
                     <div class="quick-buttons">
-                        <span class="quick-btn" onclick="sendQuickMessage('Show me production status')">Production Status</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('What maintenance is due?')">Maintenance Due</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Optimize energy usage')">Optimize Energy</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Show quality metrics')">Quality Metrics</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Help me with diagnostics')">Diagnostics</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cuál es el estado de producción?')">Estado Producción</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cuándo es el siguiente mantenimiento?')">Próximo Mantenimiento</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿En qué línea tengo mantenimiento urgente?')">Mantenimiento Urgente</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cómo está la LÍNEA 2?')">Estado LÍNEA 2</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('Optimizar consumo energético')">Optimizar Energía</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cómo están las métricas de calidad?')">Métricas Calidad</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('Ayuda con diagnósticos')">Ayuda</span>
                     </div>
                 </div>
                 
                 <div class="chat-input-container">
                     <div class="chat-input-group">
-                        <input type="text" class="chat-input" id="chat-input" placeholder="Ask me anything about the factory..." onkeypress="handleChatInput(event)">
-                        <button class="send-btn" onclick="sendMessage()">Send</button>
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Pregúntame sobre la fábrica... ¿Cuándo es el siguiente mantenimiento?" onkeypress="handleChatInput(event)">
+                        <button class="send-btn" onclick="sendMessage()">Enviar</button>
                     </div>
                 </div>
             </div>
@@ -1081,27 +1090,58 @@
         function generateAIResponse(userMessage) {
             const message = userMessage.toLowerCase();
             
-            if (message.includes('production') || message.includes('status')) {
-                return '📊 Current production status: All lines operating at 94.2% efficiency. LINE-2-CNC-02 requires attention due to elevated temperature. Overall OEE is excellent at 94.2%. Would you like me to provide detailed analysis for any specific line?';
+            // Preguntas específicas sobre mantenimiento por línea
+            if (message.includes('línea') || message.includes('linea')) {
+                if (message.includes('mantenimiento') || message.includes('siguiente mantenimiento')) {
+                    if (message.includes('1') || message.includes('uno')) {
+                        return '🔧 **LÍNEA 1 - Próximo Mantenimiento:**\n\n📅 **Programado para:** Mañana 14:00 - 15:30\n🤖 **Máquinas:** LINE-1-ROBOT-01 (calibración de precisión)\n⚡ **Tipo:** Mantenimiento preventivo\n⏱️ **Duración estimada:** 90 minutos\n👨‍🔧 **Técnico asignado:** Juan Pérez\n📋 **Tareas:** Calibración de brazos robóticos y verificación de sensores\n\n¿Te gustaría que reprograme esta ventana de mantenimiento?';
+                    }
+                    if (message.includes('2') || message.includes('dos')) {
+                        return '🚨 **LÍNEA 2 - Mantenimiento URGENTE:**\n\n📅 **Requerido:** HOY 16:00 (Crítico)\n🔥 **Máquinas:** LINE-2-CNC-02 (temperatura crítica 85°C)\n⚠️ **Tipo:** Mantenimiento correctivo de emergencia\n⏱️ **Duración estimada:** 2-3 horas\n👨‍🔧 **Técnico asignado:** María González (especialista térmico)\n📋 **Tareas:** Revisión sistema de refrigeración, reemplazo de termostatos\n💰 **Costo de parada:** $1,200/hora\n\n🤖 ¿Ejecuto el protocolo de parada de emergencia ahora?';
+                    }
+                    if (message.includes('3') || message.includes('tres')) {
+                        return '🔧 **LÍNEA 3 - Próximo Mantenimiento:**\n\n📅 **Programado para:** Viernes 09:00 - 11:00\n⚙️ **Máquinas:** LINE-3-CONV-03 (ajuste tensión de banda)\n⚡ **Tipo:** Mantenimiento preventivo\n⏱️ **Duración estimada:** 120 minutos\n👨‍🔧 **Técnico asignado:** Carlos Ruiz\n📋 **Tareas:** Ajuste tensión transportador, lubricación rodamientos\n📊 **Eficiencia esperada:** +2.5% después del mantenimiento\n\n✅ Esta línea está funcionando de manera óptima.';
+                    }
+                    return '🔧 **Resumen de Mantenimiento por Líneas:**\n\n**LÍNEA 1:** Mañana 14:00 (Preventivo - Robot)\n**LÍNEA 2:** ⚠️ HOY 16:00 (URGENTE - CNC temperatura)\n**LÍNEA 3:** Viernes 09:00 (Preventivo - Transportador)\n\n¿Sobre qué línea específica te gustaría más detalles?';
+                }
             }
             
-            if (message.includes('maintenance')) {
-                return '🔧 Upcoming maintenance: LINE-2-CNC-02 needs immediate attention (temperature), LINE-3-CONV-03 belt tension adjustment scheduled for tomorrow. I can auto-schedule optimal maintenance windows to minimize production impact.';
+            // Preguntas sobre cuándo es el siguiente mantenimiento
+            if ((message.includes('cuando') || message.includes('cuándo')) && (message.includes('siguiente') || message.includes('próximo')) && message.includes('mantenimiento')) {
+                return '📅 **Próximos Mantenimientos Programados:**\n\n🚨 **HOY 16:00** - LINE-2-CNC-02 (URGENTE)\n   ➤ Sistema de refrigeración crítico\n   ➤ Duración: 2-3 horas\n   ➤ Técnico: María González\n\n⏰ **MAÑANA 14:00** - LINE-1-ROBOT-01\n   ➤ Calibración preventiva\n   ➤ Duración: 90 minutos\n   ➤ Técnico: Juan Pérez\n\n📆 **VIERNES 09:00** - LINE-3-CONV-03\n   ➤ Ajuste tensión transportador\n   ➤ Duración: 120 minutos\n   ➤ Técnico: Carlos Ruiz\n\n🤖 ¿Quieres que ajuste alguna de estas programaciones?';
             }
             
-            if (message.includes('energy') || message.includes('optimize')) {
-                return '⚡ Energy optimization analysis: I can reduce consumption by 12% during peak hours by adjusting LINE-1 and LINE-3 schedules. This would save approximately $2,400/day with zero impact on production targets. Shall I implement this optimization?';
+            // Preguntas sobre líneas específicas
+            if (message.includes('line-1') || (message.includes('línea') && message.includes('1'))) {
+                return '🏭 **LÍNEA 1 - Estado Detallado:**\n\n✅ **Estado:** Operacional (94% eficiencia)\n🤖 **LINE-1-ROBOT-01:** 93% eficiencia, 61.4°C\n⚙️ **LINE-1-CNC-01:** 92% eficiencia, 68.2°C\n🔄 **LINE-1-CONV-01:** 98% eficiencia, 45.7°C\n\n📅 **Próximo mantenimiento:** Mañana 14:00\n📊 **Calidad:** 99.8% (Mejor línea de la fábrica)\n⚡ **Consumo energético:** 78.5 kW (Óptimo)\n\n🎯 **Recomendación:** Línea funcionando perfectamente. El mantenimiento preventivo de mañana mejorará la precisión un 0.8% adicional.';
             }
             
-            if (message.includes('quality')) {
-                return '✨ Quality metrics: Overall quality score is 99.3% - excellent! LINE-1 quality is particularly high at 99.8%. I detected minor variations on LINE-2 that correlate with the temperature issues. Fixing the cooling system should restore optimal quality levels.';
+            if (message.includes('line-2') || (message.includes('línea') && message.includes('2'))) {
+                return '🚨 **LÍNEA 2 - ALERTA CRÍTICA:**\n\n⚠️ **Estado:** Crítico - Requiere atención inmediata\n🔥 **LINE-2-CNC-02:** 85°C (CRÍTICO) - 78% eficiencia\n🤖 **LINE-2-ROBOT-02:** 72.3°C (Advertencia) - 78% eficiencia\n🔄 **LINE-2-CONV-02:** 48.9°C (Normal) - 96% eficiencia\n\n🚨 **ACCIÓN REQUERIDA:** Mantenimiento HOY 16:00\n📉 **Impacto:** Producción reducida 22%\n💰 **Costo de parada:** $1,200/hora\n\n🤖 **¿Ejecuto parada de emergencia ahora para prevenir daños mayores?**';
             }
             
-            if (message.includes('diagnostic') || message.includes('help')) {
-                return '🩺 I can help with: Real-time diagnostics, predictive maintenance alerts, energy optimization, quality analysis, production planning, and automated responses. My confidence level is currently 94%. What specific area would you like me to analyze?';
+            if (message.includes('line-3') || (message.includes('línea') && message.includes('3'))) {
+                return '🔧 **LÍNEA 3 - Estado Bueno:**\n\n✅ **Estado:** Operacional con mantenimiento próximo\n⚙️ **LINE-3-CNC-03:** 91% eficiencia, 66.8°C\n🤖 **LINE-3-ROBOT-03:** 93% eficiencia, 61.4°C\n⚠️ **LINE-3-CONV-03:** Tensión baja detectada, 52.1°C\n\n📅 **Próximo mantenimiento:** Viernes 09:00\n📊 **Calidad:** 98.5% (Muy buena)\n⚡ **Consumo energético:** 81.2 kW (Normal)\n\n🎯 **Recomendación:** Funcionamiento estable. El ajuste del viernes resolverá el tema de tensión del transportador.';
             }
             
-            return '🤖 I understand your request. Based on current factory operations and my analysis, I can provide detailed insights about production, maintenance, energy optimization, or quality metrics. I\'m continuously learning from your factory patterns to improve my recommendations. What specific information would you like me to analyze?';
+            // Preguntas sobre producción y status
+            if (message.includes('production') || message.includes('status') || message.includes('producción')) {
+                return '📊 **Estado General de Producción:**\n\n🏭 **OEE Global:** 94.2%\n📈 **Eficiencia promedio:** 88.3%\n⚡ **Líneas activas:** 3/3\n\n**Detalle por líneas:**\n✅ **LÍNEA 1:** 94% - Óptima\n🚨 **LÍNEA 2:** 78% - Crítica (Temp. alta)\n✅ **LÍNEA 3:** 91% - Buena\n\n🎯 **Meta diaria:** 102% (En riesgo por LÍNEA 2)\n📦 **Producción actual:** 847 unidades/hora\n🎯 **Target:** 950 unidades/hora\n\n💡 **¿Quieres análisis detallado de alguna línea específica?**';
+            }
+            
+            if (message.includes('energy') || message.includes('optimize') || message.includes('energía')) {
+                return '⚡ **Optimización Energética:**\n\n📊 **Consumo actual:** 237.2 kW\n💰 **Costo por hora:** $28.46\n📈 **Eficiencia energética:** 89.3%\n\n**Oportunidades detectadas:**\n🔥 **LÍNEA 2:** +15% consumo por sobrecalentamiento\n⚡ **Horario pico:** Reducir 12% ajustando turnos\n🤖 **Standby inteligente:** Ahorrar $2,400/día\n\n🎯 **Implementar optimización automática?**\n✅ Sin impacto en producción\n💰 Ahorro estimado: $876/día';
+            }
+            
+            if (message.includes('quality') || message.includes('calidad')) {
+                return '✨ **Métricas de Calidad:**\n\n🎯 **Score global:** 99.3% (Excelente)\n📊 **First Pass Yield:** 94.7%\n🔍 **Defectos/hora:** 0.7%\n\n**Por líneas:**\n🌟 **LÍNEA 1:** 99.8% (¡Perfecto!)\n⚠️ **LÍNEA 2:** 97.1% (Afectada por temperatura)\n✅ **LÍNEA 3:** 98.5% (Muy buena)\n\n🔧 **Correlación detectada:** La temperatura alta de LÍNEA 2 está afectando la calidad en 2.2%\n\n💡 **Recomendación:** Después del mantenimiento térmico, calidad debería subir a 99.5%';
+            }
+            
+            if (message.includes('diagnostic') || message.includes('help') || message.includes('ayuda')) {
+                return '🩺 **Centro de Ayuda - Smart Factory Copilot:**\n\n**Preguntas que puedo responder:**\n🏭 "¿En qué línea tengo el siguiente mantenimiento?"\n📅 "¿Cuándo es el próximo mantenimiento?"\n⚙️ "¿Cómo está la LÍNEA 2?"\n📊 "¿Cuál es el estado de producción?"\n⚡ "¿Cómo optimizar el consumo energético?"\n✨ "¿Cómo están las métricas de calidad?"\n\n**Comandos útiles:**\n🔧 "Ejecutar mantenimiento de emergencia"\n⚡ "Optimizar consumo energético"\n📊 "Mostrar análisis predictivo"\n🤖 "Calibrar robots automáticamente"\n\n💬 **Habla conmigo en lenguaje natural - Entiendo español perfectamente!**';
+            }
+            
+            return '🤖 Entiendo tu consulta. Puedo ayudarte con información específica sobre:\n\n🔧 **Mantenimiento:** "¿Cuándo es el siguiente mantenimiento de LÍNEA 2?"\n🏭 **Líneas:** "¿Cómo está funcionando LÍNEA 1?"\n📊 **Producción:** "¿Cuál es el estado actual de producción?"\n⚡ **Energía:** "¿Cómo optimizar el consumo?"\n✨ **Calidad:** "¿Cómo están las métricas de calidad?"\n\n💬 **Hazme preguntas específicas y te daré respuestas detalladas con datos reales de la fábrica.**';
         }
         
         // Action execution with real API
