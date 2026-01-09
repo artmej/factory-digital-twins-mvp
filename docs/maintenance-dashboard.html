@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Smart Factory - Maintenance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-bottom: 3px solid #ff6b35;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #ff6b35;
+            font-size: 28px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            min-height: calc(100vh - 100px);
+        }
+        
+        .dashboard-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            border-bottom: 2px solid #ff6b35;
+            padding-bottom: 10px;
+        }
+        
+        /* Critical Alerts Panel */
+        .alert-item {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #f44336;
+            animation: pulse 2s infinite;
+        }
+        
+        .alert-item.warning {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: #ff9800;
+            border-left-color: #ff9800;
+        }
+        
+        .alert-item.info {
+            background: rgba(33, 150, 243, 0.2);
+            border-color: #2196f3;
+            border-left-color: #2196f3;
+            animation: none;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .alert-machine {
+            font-size: 14px;
+            color: #ff6b35;
+            margin: 5px 0;
+        }
+        
+        .alert-desc {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .alert-action {
+            margin-top: 10px;
+        }
+        
+        .btn-action {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-action:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+        }
+        
+        /* Maintenance Schedule */
+        .schedule-item {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 5px solid #4caf50;
+        }
+        
+        .schedule-item.overdue {
+            background: rgba(255, 87, 34, 0.2);
+            border-color: #ff5722;
+            border-left-color: #ff5722;
+        }
+        
+        .schedule-item.today {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #ffc107;
+            border-left-color: #ffc107;
+        }
+        
+        .schedule-date {
+            font-weight: bold;
+            color: #4caf50;
+            font-size: 16px;
+        }
+        
+        .schedule-machine {
+            color: #ff6b35;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .schedule-task {
+            font-size: 13px;
+            margin: 5px 0;
+        }
+        
+        .schedule-priority {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        .priority-high {
+            background: #f44336;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .priority-low {
+            background: #4caf50;
+            color: white;
+        }
+        
+        /* Performance Metrics */
+        .metric-card {
+            background: rgba(0, 188, 212, 0.1);
+            border: 1px solid #00bcd4;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .metric-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00bcd4;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .metric-change {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .metric-change.positive {
+            color: #4caf50;
+        }
+        
+        .metric-change.negative {
+            color: #f44336;
+        }
+        
+        .trend-chart {
+            height: 100px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-bar {
+            background: #ff6b35;
+            position: absolute;
+            bottom: 0;
+            width: 8px;
+            border-radius: 4px 4px 0 0;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .parts-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .part-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .part-item.available {
+            border-left-color: #4caf50;
+        }
+        
+        .part-item.low {
+            border-left-color: #ff9800;
+        }
+        
+        .part-item.out {
+            border-left-color: #f44336;
+        }
+        
+        .part-name {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .part-stock {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .technician-card {
+            background: rgba(96, 125, 139, 0.2);
+            border: 1px solid #607d8b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tech-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #607d8b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .tech-info {
+            flex: 1;
+        }
+        
+        .tech-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .tech-status {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        
+        .tech-location {
+            font-size: 12px;
+            color: #ff6b35;
+            margin-top: 2px;
+        }
+        
+        .status-online {
+            color: #4caf50;
+        }
+        
+        .status-busy {
+            color: #ff9800;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b35;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+            background: #e55a2b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Maintenance Dashboard</h1>
+        <div class="header-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="activeAlerts">7</div>
+                <div class="stat-label">Active Alerts</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="scheduledTasks">12</div>
+                <div class="stat-label">Scheduled Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="techniciansActive">8</div>
+                <div class="stat-label">Technicians Active</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="uptime">96.2%</div>
+                <div class="stat-label">Factory Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="refreshDashboard()">🔄</button>
+
+    <div class="dashboard-grid">
+        <!-- Critical Alerts Panel -->
+        <div class="dashboard-panel">
+            <div class="panel-title">🚨 Critical Alerts</div>
+            
+            <div class="alert-item">
+                <div class="alert-header">
+                    <span class="alert-title">🌡️ High Temperature</span>
+                    <span class="alert-time">2 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-2-CNC-02</div>
+                <div class="alert-desc">Temperature at 85.1°C (Threshold: 80°C)</div>
+                <div class="alert-action">
+                    <button class="btn-action">Acknowledge</button>
+                    <button class="btn-action">Dispatch Tech</button>
+                </div>
+            </div>
+            
+            <div class="alert-item warning">
+                <div class="alert-header">
+                    <span class="alert-title">⚡ Power Fluctuation</span>
+                    <span class="alert-time">8 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-1-ROBOT-01</div>
+                <div class="alert-desc">Power consumption varies ±15% from normal</div>
+                <div class="alert-action">
+                    <button class="btn-action">Investigate</button>
+                    <button class="btn-action">Schedule</button>
+                </div>
+            </div>
+            
+            <div class="alert-item warning">
+                <div class="alert-header">
+                    <span class="alert-title">🔧 Vibration Anomaly</span>
+                    <span class="alert-time">15 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-3-ROBOT-03</div>
+                <div class="alert-desc">Unusual vibration pattern detected in joint #2</div>
+                <div class="alert-action">
+                    <button class="btn-action">Review Data</button>
+                    <button class="btn-action">Schedule</button>
+                </div>
+            </div>
+            
+            <div class="alert-item info">
+                <div class="alert-header">
+                    <span class="alert-title">📊 Performance Drop</span>
+                    <span class="alert-time">1 hour ago</span>
+                </div>
+                <div class="alert-machine">LINE-3-CONV-03</div>
+                <div class="alert-desc">Throughput down 8% compared to last week</div>
+                <div class="alert-action">
+                    <button class="btn-action">Analyze</button>
+                    <button class="btn-action">Optimize</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Schedule Panel -->
+        <div class="dashboard-panel">
+            <div class="panel-title">📅 Maintenance Schedule</div>
+            
+            <div class="schedule-item today">
+                <div class="schedule-date">Today 14:00</div>
+                <div class="schedule-machine">LINE-3-CONV-03</div>
+                <div class="schedule-task">Belt replacement & tensioning</div>
+                <span class="schedule-priority priority-high">HIGH</span>
+            </div>
+            
+            <div class="schedule-item">
+                <div class="schedule-date">Tomorrow 09:00</div>
+                <div class="schedule-machine">LINE-1-CNC-01</div>
+                <div class="schedule-task">Spindle calibration & precision check</div>
+                <span class="schedule-priority priority-medium">MEDIUM</span>
+            </div>
+            
+            <div class="schedule-item">
+                <div class="schedule-date">Jan 10, 16:00</div>
+                <div class="schedule-machine">LINE-2-ROBOT-02</div>
+                <div class="schedule-task">Software update & joint lubrication</div>
+                <span class="schedule-priority priority-low">LOW</span>
+            </div>
+            
+            <div class="schedule-item">
+                <div class="schedule-date">Jan 12, 10:00</div>
+                <div class="schedule-machine">LINE-1-ROBOT-01</div>
+                <div class="schedule-task">Bearing inspection & replacement</div>
+                <span class="schedule-priority priority-medium">MEDIUM</span>
+            </div>
+            
+            <div class="schedule-item overdue">
+                <div class="schedule-date">Overdue (Jan 5)</div>
+                <div class="schedule-machine">LINE-2-CNC-02</div>
+                <div class="schedule-task">Cooling system maintenance</div>
+                <span class="schedule-priority priority-high">URGENT</span>
+            </div>
+
+            <!-- Spare Parts Status -->
+            <div style="margin-top: 20px;">
+                <div class="panel-title" style="font-size: 16px;">📦 Spare Parts Status</div>
+                <div class="parts-status">
+                    <div class="part-item available">
+                        <div class="part-name">Conveyor Belts</div>
+                        <div class="part-stock">Stock: 8 units</div>
+                    </div>
+                    <div class="part-item low">
+                        <div class="part-name">Robot Joints</div>
+                        <div class="part-stock">Stock: 2 units</div>
+                    </div>
+                    <div class="part-item available">
+                        <div class="part-name">CNC Spindles</div>
+                        <div class="part-stock">Stock: 5 units</div>
+                    </div>
+                    <div class="part-item out">
+                        <div class="part-name">Temperature Sensors</div>
+                        <div class="part-stock">Stock: 0 units</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance & Metrics Panel -->
+        <div class="dashboard-panel">
+            <div class="panel-title">📊 Performance Metrics</div>
+            
+            <div class="metric-card">
+                <div class="metric-value">2.3h</div>
+                <div class="metric-label">Mean Time To Repair (MTTR)</div>
+                <div class="metric-change positive">↑ 15% improvement</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value">145.8h</div>
+                <div class="metric-label">Mean Time Between Failures (MTBF)</div>
+                <div class="metric-change positive">↑ 8% improvement</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value">78%</div>
+                <div class="metric-label">Planned Maintenance Ratio</div>
+                <div class="metric-change negative">↓ 3% decrease</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="panel-title" style="font-size: 16px;">📈 Weekly Trends</div>
+                <div class="trend-chart" id="trendChart">
+                    <!-- Chart bars will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Technician Status -->
+            <div style="margin-top: 20px;">
+                <div class="panel-title" style="font-size: 16px;">👨‍🔧 Active Technicians</div>
+                
+                <div class="technician-card">
+                    <div class="tech-avatar">🔧</div>
+                    <div class="tech-info">
+                        <div class="tech-name">Carlos Rodriguez</div>
+                        <div class="tech-status status-busy">Working on LINE-2</div>
+                        <div class="tech-location">CNC-02 Maintenance</div>
+                    </div>
+                </div>
+                
+                <div class="technician-card">
+                    <div class="tech-avatar">⚡</div>
+                    <div class="tech-info">
+                        <div class="tech-name">Ana Silva</div>
+                        <div class="tech-status status-online">Available</div>
+                        <div class="tech-location">Maintenance Office</div>
+                    </div>
+                </div>
+                
+                <div class="technician-card">
+                    <div class="tech-avatar">🤖</div>
+                    <div class="tech-info">
+                        <div class="tech-name">Miguel Santos</div>
+                        <div class="tech-status status-busy">Working on LINE-1</div>
+                        <div class="tech-location">Robot Calibration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate trend chart
+        function generateTrendChart() {
+            const chart = document.getElementById('trendChart');
+            chart.innerHTML = '';
+            
+            // Sample data for 7 days
+            const data = [85, 92, 78, 94, 88, 96, 91];
+            const maxValue = Math.max(...data);
+            
+            data.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${(value / maxValue) * 90}%`;
+                bar.style.left = `${index * 12 + 10}%`;
+                bar.title = `Day ${index + 1}: ${value}%`;
+                chart.appendChild(bar);
+                
+                // Animate bars
+                setTimeout(() => {
+                    bar.style.opacity = '1';
+                }, index * 100);
+            });
+        }
+        
+        // Refresh dashboard data
+        function refreshDashboard() {
+            // Simulate data refresh
+            console.log('Refreshing dashboard...');
+            
+            // Update some values with animation
+            updateValue('activeAlerts', Math.floor(Math.random() * 5) + 5);
+            updateValue('scheduledTasks', Math.floor(Math.random() * 8) + 10);
+            updateValue('uptime', (95 + Math.random() * 3).toFixed(1) + '%');
+            
+            // Show refresh animation
+            const btn = event.target;
+            btn.style.animation = 'spin 1s ease-in-out';
+            setTimeout(() => {
+                btn.style.animation = '';
+            }, 1000);
+        }
+        
+        function updateValue(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            element.style.transform = 'scale(1.2)';
+            element.style.color = '#ff6b35';
+            
+            setTimeout(() => {
+                element.textContent = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.color = '';
+            }, 300);
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            refreshDashboard();
+        }, 30000);
+        
+        // Initialize
+        generateTrendChart();
+        
+        // Add some interactivity to alert buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-action')) {
+                e.target.style.background = '#4caf50';
+                e.target.textContent = 'Processing...';
+                
+                setTimeout(() => {
+                    e.target.style.background = '#ff6b35';
+                    e.target.textContent = 'Completed ✓';
+                }, 2000);
+            }
+        });
+        
+        // Simulate real-time updates
+        setInterval(() => {
+            const alerts = document.querySelectorAll('.alert-item:not(.info)');
+            alerts.forEach(alert => {
+                const timeEl = alert.querySelector('.alert-time');
+                if (timeEl && !timeEl.textContent.includes('hour')) {
+                    const currentTime = parseInt(timeEl.textContent.match(/\d+/)?.[0] || 0);
+                    timeEl.textContent = `${currentTime + 1} min ago`;
+                }
+            });
+        }, 60000); // Update every minute
+    </script>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

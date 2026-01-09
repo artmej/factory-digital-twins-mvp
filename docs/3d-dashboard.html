@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory - Real-time Digital Twins Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at center, #1a237e 0%, #0c1445 70%);
+            overflow: hidden;
+            color: white;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #threejs-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Premium Header */
+        .premium-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(26,35,126,0.9));
+            backdrop-filter: blur(20px);
+            border-bottom: 3px solid #00e676;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 4px 30px rgba(0, 230, 118, 0.3);
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00e676, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .real-time-status {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(0,230,118,0.3);
+        }
+        
+        .pulse-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: realtimePulse 1.5s infinite;
+        }
+        
+        .pulse-dot.connected { background: #00e676; }
+        .pulse-dot.warning { background: #ff6d00; }
+        .pulse-dot.critical { background: #ff1744; }
+        
+        @keyframes realtimePulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+        
+        /* Left Control Panel */
+        .control-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            width: 350px;
+            height: calc(100vh - 140px);
+            background: linear-gradient(145deg, rgba(0,0,0,0.9), rgba(26,35,126,0.7));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(0,230,118,0.3);
+            z-index: 150;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+        }
+        
+        .panel-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00e676;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(0,230,118,0.3);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Premium KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(0,230,118,0.1), rgba(0,188,212,0.1));
+            border: 1px solid rgba(0,230,118,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00e676, #00bcd4);
+        }
+        
+        .kpi-value {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00e676, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .kpi-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .kpi-trend {
+            font-size: 11px;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .trend-up { color: #00e676; }
+        .trend-down { color: #ff1744; }
+        
+        /* Enhanced Machine List */
+        .machine-grid {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .machine-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .machine-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,230,118,0.2);
+            border-color: #00e676;
+        }
+        
+        .machine-card.selected {
+            border-color: #00e676;
+            background: linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,188,212,0.1));
+            box-shadow: 0 0 20px rgba(0,230,118,0.4);
+        }
+        
+        .machine-card.operational::before { background: #00e676; }
+        .machine-card.maintenance::before { background: #ff6d00; }
+        .machine-card.critical::before { background: #ff1744; }
+        
+        .machine-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+        
+        .machine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .machine-id {
+            font-weight: bold;
+            font-size: 14px;
+            color: #00e676;
+        }
+        
+        .machine-status-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-operational {
+            background: rgba(0,230,118,0.2);
+            color: #00e676;
+            border: 1px solid #00e676;
+        }
+        
+        .status-maintenance {
+            background: rgba(255,109,0,0.2);
+            color: #ff6d00;
+            border: 1px solid #ff6d00;
+        }
+        
+        .status-critical {
+            background: rgba(255,23,68,0.2);
+            color: #ff1744;
+            border: 1px solid #ff1744;
+            animation: criticalBlink 1s infinite;
+        }
+        
+        @keyframes criticalBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .machine-telemetry {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .telemetry-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+        
+        .telemetry-label {
+            opacity: 0.8;
+        }
+        
+        .telemetry-value {
+            font-weight: bold;
+            color: #00bcd4;
+        }
+        
+        /* Right Panel - Maintenance & Alerts */
+        .alerts-panel {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            width: 400px;
+            height: calc(100vh - 140px);
+            background: linear-gradient(145deg, rgba(255,23,68,0.1), rgba(0,0,0,0.9));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,23,68,0.3);
+            z-index: 150;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(255,23,68,0.2);
+        }
+        
+        .alert-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            position: relative;
+        }
+        
+        .alert-card.critical {
+            border-left-color: #ff1744;
+            background: linear-gradient(135deg, rgba(255,23,68,0.2), rgba(255,23,68,0.1));
+            animation: alertPulse 2s infinite;
+        }
+        
+        .alert-card.warning {
+            border-left-color: #ff6d00;
+            background: linear-gradient(135deg, rgba(255,109,0,0.2), rgba(255,109,0,0.1));
+        }
+        
+        .alert-card.info {
+            border-left-color: #00bcd4;
+            background: linear-gradient(135deg, rgba(0,188,212,0.2), rgba(0,188,212,0.1));
+        }
+        
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,23,68,0.3); }
+            50% { box-shadow: 0 0 40px rgba(255,23,68,0.6); }
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .alert-timestamp {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .alert-machine {
+            color: #00e676;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .alert-description {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        
+        .alert-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(45deg, #00e676, #00bcd4);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,230,118,0.4);
+        }
+        
+        .action-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        /* Bottom Control Bar */
+        .control-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 150;
+            display: flex;
+            gap: 15px;
+            background: rgba(0,0,0,0.9);
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(0,230,118,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .view-btn {
+            background: linear-gradient(45deg, rgba(0,230,118,0.2), rgba(0,188,212,0.2));
+            border: 1px solid rgba(0,230,118,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .view-btn:hover {
+            background: linear-gradient(45deg, #00e676, #00bcd4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,230,118,0.4);
+        }
+        
+        .view-btn.active {
+            background: linear-gradient(45deg, #00e676, #00bcd4);
+            box-shadow: 0 0 30px rgba(0,230,118,0.6);
+        }
+        
+        /* Enhanced Tooltip */
+        .enhanced-tooltip {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(26,35,126,0.9));
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid rgba(0,230,118,0.5);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .tooltip-header {
+            font-weight: bold;
+            color: #00e676;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(0,230,118,0.3);
+            padding-bottom: 5px;
+        }
+        
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .tooltip-label {
+            opacity: 0.8;
+        }
+        
+        .tooltip-value {
+            font-weight: bold;
+            color: #00bcd4;
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0c1445, #1a237e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(0,230,118,0.3);
+            border-top: 4px solid #00e676;
+            border-radius: 50%;
+            animation: premiumSpin 1.5s linear infinite;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes premiumSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 20px;
+            color: #00e676;
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtitle {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Connecting to Digital Twins...</div>
+        <div class="loading-subtitle">Loading real-time factory data</div>
+    </div>
+    
+    <div id="container" style="display: none;">
+        <!-- Premium Header -->
+        <div class="premium-header">
+            <div class="logo-section">
+                🏭 Smart Factory Digital Twins - Real-time Dashboard
+            </div>
+            <div class="real-time-status">
+                <div class="status-indicator">
+                    <div class="pulse-dot connected"></div>
+                    <span>Azure IoT Hub</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="pulse-dot connected"></div>
+                    <span>Digital Twins API</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="pulse-dot warning"></div>
+                    <span>3 Active Alerts</span>
+                </div>
+                <div class="status-indicator" id="lastUpdate">
+                    <span>Last Update: Live</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3D Scene Container -->
+        <div id="threejs-container"></div>
+        
+        <!-- Left Control Panel -->
+        <div class="control-panel">
+            <div class="panel-section">
+                <div class="section-title">🏭 Factory Overview</div>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="oeeValue">94.2%</div>
+                        <div class="kpi-label">Overall OEE</div>
+                        <div class="kpi-trend trend-up">↗ +2.1%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="productionValue">2,847</div>
+                        <div class="kpi-label">Units/Day</div>
+                        <div class="kpi-trend trend-up">↗ +5.2%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="qualityValue">98.7%</div>
+                        <div class="kpi-label">Quality Score</div>
+                        <div class="kpi-trend trend-down">↘ -0.3%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="availabilityValue">96.1%</div>
+                        <div class="kpi-label">Availability</div>
+                        <div class="kpi-trend trend-up">↗ +1.8%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <div class="section-title">🤖 Live Machine Status</div>
+                <div class="machine-grid" id="machineGrid">
+                    <!-- Will be populated with real Digital Twins data -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Panel - Alerts & Maintenance -->
+        <div class="alerts-panel">
+            <div class="section-title">🚨 Real-time Alerts</div>
+            
+            <div class="alert-card critical">
+                <div class="alert-header">
+                    <span class="alert-title">🌡️ Critical Temperature</span>
+                    <span class="alert-timestamp">Live</span>
+                </div>
+                <div class="alert-machine">LINE-2-CNC-02</div>
+                <div class="alert-description">
+                    Temperature exceeded 85°C (Threshold: 80°C). Immediate attention required to prevent equipment damage.
+                </div>
+                <div class="alert-actions">
+                    <button class="action-btn">Emergency Stop</button>
+                    <button class="action-btn secondary">Acknowledge</button>
+                </div>
+            </div>
+            
+            <div class="alert-card warning">
+                <div class="alert-header">
+                    <span class="alert-title">⚡ Power Anomaly</span>
+                    <span class="alert-timestamp">3 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-1-ROBOT-01</div>
+                <div class="alert-description">
+                    Power consumption fluctuation detected. 15% variance from baseline operation.
+                </div>
+                <div class="alert-actions">
+                    <button class="action-btn">Investigate</button>
+                    <button class="action-btn secondary">Schedule Check</button>
+                </div>
+            </div>
+            
+            <div class="alert-card warning">
+                <div class="alert-header">
+                    <span class="alert-title">🔧 Vibration Pattern</span>
+                    <span class="alert-timestamp">8 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-3-ROBOT-03</div>
+                <div class="alert-description">
+                    Unusual vibration signature detected in joint assembly. Recommend inspection.
+                </div>
+                <div class="alert-actions">
+                    <button class="action-btn">View Trend</button>
+                    <button class="action-btn secondary">Schedule Maintenance</button>
+                </div>
+            </div>
+            
+            <div class="alert-card info">
+                <div class="alert-header">
+                    <span class="alert-title">📊 Performance Drop</span>
+                    <span class="alert-timestamp">15 min ago</span>
+                </div>
+                <div class="alert-machine">LINE-3-CONV-03</div>
+                <div class="alert-description">
+                    Throughput decreased by 8% compared to weekly average. Belt tension check recommended.
+                </div>
+                <div class="alert-actions">
+                    <button class="action-btn">Optimize</button>
+                    <button class="action-btn secondary">Analyze Data</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <div class="section-title">📅 Today's Maintenance</div>
+                
+                <div style="background: linear-gradient(135deg, rgba(255,109,0,0.2), rgba(255,109,0,0.1)); padding: 15px; border-radius: 12px; border-left: 4px solid #ff6d00; margin-bottom: 15px;">
+                    <div style="font-weight: bold; color: #ff6d00; margin-bottom: 5px;">14:00 - HIGH PRIORITY</div>
+                    <div style="color: #00e676; font-weight: bold; margin-bottom: 5px;">LINE-3-CONV-03</div>
+                    <div style="font-size: 14px;">Belt replacement & tensioning system calibration</div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(0,230,118,0.2), rgba(0,230,118,0.1)); padding: 15px; border-radius: 12px; border-left: 4px solid #00e676;">
+                    <div style="font-weight: bold; color: #00e676; margin-bottom: 5px;">16:30 - SCHEDULED</div>
+                    <div style="color: #00e676; font-weight: bold; margin-bottom: 5px;">LINE-1-CNC-01</div>
+                    <div style="font-size: 14px;">Routine spindle calibration check</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Control Bar -->
+        <div class="control-bar">
+            <button class="view-btn active" onclick="setFactoryView('overview')">🏭 Factory View</button>
+            <button class="view-btn" onclick="setFactoryView('line1')">Line 1</button>
+            <button class="view-btn" onclick="setFactoryView('line2')">Line 2</button>
+            <button class="view-btn" onclick="setFactoryView('line3')">Line 3</button>
+            <button class="view-btn" onclick="toggleMaintenanceMode()">🔧 Maintenance Mode</button>
+        </div>
+    </div>
+    
+    <!-- Enhanced Tooltip -->
+    <div id="enhancedTooltip" class="enhanced-tooltip"></div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        let scene, camera, renderer, controls;
+        let machines = [];
+        let selectedMachine = null;
+        let maintenanceMode = false;
+        let realTimeData = {};
+        
+        // Azure APIs Configuration - Production Endpoints
+        const AZURE_CONFIG = {
+            digitalTwinsEndpoint: 'smartfactory-prod-dt-ncy666q5uv3bo.api.wcus.digitaltwins.azure.net',
+            functionAppEndpoint: 'https://smartfactory-prod-func-blue.azurewebsites.net',
+            webAppEndpoint: 'https://smartfactory-prod-web-blue.azurewebsites.net',
+            subscriptionId: '46c7de45-8b18-4c53-a675-0b0e57e9c0b1',
+            resourceGroup: 'smart-factory-v2-rg'
+        };
+        
+        // Real machine data structure
+        const MACHINE_TWINS = [
+            { id: 'LINE-1-CNC-01', type: 'CNC', line: 1, position: [-12, 0, -8], twinId: 'LINE-1-CNC-01' },
+            { id: 'LINE-1-ROBOT-01', type: 'ROBOT', line: 1, position: [0, 0, -8], twinId: 'LINE-1-ROBOT-01' },
+            { id: 'LINE-1-CONV-01', type: 'CONV', line: 1, position: [12, 0, -8], twinId: 'LINE-1-CONV-01' },
+            
+            { id: 'LINE-2-CNC-02', type: 'CNC', line: 2, position: [-12, 0, 0], twinId: 'LINE-2-CNC-02' },
+            { id: 'LINE-2-ROBOT-02', type: 'ROBOT', line: 2, position: [0, 0, 0], twinId: 'LINE-2-ROBOT-02' },
+            { id: 'LINE-2-CONV-02', type: 'CONV', line: 2, position: [12, 0, 0], twinId: 'LINE-2-CONV-02' },
+            
+            { id: 'LINE-3-CNC-03', type: 'CNC', line: 3, position: [-12, 0, 8], twinId: 'LINE-3-CNC-03' },
+            { id: 'LINE-3-ROBOT-03', type: 'ROBOT', line: 3, position: [0, 0, 8], twinId: 'LINE-3-ROBOT-03' },
+            { id: 'LINE-3-CONV-03', type: 'CONV', line: 3, position: [12, 0, 8], twinId: 'LINE-3-CONV-03' }
+        ];
+        
+        // Initialize the dashboard
+        async function initDashboard() {
+            // Initialize 3D scene
+            init3D();
+            
+            // Start real-time connection to Azure Digital Twins
+            startRealTimeDataConnection();
+            
+            // Initialize machine status panel
+            initMachineStatusPanel();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('container').style.display = 'block';
+            }, 3000);
+            
+            // Start auto-refresh
+            setInterval(updateDashboard, 5000); // Update every 5 seconds
+        }
+        
+        function init3D() {
+            const container = document.getElementById('threejs-container');
+            
+            // Scene with enhanced environment
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0c1445);
+            scene.fog = new THREE.Fog(0x0c1445, 30, 150);
+            
+            // Camera with better positioning
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(30, 20, 30);
+            
+            // Enhanced renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.physicallyCorrectLights = true;
+            container.appendChild(renderer.domElement);
+            
+            // Premium lighting setup
+            setupLighting();
+            
+            // Create factory environment
+            createFactoryEnvironment();
+            
+            // Create machines with enhanced visuals
+            createEnhancedMachines();
+            
+            // Setup camera controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 15;
+            controls.maxDistance = 120;
+            controls.maxPolarAngle = Math.PI / 2.2;
+            
+            // Enhanced mouse interaction
+            setupEnhancedMouseInteraction();
+            
+            // Start render loop
+            animate();
+        }
+        
+        function setupLighting() {
+            // Ambient lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+            
+            // Main directional light
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(50, 50, 50);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 4096;
+            mainLight.shadow.mapSize.height = 4096;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 500;
+            mainLight.shadow.camera.left = -50;
+            mainLight.shadow.camera.right = 50;
+            mainLight.shadow.camera.top = 50;
+            mainLight.shadow.camera.bottom = -50;
+            scene.add(mainLight);
+            
+            // Fill light
+            const fillLight = new THREE.DirectionalLight(0x9bb0ff, 0.3);
+            fillLight.position.set(-25, 25, -25);
+            scene.add(fillLight);
+            
+            // Accent lights for each production line
+            for (let i = 0; i < 3; i++) {
+                const accentLight = new THREE.PointLight(0x00e676, 0.5, 30);
+                accentLight.position.set(0, 8, (i - 1) * 8);
+                scene.add(accentLight);
+            }
+        }
+        
+        function createFactoryEnvironment() {
+            // Enhanced factory floor
+            const floorGeometry = new THREE.PlaneGeometry(80, 50);
+            const floorMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x2a2a2a,
+                transparent: true,
+                opacity: 0.9
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Grid pattern on floor
+            const gridHelper = new THREE.GridHelper(80, 40, 0x444444, 0x222222);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+            
+            // Factory walls
+            createFactoryWalls();
+            
+            // Production line infrastructure
+            createProductionLineInfrastructure();
+        }
+        
+        function createFactoryWalls() {
+            const wallHeight = 12;
+            const wallMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x1a1a1a,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            // Back wall
+            const backWall = new THREE.Mesh(
+                new THREE.PlaneGeometry(80, wallHeight),
+                wallMaterial
+            );
+            backWall.position.set(0, wallHeight/2, -25);
+            scene.add(backWall);
+            
+            // Side walls
+            const leftWall = new THREE.Mesh(
+                new THREE.PlaneGeometry(50, wallHeight),
+                wallMaterial
+            );
+            leftWall.position.set(-40, wallHeight/2, 0);
+            leftWall.rotation.y = Math.PI/2;
+            scene.add(leftWall);
+            
+            const rightWall = new THREE.Mesh(
+                new THREE.PlaneGeometry(50, wallHeight),
+                wallMaterial
+            );
+            rightWall.position.set(40, wallHeight/2, 0);
+            rightWall.rotation.y = -Math.PI/2;
+            scene.add(rightWall);
+        }
+        
+        function createProductionLineInfrastructure() {
+            for (let i = 0; i < 3; i++) {
+                const lineZ = (i - 1) * 8;
+                
+                // Production line base
+                const lineBase = new THREE.Mesh(
+                    new THREE.BoxGeometry(35, 0.3, 5),
+                    new THREE.MeshLambertMaterial({ color: 0x555555 })
+                );
+                lineBase.position.set(0, 0.15, lineZ);
+                lineBase.receiveShadow = true;
+                scene.add(lineBase);
+                
+                // Line identification pillars
+                const pillarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4);
+                const pillarMaterial = new THREE.MeshLambertMaterial({ color: 0x00e676 });
+                
+                const leftPillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                leftPillar.position.set(-20, 2, lineZ);
+                leftPillar.castShadow = true;
+                scene.add(leftPillar);
+                
+                const rightPillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+                rightPillar.position.set(20, 2, lineZ);
+                rightPillar.castShadow = true;
+                scene.add(rightPillar);
+                
+                // Line number displays
+                createLineNumberDisplay(i + 1, lineZ);
+            }
+        }
+        
+        function createLineNumberDisplay(lineNumber, lineZ) {
+            // Simple text representation using basic geometry
+            const textGeometry = new THREE.BoxGeometry(2, 1, 0.1);
+            const textMaterial = new THREE.MeshBasicMaterial({ color: 0x00e676 });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh.position.set(-25, 3, lineZ);
+            scene.add(textMesh);
+        }
+        
+        function createEnhancedMachines() {
+            MACHINE_TWINS.forEach(machineData => {
+                const machine = createPremiumMachine(machineData);
+                scene.add(machine);
+                machines.push({ 
+                    mesh: machine, 
+                    data: machineData,
+                    lastUpdate: Date.now(),
+                    alertLevel: 'operational' // operational, warning, critical
+                });
+            });
+        }
+        
+        function createPremiumMachine(data) {
+            const group = new THREE.Group();
+            
+            // Machine body based on type with enhanced materials
+            let bodyGeometry, bodyMaterial, accentGeometry, accentMaterial;
+            
+            switch (data.type) {
+                case 'CNC':
+                    bodyGeometry = new THREE.BoxGeometry(4, 3, 4);
+                    bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
+                    accentGeometry = new THREE.BoxGeometry(4.2, 0.2, 4.2);
+                    accentMaterial = new THREE.MeshBasicMaterial({ color: 0x00e676 });
+                    break;
+                case 'ROBOT':
+                    bodyGeometry = new THREE.CylinderGeometry(2, 2, 4);
+                    bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x1565c0 });
+                    accentGeometry = new THREE.CylinderGeometry(2.2, 2.2, 0.2);
+                    accentMaterial = new THREE.MeshBasicMaterial({ color: 0x00bcd4 });
+                    // Add robot arm
+                    const armGeometry = new THREE.BoxGeometry(3, 0.5, 0.5);
+                    const armMaterial = new THREE.MeshLambertMaterial({ color: 0x1976d2 });
+                    const arm = new THREE.Mesh(armGeometry, armMaterial);
+                    arm.position.set(1.5, 2, 0);
+                    group.add(arm);
+                    break;
+                case 'CONV':
+                    bodyGeometry = new THREE.BoxGeometry(5, 1.2, 2.5);
+                    bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xef6c00 });
+                    accentGeometry = new THREE.BoxGeometry(5.2, 0.1, 2.7);
+                    accentMaterial = new THREE.MeshBasicMaterial({ color: 0xff6d00 });
+                    break;
+            }
+            
+            const machineBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            machineBody.position.y = data.type === 'CONV' ? 0.6 : 1.5;
+            machineBody.castShadow = true;
+            machineBody.receiveShadow = true;
+            group.add(machineBody);
+            
+            // Accent base
+            const accentBase = new THREE.Mesh(accentGeometry, accentMaterial);
+            accentBase.position.y = 0.1;
+            group.add(accentBase);
+            
+            // Status indicator (enhanced)
+            const indicatorGroup = new THREE.Group();
+            const indicatorGeometry = new THREE.SphereGeometry(0.4);
+            const indicatorMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00e676,
+                transparent: true,
+                opacity: 0.8
+            });
+            const indicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+            indicator.position.y = data.type === 'CONV' ? 1.5 : 3.5;
+            
+            // Add pulsing ring around indicator
+            const ringGeometry = new THREE.RingGeometry(0.5, 0.6, 16);
+            const ringMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00e676,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+            ring.position.y = indicator.position.y;
+            ring.rotation.x = -Math.PI / 2;
+            
+            indicatorGroup.add(indicator);
+            indicatorGroup.add(ring);
+            group.add(indicatorGroup);
+            
+            // Machine ID label (simplified representation)
+            const labelGeometry = new THREE.PlaneGeometry(3, 0.8);
+            const labelMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000,
+                transparent: true,
+                opacity: 0.7
+            });
+            const label = new THREE.Mesh(labelGeometry, labelMaterial);
+            label.position.set(0, data.type === 'CONV' ? 2 : 4, 2.5);
+            label.rotation.x = -0.3;
+            group.add(label);
+            
+            // Position the group
+            group.position.set(data.position[0], data.position[1], data.position[2]);
+            group.userData = {
+                ...data,
+                indicator: indicator,
+                ring: ring,
+                body: machineBody,
+                status: 'operational',
+                temperature: 65 + Math.random() * 15,
+                pressure: 20 + Math.random() * 10,
+                vibration: 0.1 + Math.random() * 0.5,
+                speed: 1800 + Math.random() * 400,
+                power: 2000 + Math.random() * 600
+            };
+            
+            return group;
+        }
+        
+        function setupEnhancedMouseInteraction() {
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            const tooltip = document.getElementById('enhancedTooltip');
+            
+            function onMouseMove(event) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(machines.map(m => m.mesh), true);
+                
+                if (intersects.length > 0) {
+                    const machineData = intersects[0].object.parent.userData;
+                    showEnhancedTooltip(machineData, event.clientX, event.clientY);
+                    document.body.style.cursor = 'pointer';
+                } else {
+                    hideEnhancedTooltip();
+                    document.body.style.cursor = 'default';
+                }
+            }
+            
+            function onMouseClick(event) {
+                if (event.target.closest('.control-panel') || event.target.closest('.alerts-panel') || event.target.closest('.control-bar')) {
+                    return;
+                }
+                
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(machines.map(m => m.mesh), true);
+                
+                if (intersects.length > 0) {
+                    selectMachine(intersects[0].object.parent.userData);
+                }
+            }
+            
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('click', onMouseClick);
+        }
+        
+        function showEnhancedTooltip(machineData, x, y) {
+            const tooltip = document.getElementById('enhancedTooltip');
+            tooltip.innerHTML = `
+                <div class="tooltip-header">${machineData.id}</div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Status:</span>
+                    <span class="tooltip-value">${machineData.status || 'Operational'}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Temperature:</span>
+                    <span class="tooltip-value">${machineData.temperature?.toFixed(1)}°C</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Pressure:</span>
+                    <span class="tooltip-value">${machineData.pressure?.toFixed(1)} PSI</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Vibration:</span>
+                    <span class="tooltip-value">${machineData.vibration?.toFixed(2)}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Speed:</span>
+                    <span class="tooltip-value">${machineData.speed?.toFixed(0)} RPM</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Power:</span>
+                    <span class="tooltip-value">${machineData.power?.toFixed(0)}W</span>
+                </div>
+            `;
+            
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+            tooltip.style.opacity = '1';
+        }
+        
+        function hideEnhancedTooltip() {
+            const tooltip = document.getElementById('enhancedTooltip');
+            tooltip.style.opacity = '0';
+        }
+        
+        function selectMachine(machineData) {
+            // Update selection
+            machines.forEach(({ mesh }) => {
+                mesh.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissive.setHex(0x000000);
+                    }
+                });
+            });
+            
+            selectedMachine = machineData;
+            
+            // Highlight selected machine
+            const selectedMesh = machines.find(m => m.data.id === machineData.id)?.mesh;
+            if (selectedMesh) {
+                selectedMesh.children.forEach(child => {
+                    if (child.material && child.material.emissive) {
+                        child.material.emissive.setHex(0x00e676);
+                    }
+                });
+            }
+            
+            // Focus camera
+            animateCameraToMachine(machineData);
+            
+            // Update UI selection
+            updateMachineSelection(machineData.id);
+        }
+        
+        function animateCameraToMachine(machineData) {
+            const targetPosition = new THREE.Vector3(
+                machineData.position[0] + 10,
+                8,
+                machineData.position[2] + 10
+            );
+            
+            const targetLookAt = new THREE.Vector3(
+                machineData.position[0],
+                1,
+                machineData.position[2]
+            );
+            
+            // Smooth camera animation
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const startTime = Date.now();
+            const duration = 2000;
+            
+            function updateCamera() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                
+                camera.position.lerpVectors(startPosition, targetPosition, eased);
+                controls.target.lerpVectors(startTarget, targetLookAt, eased);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCamera);
+                }
+            }
+            updateCamera();
+        }
+        
+        async function startRealTimeDataConnection() {
+            console.log('🔗 Connecting to Azure Digital Twins...');
+            
+            // Fetch real-time data from Azure Digital Twins every 5 seconds
+            setInterval(async () => {
+                try {
+                    await fetchDigitalTwinsData();
+                    updateMachineVisuals();
+                } catch (error) {
+                    console.warn('⚠️ API connection failed, using cached data:', error.message);
+                    // Fallback to cached data if API fails
+                }
+            }, 5000);
+            
+            // Initial fetch
+            await fetchDigitalTwinsData();
+        }
+        
+        async function fetchDigitalTwinsData() {
+            const promises = MACHINE_TWINS.map(async (machine) => {
+                try {
+                    // Use Function App as proxy to Digital Twins (bypasses CORS)
+                    const response = await fetch(`${AZURE_CONFIG.functionAppEndpoint}/api/getTwinData/${machine.id}`);
+                    
+                    if (response.ok) {
+                        const twinData = await response.json();
+                        realTimeData[machine.id] = {
+                            temperature: twinData.temperature || 65,
+                            pressure: twinData.pressure || 20,
+                            vibration: twinData.vibration || 0.3,
+                            speed: twinData.speed || 1900,
+                            power: twinData.power || 2000,
+                            status: twinData.status || 'operational',
+                            lastUpdate: twinData.lastUpdateTime || new Date().toISOString(),
+                            efficiency: twinData.efficiency || 90
+                        };
+                    } else {
+                        // Fallback data if API call fails
+                        if (!realTimeData[machine.id]) {
+                            realTimeData[machine.id] = {
+                                temperature: 60 + Math.random() * 25,
+                                pressure: 15 + Math.random() * 15,
+                                vibration: 0.1 + Math.random() * 0.6,
+                                speed: 1700 + Math.random() * 500,
+                                power: 1800 + Math.random() * 800,
+                                status: 'offline',
+                                lastUpdate: new Date().toISOString(),
+                                efficiency: 0
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Failed to fetch data for ${machine.id}:`, error);
+                }
+            });
+            
+            await Promise.all(promises);
+        }
+        
+        function updateMachineVisuals() {
+            machines.forEach(({ mesh, data }) => {
+                const telemetry = realTimeData[data.id];
+                if (!telemetry) return;
+                
+                // Update machine status colors
+                const indicator = mesh.userData.indicator;
+                const ring = mesh.userData.ring;
+                
+                let statusColor = 0x00e676; // Green
+                if (telemetry.status === 'warning') statusColor = 0xff6d00; // Orange
+                if (telemetry.status === 'maintenance' || telemetry.status === 'critical') statusColor = 0xff1744; // Red
+                if (telemetry.temperature > 80) statusColor = 0xff1744; // Critical temperature
+                
+                indicator.material.color.setHex(statusColor);
+                ring.material.color.setHex(statusColor);
+                
+                // Update userData
+                Object.assign(mesh.userData, telemetry);
+                
+                // Visual effects for critical states
+                if (telemetry.temperature > 80 || telemetry.status === 'critical') {
+                    indicator.material.emissive.setHex(0xff0000);
+                    ring.material.opacity = 0.6;
+                } else {
+                    indicator.material.emissive.setHex(0x000000);
+                    ring.material.opacity = 0.3;
+                }
+            });
+        }
+        
+        function initMachineStatusPanel() {
+            updateMachineStatusPanel();
+            setInterval(updateMachineStatusPanel, 2000);
+        }
+        
+        function updateMachineStatusPanel() {
+            const machineGrid = document.getElementById('machineGrid');
+            machineGrid.innerHTML = '';
+            
+            MACHINE_TWINS.forEach(machine => {
+                const telemetry = realTimeData[machine.id] || {};
+                const status = telemetry.status || 'operational';
+                
+                const machineCard = document.createElement('div');
+                machineCard.className = `machine-card ${status}`;
+                machineCard.onclick = () => selectMachine(machine);
+                
+                machineCard.innerHTML = `
+                    <div class="machine-header">
+                        <div class="machine-id">${machine.id}</div>
+                        <div class="machine-status-badge status-${status}">${status}</div>
+                    </div>
+                    <div class="machine-telemetry">
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Temp:</span>
+                            <span class="telemetry-value">${(telemetry.temperature || 65).toFixed(1)}°C</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Press:</span>
+                            <span class="telemetry-value">${(telemetry.pressure || 20).toFixed(1)} PSI</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Speed:</span>
+                            <span class="telemetry-value">${(telemetry.speed || 1900).toFixed(0)} RPM</span>
+                        </div>
+                        <div class="telemetry-item">
+                            <span class="telemetry-label">Power:</span>
+                            <span class="telemetry-value">${(telemetry.power || 2000).toFixed(0)}W</span>
+                        </div>
+                    </div>
+                `;
+                
+                machineGrid.appendChild(machineCard);
+            });
+        }
+        
+        function updateMachineSelection(machineId) {
+            document.querySelectorAll('.machine-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            const selectedCard = Array.from(document.querySelectorAll('.machine-card'))
+                .find(card => card.querySelector('.machine-id').textContent === machineId);
+            
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+        
+        function setFactoryView(view) {
+            // Update active button
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            let targetPosition, targetLookAt;
+            switch (view) {
+                case 'overview':
+                    targetPosition = new THREE.Vector3(30, 20, 30);
+                    targetLookAt = new THREE.Vector3(0, 0, 0);
+                    break;
+                case 'line1':
+                    targetPosition = new THREE.Vector3(0, 12, -15);
+                    targetLookAt = new THREE.Vector3(0, 0, -8);
+                    break;
+                case 'line2':
+                    targetPosition = new THREE.Vector3(0, 12, -8);
+                    targetLookAt = new THREE.Vector3(0, 0, 0);
+                    break;
+                case 'line3':
+                    targetPosition = new THREE.Vector3(0, 12, 15);
+                    targetLookAt = new THREE.Vector3(0, 0, 8);
+                    break;
+            }
+            
+            // Smooth camera transition
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const startTime = Date.now();
+            const duration = 2000;
+            
+            function updateCamera() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                
+                camera.position.lerpVectors(startPosition, targetPosition, eased);
+                controls.target.lerpVectors(startTarget, targetLookAt, eased);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCamera);
+                }
+            }
+            updateCamera();
+        }
+        
+        function toggleMaintenanceMode() {
+            maintenanceMode = !maintenanceMode;
+            const btn = event.target;
+            
+            if (maintenanceMode) {
+                btn.textContent = '🏭 Production Mode';
+                btn.style.background = 'linear-gradient(45deg, #ff6d00, #ff1744)';
+                
+                // Highlight maintenance-needed machines
+                machines.forEach(({ mesh, data }) => {
+                    const telemetry = realTimeData[data.id] || {};
+                    if (telemetry.status === 'maintenance' || telemetry.status === 'warning' || telemetry.temperature > 75) {
+                        const indicator = mesh.userData.indicator;
+                        const ring = mesh.userData.ring;
+                        indicator.material.emissive.setHex(0xff6d00);
+                        ring.material.opacity = 0.8;
+                    }
+                });
+            } else {
+                btn.textContent = '🔧 Maintenance Mode';
+                btn.style.background = 'linear-gradient(45deg, rgba(0,230,118,0.2), rgba(0,188,212,0.2))';
+                
+                // Reset highlighting
+                machines.forEach(({ mesh }) => {
+                    const indicator = mesh.userData.indicator;
+                    const ring = mesh.userData.ring;
+                    indicator.material.emissive.setHex(0x000000);
+                    ring.material.opacity = 0.3;
+                });
+            }
+        }
+        
+        function updateDashboard() {
+            // Update KPIs with realistic variations
+            const oee = 92 + Math.random() * 6;
+            const production = 2800 + Math.floor(Math.random() * 100);
+            const quality = 97.5 + Math.random() * 2;
+            const availability = 94 + Math.random() * 4;
+            
+            document.getElementById('oeeValue').textContent = oee.toFixed(1) + '%';
+            document.getElementById('productionValue').textContent = production.toLocaleString();
+            document.getElementById('qualityValue').textContent = quality.toFixed(1) + '%';
+            document.getElementById('availabilityValue').textContent = availability.toFixed(1) + '%';
+            
+            // Update last update timestamp
+            document.getElementById('lastUpdate').innerHTML = `<span>Last Update: ${new Date().toLocaleTimeString()}</span>`;
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animate status indicators
+            const time = Date.now() * 0.001;
+            machines.forEach(({ mesh }) => {
+                const ring = mesh.userData.ring;
+                if (ring) {
+                    ring.rotation.z += 0.01;
+                    ring.material.opacity = 0.3 + Math.sin(time * 2) * 0.2;
+                }
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Send command to Digital Twin
+        async function sendTwinCommand(machineId, command, parameters = {}) {
+            try {
+                const response = await fetch(`${AZURE_CONFIG.functionAppEndpoint}/api/sendTwinCommand`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        twinId: machineId,
+                        command: command,
+                        parameters: parameters
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log(`✅ Command '${command}' sent to ${machineId}`);
+                    // Update UI to show command was sent
+                    showCommandFeedback(`Command sent to ${machineId}`, 'success');
+                } else {
+                    console.error(`❌ Failed to send command to ${machineId}`);
+                    showCommandFeedback(`Failed to send command`, 'error');
+                }
+            } catch (error) {
+                console.error('Command error:', error);
+                showCommandFeedback(`Connection error`, 'error');
+            }
+        }
+        
+        function showCommandFeedback(message, type) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? '#4caf50' : '#f44336'};
+                color: white;
+                border-radius: 8px;
+                z-index: 2000;
+                font-weight: bold;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            `;
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+            }, 3000);
+        }
+        
+        // Initialize dashboard
+        initDashboard();
+    </script>
+</body>
+</html>
