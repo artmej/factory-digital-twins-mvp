@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-12-07T00:00:00.000Z" agent="Factory Digital Twins MVP" etag="factory-dt-architecture" version="22.1.11">
+  <diagram name="Factory Digital Twins Architecture" id="factory-dt-arch">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Factory Digital Twins MVP Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="369" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Physical Layer -->
+        <mxCell id="physical-layer" value="Physical Factory" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="260" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="factory-physical" value="🏭 Factory" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="physical-layer">
+          <mxGeometry x="20" y="30" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="line-physical" value="📈 Production Line" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="physical-layer">
+          <mxGeometry x="140" y="30" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="machine-physical" value="⚙️ Machine" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="physical-layer">
+          <mxGeometry x="20" y="90" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="sensors-physical" value="📡 IoT Sensors" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="physical-layer">
+          <mxGeometry x="140" y="90" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Edge Computing Layer -->
+        <mxCell id="edge-layer" value="Edge Computing (Optional)" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="50" y="290" width="260" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="iot-edge" value="🔧 IoT Edge Runtime" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffc659;strokeColor=#d79b00;" vertex="1" parent="edge-layer">
+          <mxGeometry x="20" y="30" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="edge-simulator" value="📱 Simulator Module" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffc659;strokeColor=#d79b00;" vertex="1" parent="edge-layer">
+          <mxGeometry x="140" y="30" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Cloud Ingestion -->
+        <mxCell id="cloud-ingestion" value="Azure IoT Platform" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="380" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="iot-hub" value="☁️ IoT Hub&#xa;(Message Ingestion)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#b3d9ff;strokeColor=#0066cc;" vertex="1" parent="cloud-ingestion">
+          <mxGeometry x="20" y="30" width="160" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="event-hub-endpoint" value="📨 Event Hub Endpoint&#xa;(Built-in)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#b3d9ff;strokeColor=#0066cc;" vertex="1" parent="cloud-ingestion">
+          <mxGeometry x="20" y="100" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Processing Layer -->
+        <mxCell id="processing-layer" value="Event Processing" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="650" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="azure-function" value="⚡ Azure Function&#xa;(ADT Projection)&#xa;&#xa;• Update Properties&#xa;• Publish Telemetry" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d4b3db;strokeColor=#9673a6;align=center;" vertex="1" parent="processing-layer">
+          <mxGeometry x="20" y="30" width="160" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Digital Twin Layer -->
+        <mxCell id="digital-twin-layer" value="Azure Digital Twins" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="380" y="290" width="470" height="240" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="dtdl-models" value="📋 DTDL Models&#xa;&#xa;• Factory Interface&#xa;• Line Interface&#xa;• Machine Interface&#xa;• Sensor Interface" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffb3b3;strokeColor=#b85450;" vertex="1" parent="digital-twin-layer">
+          <mxGeometry x="20" y="30" width="140" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="twin-instances" value="🔗 Digital Twins&#xa;&#xa;Factory1 ➤ LineA ➤ MachineA ➤ SensorA&#xa;&#xa;Properties: health, state, oee&#xa;Telemetry: temp, throughput, value" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffb3b3;strokeColor=#b85450;" vertex="1" parent="digital-twin-layer">
+          <mxGeometry x="180" y="30" width="270" height="100" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="twin-graph" value="🌐 Twin Graph &amp; Query Engine&#xa;&#xa;SELECT * FROM digitaltwins T&#xa;WHERE T.$dtId = 'lineA'&#xa;AND T.oee > 0.8" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffb3b3;strokeColor=#b85450;fontFamily=Courier New;" vertex="1" parent="digital-twin-layer">
+          <mxGeometry x="20" y="150" width="430" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Visualization Layer -->
+        <mxCell id="visualization-layer" value="Visualization &amp; Analytics" style="swimlane;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="900" y="80" width="220" height="450" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="adt-explorer" value="🔍 ADT Explorer&#xa;&#xa;• Model Viewer&#xa;• Twin Graph&#xa;• Live Updates" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#b3ff99;strokeColor=#82b366;" vertex="1" parent="visualization-layer">
+          <mxGeometry x="20" y="30" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="adx" value="📊 Azure Data Explorer&#xa;(Optional)&#xa;&#xa;• Historical Data&#xa;• Time Series Analysis" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#b3ff99;strokeColor=#82b366;" vertex="1" parent="visualization-layer">
+          <mxGeometry x="20" y="130" width="180" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="powerbi" value="📈 Power BI / Fabric&#xa;(Optional)&#xa;&#xa;• Dashboards&#xa;• Reports&#xa;• KPIs" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#b3ff99;strokeColor=#82b366;" vertex="1" parent="visualization-layer">
+          <mxGeometry x="20" y="230" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Device Simulator -->
+        <mxCell id="device-simulator" value="💻 Device Simulator&#xa;&#xa;Node.js Application&#xa;Generates realistic telemetry:&#xa;• OEE: 0.85 ± 0.1&#xa;• Temperature: 75°C ± 10°C&#xa;• Throughput: 120 ± 20 units/min" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e6f3ff;strokeColor=#0066cc;" vertex="1" parent="1">
+          <mxGeometry x="380" y="560" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Data Flow Arrows -->
+        
+        <!-- Physical to IoT Hub -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0066cc;" edge="1" parent="1" source="sensors-physical" target="iot-hub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow1-label" value="📡 IoT Telemetry" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#0066cc;" vertex="1" connectable="0" parent="arrow1">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Edge to IoT Hub -->
+        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1" source="edge-simulator" target="iot-hub">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="350" />
+              <mxPoint x="350" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow2-label" value="🔧 Edge Messages" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#d79b00;" vertex="1" connectable="0" parent="arrow2">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Simulator to IoT Hub -->
+        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0066cc;" edge="1" parent="1" source="device-simulator" target="iot-hub">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="540" />
+              <mxPoint x="480" y="280" />
+              <mxPoint x="460" y="280" />
+              <mxPoint x="460" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow3-label" value="📱 Simulated Data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#0066cc;" vertex="1" connectable="0" parent="arrow3">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- IoT Hub to Event Hub -->
+        <mxCell id="arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0066cc;" edge="1" parent="1" source="iot-hub" target="event-hub-endpoint">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow4-label" value="📨 Event Stream" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#0066cc;" vertex="1" connectable="0" parent="arrow4">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Event Hub to Function -->
+        <mxCell id="arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="event-hub-endpoint" target="azure-function">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow5-label" value="⚡ Event Trigger" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#9673a6;" vertex="1" connectable="0" parent="arrow5">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Function to Digital Twins -->
+        <mxCell id="arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#b85450;" edge="1" parent="1" source="azure-function" target="twin-instances">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="270" />
+              <mxPoint x="600" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow6-label" value="🔄 Update Properties&#xa;📊 Publish Telemetry" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#b85450;" vertex="1" connectable="0" parent="arrow6">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Digital Twins to Visualization -->
+        <mxCell id="arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="twin-instances" target="adt-explorer">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="370" />
+              <mxPoint x="870" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow7-label" value="🔍 Real-time Queries" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#82b366;" vertex="1" connectable="0" parent="arrow7">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Digital Twins to Analytics -->
+        <mxCell id="arrow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;dashed=1;" edge="1" parent="1" source="twin-instances" target="adx">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="370" />
+              <mxPoint x="870" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow8-label" value="📊 Historical Data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#82b366;" vertex="1" connectable="0" parent="arrow8">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ADX to Power BI -->
+        <mxCell id="arrow9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;strokeColor=#82b366;dashed=1;" edge="1" parent="1" source="adx" target="powerbi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow9-label" value="📈 Dashboards" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#82b366;" vertex="1" connectable="0" parent="arrow9">
+          <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="📋 LEGEND" style="swimlane;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;fillColor=#f0f0f0;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="50" y="560" width="280" height="120" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-solid" value="━━━ Real-time Data Flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="25" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-dashed" value="┅┅┅ Optional Components" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="45" width="150" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-colors" value="🟦 Azure Services  🟨 Physical Assets&#xa;🟧 Edge Computing  🟪 Processing&#xa;🟥 Digital Twins  🟩 Visualization" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=10;" vertex="1" parent="legend">
+          <mxGeometry x="10" y="65" width="260" height="40" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

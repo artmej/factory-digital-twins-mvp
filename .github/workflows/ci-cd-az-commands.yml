@@ -1,0 +1,163 @@
+# GitHub Actions con comandos AZ para VNet
+# Versión optimizada que evita los tasks problemáticos
+
+name: Factory Digital Twins - AZ Commands VNet Compatible
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: factory-rg-dev
+  FUNCTION_APP_NAME: factory-function-dev
+  STORAGE_ACCOUNT: factorystoragedev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Build Function App
+      run: |
+        cd src/function-adt-projection
+        npm ci
+        echo "Function app built successfully"
+    
+    - name: Create deployment package
+      run: |
+        cd src/function-adt-projection
+        zip -r ../../function-app.zip . -x "node_modules/@types/*" "*.log" "local.settings.json"
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: function-app
+        path: function-app.zip
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: function-app
+    
+    - name: Azure Login (OIDC)
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Deploy Infrastructure
+      run: |
+        echo "🚀 Deploying infrastructure..."
+        az deployment group create \
+          --resource-group $RESOURCE_GROUP \
+          --template-file infra/bicep/main.bicep \
+          --parameters environment=dev \
+          --verbose
+
+    - name: Configure Managed Identity
+      run: |
+        echo "🔐 Configuring managed identity..."
+        
+        # Enable managed identity if not exists
+        az functionapp identity assign \
+          --name $FUNCTION_APP_NAME \
+          --resource-group $RESOURCE_GROUP || true
+        
+        # Wait for identity propagation
+        sleep 30
+        
+        # Get principal ID
+        PRINCIPAL_ID=$(az functionapp identity show \
+          --name $FUNCTION_APP_NAME \
+          --resource-group $RESOURCE_GROUP \
+          --query principalId -o tsv)
+        
+        echo "Principal ID: $PRINCIPAL_ID"
+        
+        # Assign roles (using resource group scope for simplicity)
+        az role assignment create \
+          --assignee $PRINCIPAL_ID \
+          --role "Azure Digital Twins Data Owner" \
+          --resource-group $RESOURCE_GROUP || true
+          
+        az role assignment create \
+          --assignee $PRINCIPAL_ID \
+          --role "IoT Hub Data Contributor" \
+          --resource-group $RESOURCE_GROUP || true
+          
+        az role assignment create \
+          --assignee $PRINCIPAL_ID \
+          --role "Storage Blob Data Contributor" \
+          --resource-group $RESOURCE_GROUP || true
+
+    - name: Deploy Function App Code (VNet Compatible)
+      run: |
+        echo "📦 Deploying Function App using AZ commands (VNet compatible)..."
+        
+        # Method 1: Using az functionapp deployment source config-zip
+        # This uses ARM API which works with VNet!
+        az functionapp deployment source config-zip \
+          --name $FUNCTION_APP_NAME \
+          --resource-group $RESOURCE_GROUP \
+          --src function-app.zip \
+          --timeout 300
+          
+        echo "✅ Function App deployed successfully using AZ commands!"
+
+    - name: Validate Deployment
+      run: |
+        echo "🔍 Validating deployment..."
+        
+        # Check function app status
+        STATUS=$(az functionapp show \
+          --name $FUNCTION_APP_NAME \
+          --resource-group $RESOURCE_GROUP \
+          --query state -o tsv)
+        
+        echo "Function App Status: $STATUS"
+        
+        if [ "$STATUS" = "Running" ]; then
+          echo "✅ Function App is running"
+        else
+          echo "❌ Function App deployment failed"
+          exit 1
+        fi
+        
+        # Test endpoints
+        echo "📡 Testing Azure services..."
+        
+        # Digital Twins
+        DT_ENDPOINT=$(az dt show \
+          --dt-name factory-dt-dev \
+          --resource-group $RESOURCE_GROUP \
+          --query hostName -o tsv 2>/dev/null)
+        
+        [ ! -z "$DT_ENDPOINT" ] && echo "✅ Digital Twins: https://$DT_ENDPOINT" || echo "⚠️ Digital Twins not found"
+        
+        # IoT Hub
+        IOT_STATUS=$(az iot hub show \
+          --name factory-iothub-dev \
+          --resource-group $RESOURCE_GROUP \
+          --query properties.state -o tsv 2>/dev/null)
+        
+        [ "$IOT_STATUS" = "Active" ] && echo "✅ IoT Hub: Active" || echo "⚠️ IoT Hub: $IOT_STATUS"
+        
+        echo "🎉 Validation completed!"

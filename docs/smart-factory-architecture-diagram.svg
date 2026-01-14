@@ -1,0 +1,194 @@
+<!-- Smart Factory Digital Twins Architecture Diagram -->
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#0078d4">Smart Factory Digital Twins Architecture</text>
+  
+  <!-- Edge Zone -->
+  <rect x="50" y="80" width="300" height="280" rx="10" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
+  <text x="200" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0277bd">Edge Computing Zone</text>
+  
+  <!-- Factory Floor -->
+  <rect x="70" y="120" width="120" height="80" rx="5" fill="#4caf50" stroke="#2e7d32"/>
+  <text x="130" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Factory Floor</text>
+  <text x="130" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">IoT Sensors</text>
+  <text x="130" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">PLCs</text>
+  <text x="130" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">SCADA</text>
+  
+  <!-- K3s Cluster -->
+  <rect x="210" y="120" width="120" height="120" rx="5" fill="#ff9800" stroke="#e65100"/>
+  <text x="270" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">K3s Cluster</text>
+  <text x="270" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">MQTT Broker</text>
+  <text x="270" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">PostgreSQL</text>
+  <text x="270" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Grafana</text>
+  <text x="270" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">IoT Edge</text>
+  <text x="270" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Azure Arc</text>
+  
+  <!-- Edge Storage -->
+  <rect x="70" y="260" width="120" height="60" rx="5" fill="#9c27b0" stroke="#6a1b9a"/>
+  <text x="130" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Local Storage</text>
+  <text x="130" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Time Series DB</text>
+  <text x="130" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Cache</text>
+  
+  <!-- Azure Cloud Zone -->
+  <rect x="400" y="80" width="750" height="650" rx="10" fill="#e8f5e8" stroke="#2e7d32" stroke-width="2"/>
+  <text x="775" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2e7d32">Azure Cloud Services</text>
+  
+  <!-- IoT Hub -->
+  <rect x="420" y="140" width="140" height="60" rx="5" fill="#0078d4" stroke="#005a9e"/>
+  <text x="490" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Azure IoT Hub</text>
+  <text x="490" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Device Management</text>
+  <text x="490" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Event Routing</text>
+  
+  <!-- Digital Twins -->
+  <rect x="600" y="140" width="140" height="80" rx="5" fill="#6441a4" stroke="#4a2c8b"/>
+  <text x="670" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Digital Twins</text>
+  <text x="670" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Factory Model</text>
+  <text x="670" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Real-time Sync</text>
+  <text x="670" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Spatial Graph</text>
+  
+  <!-- Azure Functions -->
+  <rect x="780" y="140" width="140" height="60" rx="5" fill="#ff6f00" stroke="#e65100"/>
+  <text x="850" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Azure Functions</text>
+  <text x="850" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Event Processing</text>
+  <text x="850" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Business Logic</text>
+  
+  <!-- Machine Learning -->
+  <rect x="420" y="240" width="140" height="80" rx="5" fill="#e91e63" stroke="#ad1457"/>
+  <text x="490" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Azure ML</text>
+  <text x="490" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Predictive Models</text>
+  <text x="490" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Anomaly Detection</text>
+  <text x="490" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Quality Prediction</text>
+  
+  <!-- Cosmos DB -->
+  <rect x="600" y="240" width="140" height="60" rx="5" fill="#00796b" stroke="#004d40"/>
+  <text x="670" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Cosmos DB</text>
+  <text x="670" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Operational Data</text>
+  <text x="670" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">NoSQL Storage</text>
+  
+  <!-- Cognitive Services -->
+  <rect x="780" y="240" width="140" height="60" rx="5" fill="#673ab7" stroke="#512da8"/>
+  <text x="850" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Cognitive Services</text>
+  <text x="850" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">AI Copilot</text>
+  <text x="850" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Natural Language</text>
+  
+  <!-- Analytics & Dashboards -->
+  <rect x="420" y="360" width="500" height="120" rx="5" fill="#1976d2" stroke="#0d47a1"/>
+  <text x="670" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Analytics & Visualization Layer</text>
+  
+  <!-- Individual Dashboards -->
+  <rect x="440" y="400" width="110" height="60" rx="3" fill="#42a5f5" stroke="#1976d2"/>
+  <text x="495" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">3D Digital Twin</text>
+  <text x="495" y="435" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Dashboard</text>
+  <text x="495" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Real-time 3D View</text>
+  
+  <rect x="560" y="400" width="110" height="60" rx="3" fill="#42a5f5" stroke="#1976d2"/>
+  <text x="615" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Executive ROI</text>
+  <text x="615" y="435" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Dashboard</text>
+  <text x="615" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">KPIs & Analytics</text>
+  
+  <rect x="680" y="400" width="110" height="60" rx="3" fill="#42a5f5" stroke="#1976d2"/>
+  <text x="735" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Maintenance</text>
+  <text x="735" y="435" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Dashboard</text>
+  <text x="735" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Predictive Alerts</text>
+  
+  <rect x="800" y="400" width="110" height="60" rx="3" fill="#42a5f5" stroke="#1976d2"/>
+  <text x="855" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Mobile PWA</text>
+  <text x="855" y="435" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Technician App</text>
+  <text x="855" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">Field Operations</text>
+  
+  <!-- Security & Identity -->
+  <rect x="960" y="140" width="160" height="180" rx="5" fill="#795548" stroke="#5d4037"/>
+  <text x="1040" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Security & Identity</text>
+  
+  <rect x="980" y="180" width="120" height="40" rx="3" fill="#8d6e63" stroke="#5d4037"/>
+  <text x="1040" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Azure Active Directory</text>
+  <text x="1040" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">SSO & MFA</text>
+  
+  <rect x="980" y="230" width="120" height="40" rx="3" fill="#8d6e63" stroke="#5d4037"/>
+  <text x="1040" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Application Gateway</text>
+  <text x="1040" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">WAF & Load Balancer</text>
+  
+  <rect x="980" y="280" width="120" height="30" rx="3" fill="#8d6e63" stroke="#5d4037"/>
+  <text x="1040" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Key Vault</text>
+  
+  <!-- Smart Factory Copilot -->
+  <rect x="420" y="520" width="500" height="80" rx="5" fill="#388e3c" stroke="#2e7d32"/>
+  <text x="670" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Smart Factory AI Copilot</text>
+  <text x="670" y="565" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">"When is next maintenance on LINE-2?" | "Which line has highest efficiency?"</text>
+  <text x="670" y="580" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Natural Language Processing | Contextual AI Responses | Multi-language Support</text>
+  <text x="670" y="595" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Powered by Azure Cognitive Services & Azure OpenAI</text>
+  
+  <!-- Monitoring -->
+  <rect x="420" y="630" width="240" height="60" rx="5" fill="#607d8b" stroke="#455a64"/>
+  <text x="540" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">Azure Monitor</text>
+  <text x="540" y="665" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Application Insights</text>
+  <text x="540" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Log Analytics</text>
+  
+  <!-- DevOps -->
+  <rect x="680" y="630" width="240" height="60" rx="5" fill="#ff5722" stroke="#d84315"/>
+  <text x="800" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="white">GitHub Actions</text>
+  <text x="800" y="665" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">CI/CD Pipelines</text>
+  <text x="800" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">Infrastructure as Code</text>
+  
+  <!-- Data Flow Arrows -->
+  <!-- Edge to IoT Hub -->
+  <path d="M 350 170 L 400 170 L 420 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- IoT Hub to Digital Twins -->
+  <path d="M 560 170 L 600 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Digital Twins to Functions -->
+  <path d="M 740 170 L 780 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Functions to ML -->
+  <path d="M 820 200 L 520 240" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Digital Twins to Cosmos -->
+  <path d="M 670 220 L 670 240" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- All services to Analytics -->
+  <path d="M 490 300 L 490 360" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 670 300 L 670 360" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M 850 300 L 780 360" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Analytics to Copilot -->
+  <path d="M 670 480 L 670 520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Legend -->
+  <rect x="50" y="650" width="300" height="120" rx="5" fill="#fff" stroke="#ddd"/>
+  <text x="200" y="670" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Data Flow Legend</text>
+  
+  <circle cx="70" cy="690" r="5" fill="#4caf50"/>
+  <text x="85" y="695" font-family="Arial, sans-serif" font-size="10">Real-time Telemetry</text>
+  
+  <circle cx="70" cy="710" r="5" fill="#0078d4"/>
+  <text x="85" y="715" font-family="Arial, sans-serif" font-size="10">Cloud Processing</text>
+  
+  <circle cx="70" cy="730" r="5" fill="#6441a4"/>
+  <text x="85" y="735" font-family="Arial, sans-serif" font-size="10">Digital Twin Updates</text>
+  
+  <circle cx="70" cy="750" r="5" fill="#388e3c"/>
+  <text x="85" y="755" font-family="Arial, sans-serif" font-size="10">AI-Powered Insights</text>
+  
+  <circle cx="200" cy="690" r="5" fill="#e91e63"/>
+  <text x="215" y="695" font-family="Arial, sans-serif" font-size="10">ML Predictions</text>
+  
+  <circle cx="200" cy="710" r="5" fill="#1976d2"/>
+  <text x="215" y="715" font-family="Arial, sans-serif" font-size="10">Dashboard Visualization</text>
+  
+  <circle cx="200" cy="730" r="5" fill="#795548"/>
+  <text x="215" y="735" font-family="Arial, sans-serif" font-size="10">Security Layer</text>
+  
+  <circle cx="200" cy="750" r="5" fill="#607d8b"/>
+  <text x="215" y="755" font-family="Arial, sans-serif" font-size="10">Monitoring & Alerts</text>
+</svg>

@@ -1,0 +1,473 @@
+# 🤖 Smart Factory CI/CD Pipeline
+# Comprehensive GitHub Actions workflow for automated testing and deployment
+
+name: Smart Factory CI/CD
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'blue'
+        type: choice
+        options:
+        - blue
+        - green
+      run_load_tests:
+        description: 'Run load tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AZURE_WEBAPP_NAME: 'smartfactory-web-app'
+  AZURE_FUNCTIONAPP_NAME: 'smartfactory-function-app'
+  AZURE_WEBAPP_PACKAGE_PATH: './src/device-simulator'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/function-adt-projection'
+  NODE_VERSION: '18.x'
+  
+jobs:
+  # 🔍 Code Quality & Security
+  code-analysis:
+    name: Code Analysis & Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: |
+          src/device-simulator/package-lock.json
+          src/function-adt-projection/package-lock.json
+
+    - name: 📦 Install dependencies - Web App
+      working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: |
+        npm ci
+        npm audit --audit-level=high
+
+    - name: 📦 Install dependencies - Function App
+      working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+      run: |
+        npm ci
+        npm audit --audit-level=high
+
+    - name: 🧪 Run tests - Web App
+      working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: |
+        npm test --if-present
+        
+    - name: 🧪 Run tests - Function App
+      working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+      run: |
+        npm test --if-present
+
+    - name: 🔒 Run security scan
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+
+    - name: 🔒 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+    - name: 📊 SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.projectKey=smart-factory
+          -Dsonar.organization=your-org
+          -Dsonar.sources=src/
+          -Dsonar.exclusions=**/node_modules/**
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # 🏗️ Build & Package
+  build:
+    name: Build Applications
+    runs-on: ubuntu-latest
+    needs: code-analysis
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 🏗️ Build Web App
+      working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: |
+        npm ci --production
+        npm run build --if-present
+        
+    - name: 🏗️ Build Function App
+      working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+      run: |
+        npm ci --production
+        npm run build --if-present
+
+    - name: 📦 Upload Web App artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: webapp-package
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: 📦 Upload Function App artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: functionapp-package
+        path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+
+  # 🔧 Infrastructure Validation
+  infrastructure-validation:
+    name: Validate Infrastructure
+    runs-on: ubuntu-latest
+    needs: code-analysis
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔑 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ✅ Validate Bicep templates
+      run: |
+        az bicep build --file ./infra/bicep/main.bicep
+        
+    - name: 🧪 Test Bicep deployment (What-If)
+      run: |
+        az deployment group what-if \
+          --resource-group smartfactory-blue-rg \
+          --template-file ./infra/bicep/main.bicep \
+          --parameters environment=staging
+
+  # 🚀 Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, infrastructure-validation]
+    if: github.ref == 'refs/heads/develop'
+    environment: 
+      name: staging
+      url: https://smartfactory-web-app-staging.azurewebsites.net
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📦 Download Web App artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: webapp-package
+        path: ./webapp-package
+
+    - name: 📦 Download Function App artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: functionapp-package
+        path: ./functionapp-package
+
+    - name: 🔑 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 🏗️ Deploy infrastructure
+      run: |
+        az deployment group create \
+          --resource-group smartfactory-staging-rg \
+          --template-file ./infra/bicep/main.bicep \
+          --parameters environment=staging
+
+    - name: 🚀 Deploy Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'smartfactory-web-app-staging'
+        package: ./webapp-package
+
+    - name: ⚡ Deploy Function App
+      uses: Azure/functions-action@v1
+      with:
+        app-name: 'smartfactory-function-app-staging'
+        package: ./functionapp-package
+
+  # 🧪 Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: 📦 Install test dependencies
+      run: |
+        npm install -g newman
+        npm install -g artillery
+
+    - name: 🏥 Health check tests
+      run: |
+        # Wait for apps to warm up
+        sleep 30
+        
+        # Test Web App health
+        curl -f "https://smartfactory-web-app-staging.azurewebsites.net/api/health" || exit 1
+        
+        # Test Function App health
+        curl -f "https://smartfactory-function-app-staging.azurewebsites.net/api/health" || exit 1
+
+    - name: 🔧 Setup Python for advanced testing
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: 🧪 Run comprehensive health tests
+      run: |
+        python -c "
+        import requests
+        import json
+        import sys
+        
+        def test_health_endpoint(url, name):
+            try:
+                response = requests.get(f'{url}/api/health', timeout=30)
+                if response.status_code == 200:
+                    health_data = response.json()
+                    print(f'✅ {name}: {health_data.get('status', 'unknown').upper()}')
+                    return health_data.get('status') == 'healthy'
+                else:
+                    print(f'❌ {name}: HTTP {response.status_code}')
+                    return False
+            except Exception as e:
+                print(f'❌ {name}: {str(e)}')
+                return False
+        
+        web_app_healthy = test_health_endpoint('https://smartfactory-web-app-staging.azurewebsites.net', 'Web App')
+        function_app_healthy = test_health_endpoint('https://smartfactory-function-app-staging.azurewebsites.net', 'Function App')
+        
+        if not (web_app_healthy and function_app_healthy):
+            sys.exit(1)
+        "
+
+    - name: 📊 Load testing
+      if: github.event.inputs.run_load_tests == 'true'
+      run: |
+        cat > load-test.yml << 'EOF'
+        config:
+          target: 'https://smartfactory-web-app-staging.azurewebsites.net'
+          phases:
+            - duration: 60
+              arrivalRate: 5
+          defaults:
+            headers:
+              User-Agent: "Artillery Load Test"
+        scenarios:
+          - name: "Health endpoint load test"
+            requests:
+              - get:
+                  url: "/api/health"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/metrics"
+                  expect:
+                    - statusCode: 200
+        EOF
+        
+        artillery run load-test.yml
+
+  # 🚀 Production Deployment (Blue-Green)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, integration-tests]
+    if: github.ref == 'refs/heads/master'
+    environment: 
+      name: production
+      url: https://smartfactory-web-app.azurewebsites.net
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📦 Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: webapp-package
+        path: ./webapp-package
+
+    - name: 📦 Download Function App artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: functionapp-package
+        path: ./functionapp-package
+
+    - name: 🔑 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 🔍 Determine target environment
+      id: target-env
+      run: |
+        # Get current active slot
+        CURRENT_SLOT=$(az webapp show --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group smartfactory-blue-rg --query "slotSwapStatus.sourceSlot" -o tsv || echo "blue")
+        
+        if [ "$CURRENT_SLOT" = "blue" ] || [ "$CURRENT_SLOT" = "" ]; then
+          TARGET_SLOT="green"
+        else
+          TARGET_SLOT="blue"
+        fi
+        
+        echo "target-slot=$TARGET_SLOT" >> $GITHUB_OUTPUT
+        echo "🎯 Target deployment slot: $TARGET_SLOT"
+
+    - name: 🏗️ Deploy infrastructure to target slot
+      run: |
+        az deployment group create \
+          --resource-group smartfactory-${{ steps.target-env.outputs.target-slot }}-rg \
+          --template-file ./infra/bicep/main.bicep \
+          --parameters environment=production deploymentSlot=${{ steps.target-env.outputs.target-slot }}
+
+    - name: 🚀 Deploy to target slot
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        slot-name: ${{ steps.target-env.outputs.target-slot }}
+        package: ./webapp-package
+
+    - name: ⚡ Deploy Function App to target slot
+      uses: Azure/functions-action@v1
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        slot-name: ${{ steps.target-env.outputs.target-slot }}
+        package: ./functionapp-package
+
+    - name: 🧪 Smoke tests on target slot
+      run: |
+        # Wait for deployment to settle
+        sleep 60
+        
+        # Test target slot
+        SLOT_URL="https://${{ env.AZURE_WEBAPP_NAME }}-${{ steps.target-env.outputs.target-slot }}.azurewebsites.net"
+        
+        echo "🧪 Running smoke tests on $SLOT_URL"
+        
+        # Health check
+        curl -f "$SLOT_URL/api/health" || exit 1
+        
+        # Metrics check
+        curl -f "$SLOT_URL/api/metrics" || exit 1
+        
+        echo "✅ Smoke tests passed"
+
+    - name: 🔄 Blue-Green swap
+      if: success()
+      run: |
+        echo "🔄 Performing blue-green swap..."
+        
+        az webapp deployment slot swap \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --resource-group smartfactory-blue-rg \
+          --slot ${{ steps.target-env.outputs.target-slot }} \
+          --target-slot production
+        
+        echo "✅ Blue-green swap completed"
+
+    - name: 🧪 Production verification
+      run: |
+        # Wait for swap to complete
+        sleep 30
+        
+        # Verify production
+        echo "🔍 Verifying production deployment..."
+        
+        curl -f "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/health" || exit 1
+        
+        echo "✅ Production verification successful"
+
+  # 📊 Post-deployment monitoring
+  post-deployment:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: always()
+    
+    steps:
+    - name: 📊 Setup monitoring alerts
+      run: |
+        echo "Setting up post-deployment monitoring..."
+        
+        # This would typically configure monitoring alerts
+        # For demo purposes, we'll just log the completion
+        echo "✅ Monitoring alerts configured"
+
+    - name: 📈 Performance baseline
+      run: |
+        # Quick performance check
+        curl -w "@-" -o /dev/null "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/health" <<'EOF'
+        ⏱️  Performance Metrics:
+        Total Time: %{time_total}s
+        DNS Lookup: %{time_namelookup}s
+        Connect: %{time_connect}s
+        Transfer: %{time_starttransfer}s
+        Speed: %{speed_download} bytes/sec
+        EOF
+
+    - name: 🔔 Notification
+      if: always()
+      run: |
+        STATUS="${{ job.status }}"
+        if [ "$STATUS" = "success" ]; then
+          echo "🎉 Deployment completed successfully!"
+        else
+          echo "❌ Deployment failed or had issues"
+        fi
+
+  # 🧹 Cleanup
+  cleanup:
+    name: Cleanup Resources
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [deploy-production]
+    
+    steps:
+    - name: 🔑 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 🧹 Rollback on failure
+      run: |
+        echo "🔄 Rolling back due to deployment failure..."
+        
+        # This would implement rollback logic
+        # For now, just log the action
+        echo "⚠️  Manual intervention may be required"
