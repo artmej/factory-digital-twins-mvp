@@ -577,10 +577,12 @@
         // device telemetry data from these Azure services
         async function loadFactoryData() {
             try {
+                console.log('🔄 Starting to load factory data...');
                 showLoading(true);
                 
                 const promises = FACTORY_DEVICES.map(async (device) => {
                     try {
+                        console.log(`🔄 Loading data for ${device}...`);
                         // APIs should read real telemetry from Cosmos DB/Digital Twins
                         const [maintenance, quality] = await Promise.all([
                             fetchWithRetry(
@@ -590,6 +592,8 @@
                                 `${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${device}&real=true`
                             )
                         ]);
+
+                        console.log(`✅ Got data for ${device}:`, { maintenance: maintenance.confidence, quality: quality.qualityScore });
 
                         return {
                             deviceId: device,
@@ -610,16 +614,19 @@
                     }
                 });
 
+                console.log('⏳ Waiting for all device data...');
                 const results = await Promise.all(promises);
                 machineData = results.reduce((acc, result) => {
                     acc[result.deviceId] = result;
                     return acc;
                 }, {});
 
+                console.log('📊 Machine data loaded:', machineData);
                 renderMachines();
                 updateStatusBar();
                 generateAlerts();
                 showLoading(false);
+                console.log('✅ Factory data loaded successfully!');
 
             } catch (error) {
                 console.error('Failed to load factory data:', error);
@@ -749,11 +756,43 @@
         }
 
         function showLoading(show) {
-            // Loading states are handled by initial HTML content
+            const machinesGrid = document.getElementById('machinesGrid');
+            const alertsContainer = document.getElementById('alertsContainer');
+            
+            if (show) {
+                machinesGrid.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading factory data...</p>
+                    </div>
+                `;
+                alertsContainer.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading alerts...</p>
+                    </div>
+                `;
+            }
         }
 
         function showError(message) {
             console.error(message);
+            const machinesGrid = document.getElementById('machinesGrid');
+            const alertsContainer = document.getElementById('alertsContainer');
+            
+            machinesGrid.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #f44336;">
+                    ⚠️ Connection Error<br>
+                    <small style="opacity: 0.7;">${message}</small><br><br>
+                    <button class="refresh-btn" onclick="refreshData()">🔄 Retry</button>
+                </div>
+            `;
+            
+            alertsContainer.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #f44336;">
+                    ⚠️ Unable to load alerts
+                </div>
+            `;
         }
 
         // Navigation
