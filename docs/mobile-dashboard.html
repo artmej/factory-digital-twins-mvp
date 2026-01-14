@@ -405,16 +405,16 @@
         <!-- Quick Status -->
         <div class="status-bar" id="statusBar">
             <div class="status-chip good">
-                <div>9 Online</div>
-            </div>
-            <div class="status-chip warning">
-                <div>2 Alerts</div>
+                <div>Loading...</div>
             </div>
             <div class="status-chip good">
-                <div>87% Efficiency</div>
+                <div>Loading...</div>
             </div>
             <div class="status-chip good">
-                <div>94% Quality</div>
+                <div>Loading...</div>
+            </div>
+            <div class="status-chip good">
+                <div>Loading...</div>
             </div>
         </div>
 
@@ -571,18 +571,23 @@
         }
 
         // Load factory data
+        // NOTE: APIs should be reading real telemetry data from:
+        // IoT Hub -> Event Hub -> Logic Apps -> Cosmos DB + Digital Twins
+        // Rather than using URL parameters, the ML APIs should query the latest
+        // device telemetry data from these Azure services
         async function loadFactoryData() {
             try {
                 showLoading(true);
                 
                 const promises = FACTORY_DEVICES.map(async (device) => {
                     try {
+                        // APIs should read real telemetry from Cosmos DB/Digital Twins
                         const [maintenance, quality] = await Promise.all([
                             fetchWithRetry(
-                                `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                                `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true`
                             ),
                             fetchWithRetry(
-                                `${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
+                                `${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${device}&real=true`
                             )
                         ]);
 
@@ -591,8 +596,8 @@
                             name: DEVICE_NAMES[device],
                             maintenance,
                             quality,
-                            status: maintenance.confidence > 0.7 ? 'online' : 
-                                   maintenance.confidence > 0.5 ? 'warning' : 'offline'
+                            status: maintenance.confidence > 0.75 ? 'online' : 
+                                   maintenance.confidence > 0.60 ? 'warning' : 'offline'
                         };
                     } catch (error) {
                         return {
@@ -631,7 +636,7 @@
             let html = '';
             machines.forEach(machine => {
                 const confidencePercent = Math.round(machine.maintenance.confidence * 100);
-                const qualityScore = machine.quality.qualityScore || 50;
+                const qualityScore = Math.round(machine.quality.qualityScore) || 50;
                 
                 html += `
                     <div class="machine-card" onclick="showMachineDetails('${machine.deviceId}')">
@@ -648,6 +653,13 @@
                                 <div class="metric-value ${getStatusClass(qualityScore)}">${qualityScore}%</div>
                                 <div class="metric-label">Quality</div>
                             </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
                         </div>
                     </div>
                 `;
