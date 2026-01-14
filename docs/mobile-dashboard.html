@@ -2,404 +2,339 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏢 Smart Factory 3D - Digital Twins Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>📱 Smart Factory Mobile - Factory Monitoring</title>
     
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#00e676">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Smart Factory">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23667eea' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3E🏢%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%2300e676' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='black' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E">
     
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    
-    <!-- Microsoft Authentication Library (MSAL) -->
-    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
+    <!-- Microsoft Authentication Library -->
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f3460, #16213e);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            height: 100vh;
+            position: relative;
         }
 
-        .header {
+        /* Header - Mobile Optimized */
+        .mobile-header {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00e676;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 80px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            border-bottom: 2px solid #00ff88;
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-name {
-            background: rgba(0, 255, 136, 0.1);
-            padding: 8px 16px;
-            border-radius: 25px;
-            border: 1px solid #00ff88;
-        }
-
-        .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: #ff3742;
-            transform: translateY(-2px);
-        }
-
-        #canvas-container {
-            position: absolute;
-            top: 80px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .controls-panel {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #00ff88;
-            z-index: 500;
-            min-width: 250px;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-
-        .panel-title {
+        
+        .header-title {
+            color: #00e676;
             font-size: 18px;
             font-weight: bold;
-            margin-bottom: 15px;
-            color: #00ff88;
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00e676, #00d4aa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #000;
+        }
+
+        /* Main Container */
+        .mobile-container {
+            padding-top: 70px;
+            padding-bottom: 80px;
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Quick Status Bar */
+        .status-bar {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .status-chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 15px;
+            white-space: nowrap;
+            font-size: 12px;
+            min-width: 120px;
             text-align: center;
         }
 
-        .machine-item {
-            background: rgba(255, 255, 255, 0.1);
-            margin: 8px 0;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #00ff88;
+        .status-chip.good { 
+            border-color: #00e676; 
+            background: rgba(0, 230, 118, 0.2);
+        }
+        .status-chip.warning { 
+            border-color: #ff9800; 
+            background: rgba(255, 152, 0, 0.2);
+        }
+        .status-chip.critical { 
+            border-color: #f44336; 
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        /* Machine Cards - Touch Optimized */
+        .machines-section {
+            padding: 0 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        .refresh-btn {
+            background: rgba(0, 230, 118, 0.2);
+            border: 1px solid #00e676;
+            color: #00e676;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .machine-item:hover {
-            background: rgba(0, 255, 136, 0.2);
-            transform: translateX(5px);
+        .refresh-btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 230, 118, 0.3);
+        }
+
+        .machines-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .machine-card {
+            background: linear-gradient(145deg, rgba(0,0,0,0.8), rgba(26,35,126,0.3));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .machine-card:active {
+            transform: scale(0.98);
+            border-color: #00e676;
+        }
+
+        .machine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         .machine-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .machine-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .machine-status.online {
+            background: #00e676;
+            box-shadow: 0 0 10px #00e676;
+        }
+
+        .machine-status.warning {
+            background: #ff9800;
+            box-shadow: 0 0 10px #ff9800;
+        }
+
+        .machine-status.offline {
+            background: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .machine-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
             font-weight: bold;
             margin-bottom: 5px;
         }
 
-        .machine-status {
-            font-size: 12px;
+        .metric-value.good { color: #00e676; }
+        .metric-value.warning { color: #ff9800; }
+        .metric-value.critical { color: #f44336; }
+
+        .metric-label {
+            font-size: 11px;
             opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .status-running { color: #00ff88; }
-        .status-maintenance { color: #ffa502; }
-        .status-offline { color: #ff4757; }
+        /* Alerts Section */
+        .alerts-section {
+            margin: 20px 15px;
+        }
 
-        #loading {
+        .alert-card {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f44336;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .alert-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #f44336;
+        }
+
+        .alert-time {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .alert-description {
+            font-size: 12px;
+            line-height: 1.3;
+            opacity: 0.9;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
             position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            z-index: 9999;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            min-width: 60px;
+        }
+
+        .nav-item:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+        }
+
+        .nav-item.active {
+            color: #00e676;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: #ccc;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 255, 136, 0.3);
-            border-top: 5px solid #00ff88;
+            border: 3px solid rgba(0, 230, 118, 0.3);
+            border-left: 3px solid #00e676;
             border-radius: 50%;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -407,1501 +342,532 @@ async function fetchWithRetry(url, options = {}, retries = 3) {
             100% { transform: rotate(360deg); }
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .alert-panel {
-            position: fixed;
-            top: 100px;
-            left: 20px;
-            background: rgba(255, 71, 87, 0.9);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ff4757;
-            z-index: 500;
-            max-width: 300px;
-            display: none;
-        }
-
-        .machine-info-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 300px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #00ff88;
-            z-index: 500;
-            display: none;
-        }
-
-        .maintenance-panel {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            width: 320px;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid #ffa502;
-            z-index: 600;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .maintenance-header {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #ffa502;
-            text-align: center;
-            border-bottom: 1px solid #ffa502;
-            padding-bottom: 10px;
-        }
-
-        .maintenance-alert {
-            background: rgba(255, 165, 2, 0.2);
-            border: 1px solid #ffa502;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            animation: pulse-maintenance 2s infinite;
-        }
-
-        .maintenance-critical {
-            background: rgba(255, 71, 87, 0.3);
-            border-color: #ff4757;
-            animation: pulse-critical 1.5s infinite;
-        }
-
-        @keyframes pulse-maintenance {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        @keyframes pulse-critical {
-            0%, 100% { 
-                opacity: 1;
-                border-color: #ff4757;
-            }
-            50% { 
-                opacity: 0.8;
-                border-color: #ff6b7a;
-            }
-        }
-
-        .maintenance-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .maintenance-machine {
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .maintenance-time {
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            background: rgba(0, 230, 118, 0.9);
+            border-radius: 20px;
             font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .calendar-button {
-            background: linear-gradient(45deg, #ffa502, #ff6348);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
+            color: #000;
+            opacity: 0;
             transition: all 0.3s ease;
-            margin-top: 10px;
-            width: 100%;
-            text-align: center;
         }
 
-        .calendar-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 165, 2, 0.4);
+        .pull-to-refresh.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
         }
 
-        @media (max-width: 768px) {
-            .controls-panel {
-                top: 100px;
-                right: 10px;
-                left: 10px;
-                min-width: auto;
+        /* Responsive adjustments for larger phones */
+        @media (min-width: 414px) {
+            .machines-grid {
+                grid-template-columns: 1fr 1fr;
             }
+        }
 
-            .machine-info-panel {
-                bottom: 20px;
-                left: 10px;
-                right: 10px;
+        @media (min-width: 768px) {
+            .machines-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
+        }
 
-            .header {
-                padding: 0 15px;
+        /* Dark theme safe area for notched phones */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .mobile-header {
+                padding-top: calc(env(safe-area-inset-top) + 15px);
             }
-
-            .logo {
-                font-size: 18px;
+            
+            .mobile-container {
+                padding-top: calc(env(safe-area-inset-top) + 70px);
             }
-
-            .user-info {
-                gap: 10px;
+            
+            .bottom-nav {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
             }
         }
     </style>
 </head>
 <body>
-    <!-- 🔄 Loading Screen -->
-    <div id="loading">
-        <div style="text-align: center;">
-            <div class="spinner"></div>
-            <p style="margin-top: 20px; color: #00ff88; font-size: 18px;">🏭 Cargando Smart Factory 3D... v2.0</p>
+    <div class="mobile-header">
+        <div class="header-title">📱 Smart Factory Mobile</div>
+        <div class="user-avatar" id="userAvatar">🔒</div>
+    </div>
+
+    <div class="pull-to-refresh" id="pullToRefresh">
+        🔄 Pull to refresh
+    </div>
+
+    <div class="mobile-container">
+        <!-- Quick Status -->
+        <div class="status-bar" id="statusBar">
+            <div class="status-chip good">
+                <div>9 Online</div>
+            </div>
+            <div class="status-chip warning">
+                <div>2 Alerts</div>
+            </div>
+            <div class="status-chip good">
+                <div>87% Efficiency</div>
+            </div>
+            <div class="status-chip good">
+                <div>94% Quality</div>
+            </div>
+        </div>
+
+        <!-- Machines Section -->
+        <div class="machines-section">
+            <div class="section-header">
+                <div class="section-title">🏭 Production Lines</div>
+                <button class="refresh-btn" onclick="refreshData()">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <div class="machines-grid" id="machinesGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading factory data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="alerts-section">
+            <div class="section-header">
+                <div class="section-title">🚨 Active Alerts</div>
+            </div>
+            <div id="alertsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading alerts...</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 📱 Header -->
-    <header class="header">
-        <div class="logo">
-            <span style="margin-right: 10px;">🏭</span>
-            Smart Factory 3D Dashboard
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showSection('machines')">
+            <div class="nav-icon">🏭</div>
+            <div class="nav-label">Factory</div>
         </div>
-        <div class="user-info">
-            <span id="user-name" class="user-name">Loading...</span>
-            <button id="logout-btn" class="logout-btn" onclick="logout()">Logout</button>
+        <div class="nav-item" onclick="showSection('analytics')">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">Analytics</div>
         </div>
-    </header>
-
-    <!-- 🎮 3D Canvas Container -->
-    <div id="canvas-container"></div>
-
-    <!-- 🎛️ Controls Panel -->
-    <div class="controls-panel">
-        <div class="panel-title">�️ Machine Control Panel</div>
-        <div id="machine-list">
-            <!-- Machines will be populated dynamically -->
+        <div class="nav-item" onclick="showSection('alerts')">
+            <div class="nav-icon">🚨</div>
+            <div class="nav-label">Alerts</div>
         </div>
-    </div>
-
-    <!-- ⚠️ Alert Panel -->
-    <div id="alert-panel" class="alert-panel">
-        <strong>⚠️ System Alert</strong>
-        <p id="alert-message"></p>
-    </div>
-
-    <!-- 📊 Machine Info Panel -->
-    <div id="machine-info-panel" class="machine-info-panel">
-        <h3 id="machine-info-title">📊 Machine Information</h3>
-        <div id="machine-info-content"></div>
-    </div>
-
-    <!-- 🔧 Maintenance Panel -->
-    <div id="maintenance-panel" class="maintenance-panel">
-        <div class="maintenance-header">🔧 Maintenance Alerts</div>
-        <div id="maintenance-alerts">
-            <!-- Maintenance alerts will be populated dynamically -->
+        <div class="nav-item" onclick="showSection('settings')">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Settings</div>
         </div>
-        <a href="maintenance-calendar.html" target="_blank" class="calendar-button">
-            📅 View Full Calendar
-        </a>
     </div>
 
     <script>
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // 🔐 Microsoft Authentication Library Configuration
-        const msalConfig = {
-            auth: {
-                clientId: "982a060b-6968-4038-860c-68925782906d",
-                authority: "https://login.microsoftonline.com/fdpo.onmicrosoft.com",
-                redirectUri: "https://artmej.github.io/smart-factory-dashboard/login.html"
-            },
-            cache: {
-                cacheLocation: "sessionStorage",
-                storeAuthStateInCookie: false,
-            }
+        // Configuration
+        const AZURE_ML_CONFIG = {
+            endpoint: 'https://smartfactory-ml-api.azurewebsites.net'
         };
 
-        const myMSALObj = new msal.PublicClientApplication(msalConfig);
-
-        // 🚀 Initialize Dashboard - Simplified Logic with Debug
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏭 Initializing Smart Factory 3D Dashboard...');
-            
-            // Only check localStorage - no MSAL interaction
-            const authData = localStorage.getItem('smartfactory_auth');
-            console.log('📋 Auth data from localStorage:', authData);
-            
-            if (!authData) {
-                console.log('❌ No auth data found, redirecting to login...');
-                window.location.href = '/smart-factory-dashboard/login.html';
-                return;
-            }
-            
-            try {
-                const auth = JSON.parse(authData);
-                console.log('📊 Parsed auth object:', auth);
-                
-                const loginTime = new Date(auth.loginTime);
-                const now = new Date();
-                console.log('⏰ Login time:', loginTime, 'Current time:', now);
-                
-                // Check if auth is valid and recent (24 hours)
-                if (!auth.authenticated) {
-                    console.log('❌ Not authenticated, auth.authenticated:', auth.authenticated);
-                    localStorage.removeItem('smartfactory_auth');
-                    window.location.href = '/smart-factory-dashboard/login.html';
-                    return;
-                }
-                
-                if (!auth.user) {
-                    console.log('❌ No user field, auth.user:', auth.user);
-                    localStorage.removeItem('smartfactory_auth');
-                    window.location.href = '/smart-factory-dashboard/login.html';
-                    return;
-                }
-                
-                if (!auth.user.endsWith('@microsoft.com')) {
-                    console.log('❌ Invalid domain, auth.user:', auth.user);
-                    localStorage.removeItem('smartfactory_auth');
-                    window.location.href = '/smart-factory-dashboard/login.html';
-                    return;
-                }
-                
-                // Check if token is expired (24 hours)
-                const timeDiff = now - loginTime;
-                const hoursOld = timeDiff / (1000 * 60 * 60);
-                console.log('⏱️ Auth is', hoursOld.toFixed(2), 'hours old');
-                
-                if (timeDiff > 24 * 60 * 60 * 1000) {
-                    console.log('⏰ Auth expired, redirecting to login...');
-                    localStorage.removeItem('smartfactory_auth');
-                    window.location.href = '/smart-factory-dashboard/login.html';
-                    return;
-                }
-                
-                // Valid auth found - proceed with dashboard
-                console.log('✅ Valid authentication found:', auth.user);
-                document.getElementById('user-name').textContent = auth.user;
-                
-                // Initialize 3D Factory with error handling
-                try {
-                    console.log('🚀 Starting SmartFactory3D initialization...');
-                    window.factory3D = new SmartFactory3D();
-                    console.log('🎉 SmartFactory3D created successfully!');
-                    console.log('🎉 Dashboard initialized successfully!');
-                } catch (factory3dError) {
-                    console.error('❌ SmartFactory3D initialization error:', factory3dError);
-                    console.error('❌ Error stack:', factory3dError.stack);
-                    // Don't redirect on 3D error, just log it
-                    alert('Error initializing 3D factory: ' + factory3dError.message);
-                }
-                
-            } catch (error) {
-                console.error('❌ Error parsing auth data:', error);
-                console.error('❌ Error stack:', error.stack);
-                localStorage.removeItem('smartfactory_auth');
-                window.location.href = '/smart-factory-dashboard/login.html';
-            }
-        });
-
-        // 🚪 Logout function - Simplified
-        function logout() {
-            console.log('🚪 Logging out...');
-            localStorage.removeItem('smartfactory_auth');
-            window.location.href = '/smart-factory-dashboard/logout.html';
-        }
-
-        // 🔄 Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.factory3D && window.factory3D.handleWindowResize) {
-                window.factory3D.handleWindowResize();
-            }
-        });
-
-        // 📱 Mobile menu toggle
-        function toggleMobileMenu() {
-            const controlsPanel = document.querySelector('.controls-panel');
-            controlsPanel.classList.toggle('mobile-hidden');
-        }
-
-        // 🎯 Machine selection handler
-        function selectMachine(machineId) {
-            if (window.factory3D && window.factory3D.selectMachine) {
-                window.factory3D.selectMachine(machineId);
-            }
-        }
-
-        // 📊 Update machine status in UI
-        function updateMachineStatus(machineId, status, data) {
-            const machineElement = document.getElementById(`machine-${machineId}`);
-            if (machineElement) {
-                const statusElement = machineElement.querySelector('.machine-status');
-                const indicatorElement = machineElement.querySelector('.status-indicator');
-                
-                statusElement.textContent = `Status: ${status}`;
-                statusElement.className = `machine-status status-${status.toLowerCase()}`;
-                
-                if (indicatorElement) {
-                    indicatorElement.className = `status-indicator status-${status.toLowerCase()}`;
-                }
-            }
-        }
-
-        // 🚨 Show alert
-        function showAlert(message) {
-            const alertPanel = document.getElementById('alert-panel');
-            const alertMessage = document.getElementById('alert-message');
-            
-            alertMessage.textContent = message;
-            alertPanel.style.display = 'block';
-            
-            setTimeout(() => {
-                alertPanel.style.display = 'none';
-            }, 5000);
-        }
-
-        // 🔧 Maintenance prediction data
-        const maintenanceData = [
-            {
-                machineId: 'M001',
-                remainingHours: 18.5,
-                urgency: 'CRITICAL',
-                status: '🚨 URGENT MAINTENANCE REQUIRED'
-            },
-            {
-                machineId: 'M005',
-                remainingHours: 32.1,
-                urgency: 'WARNING',
-                status: '⚠️ CRITICAL MAINTENANCE NEEDED'
-            },
-            {
-                machineId: 'M012',
-                remainingHours: 41.7,
-                urgency: 'WARNING',
-                status: '🟡 SCHEDULE IN 1-2 DAYS'
-            },
-            {
-                machineId: 'M008',
-                remainingHours: 96.3,
-                urgency: 'PREVENTIVE',
-                status: '🟢 PREVENTIVE MAINTENANCE'
-            }
+        // Factory configuration
+        const FACTORY_DEVICES = [
+            'LINE_1_CNC_01', 'LINE_1_ROBOT_01', 'LINE_1_CONV_01',
+            'LINE_2_CNC_02', 'LINE_2_ROBOT_02', 'LINE_2_CONV_02', 
+            'LINE_3_CNC_03', 'LINE_3_ROBOT_03', 'LINE_3_CONV_03'
         ];
 
-        // 📅 Update maintenance alerts
-        function updateMaintenanceAlerts() {
-            const alertsContainer = document.getElementById('maintenance-alerts');
-            alertsContainer.innerHTML = '';
+        const DEVICE_NAMES = {
+            'LINE_1_CNC_01': 'Line 1 CNC',
+            'LINE_1_ROBOT_01': 'Line 1 Robot',
+            'LINE_1_CONV_01': 'Line 1 Conv',
+            'LINE_2_CNC_02': 'Line 2 CNC',
+            'LINE_2_ROBOT_02': 'Line 2 Robot',
+            'LINE_2_CONV_02': 'Line 2 Conv',
+            'LINE_3_CNC_03': 'Line 3 CNC',
+            'LINE_3_ROBOT_03': 'Line 3 Robot',
+            'LINE_3_CONV_03': 'Line 3 Conv'
+        };
 
-            // Filter critical and warning alerts
-            const urgentAlerts = maintenanceData.filter(m => 
-                m.urgency === 'CRITICAL' || m.urgency === 'WARNING'
-            );
-
-            if (urgentAlerts.length === 0) {
-                alertsContainer.innerHTML = '<div style="text-align: center; opacity: 0.7;">✅ No urgent alerts</div>';
-                return;
+        // Microsoft Authentication
+        const msalConfig = {
+            auth: {
+                clientId: "a0c73c16-a7e3-4564-9a95-2bdf47383716",
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin + window.location.pathname
+            },
+            cache: {
+                cacheLocation: "localStorage",
+                storeAuthStateInCookie: true
             }
+        };
 
-            urgentAlerts.forEach(alert => {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = alert.urgency === 'CRITICAL' ? 
-                    'maintenance-alert maintenance-critical' : 'maintenance-alert';
-                
-                const timeText = alert.remainingHours < 24 ? 
-                    `${alert.remainingHours.toFixed(1)} hours` :
-                    `${(alert.remainingHours / 24).toFixed(1)} days`;
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+        let currentUser = null;
+        let machineData = {};
 
-                alertDiv.innerHTML = `
-                    <div class="maintenance-item">
-                        <div class="maintenance-machine">${alert.machineId}</div>
-                        <div class="maintenance-time">${timeText}</div>
-                    </div>
-                    <div style="font-size: 12px; opacity: 0.9;">${alert.status}</div>
-                `;
-                
-                alertsContainer.appendChild(alertDiv);
-            });
-        }
-
-        // 🔄 Simulate real-time maintenance updates
-        function simulateMaintenanceUpdates() {
-            maintenanceData.forEach(machine => {
-                // Decrease remaining time slightly
-                machine.remainingHours -= Math.random() * 0.1;
-                
-                // Update urgency based on remaining time
-                if (machine.remainingHours <= 24) {
-                    machine.urgency = 'CRITICAL';
-                    machine.status = '🚨 MANTENIMIENTO URGENTE';
-                } else if (machine.remainingHours <= 48) {
-                    machine.urgency = 'WARNING';
-                    machine.status = '⚠️ MANTENIMIENTO CRÍTICO';
-                }
-            });
-            
-            updateMaintenanceAlerts();
-        }
-
-        // 🚀 Initialize maintenance alerts
-        setTimeout(() => {
-            updateMaintenanceAlerts();
-            // Update every 30 seconds
-            setInterval(simulateMaintenanceUpdates, 30000);
-        }, 2000);
-
-        // 📱 PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('✅ PWA: Service Worker registered successfully:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            console.log('🔄 PWA: Service Worker update found');
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed') {
-                                    if (navigator.serviceWorker.controller) {
-                                        console.log('🆕 PWA: New version available');
-                                        // Show update notification
-                                        showAlert('New version available! Refresh to update.');
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('❌ PWA: Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        // 📱 PWA Install Prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('💾 PWA: Install prompt triggered');
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // Show install button or banner
-            showInstallPromotion();
-        });
-
-        function showInstallPromotion() {
-            // Create install promotion banner
-            const installBanner = document.createElement('div');
-            installBanner.innerHTML = `
-                <div style="
-                    position: fixed; bottom: 20px; right: 20px; 
-                    background: linear-gradient(45deg, #667eea, #764ba2);
-                    color: white; padding: 15px 20px; border-radius: 10px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                    z-index: 1000; cursor: pointer;
-                    font-size: 14px; max-width: 300px;
-                " onclick="installPWA()">
-                    📱 Install Smart Factory App for offline access and better performance!
-                    <div style="margin-top: 8px; font-size: 12px; opacity: 0.9;">
-                        ✨ Works offline • 🚀 Faster loading • 📊 Push notifications
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(installBanner);
-            
-            // Auto-hide after 10 seconds
-            setTimeout(() => {
-                if (installBanner.parentNode) {
-                    installBanner.parentNode.removeChild(installBanner);
-                }
-            }, 10000);
-        }
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ PWA: User accepted installation');
-                    } else {
-                        console.log('❌ PWA: User dismissed installation');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
-
-        // 🔔 Request notification permission for maintenance alerts
-        if ('Notification' in window && navigator.serviceWorker) {
-            if (Notification.permission === 'default') {
-                setTimeout(() => {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            console.log('✅ PWA: Notifications enabled');
-                            showAlert('Notifications enabled! You\'ll receive maintenance alerts.');
-                        } else {
-                            console.log('❌ PWA: Notifications denied');
-                        }
-                    });
-                }, 5000); // Ask after 5 seconds
-            }
-        }
-    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-
-    <!-- 🏥 Health Modeling Integration -->
-    <script type="module">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // Import and initialize Health Modeling System
-        import SmartFactoryHealthModel from '../src/observability/health-modeling.js';
-        
-        // Initialize health modeling after dashboard loads
-        setTimeout(() => {
-            console.log('🏥 Initializing Health Modeling System...');
-            
+        // Initialize app
+        async function initializeApp() {
             try {
-                // Health model should be available globally
-                if (window.SmartFactoryHealthModel) {
-                    console.log('✅ Health Modeling System initialized successfully');
-                    
-                    // The health model automatically creates its own dashboard panel
-                    // and starts monitoring immediately
-                    
-                    // Get current health statistics
-                    setTimeout(() => {
-                        const healthStats = window.getHealthStatistics();
-                        if (healthStats) {
-                            console.log('📊 Current Health Statistics:', healthStats);
-                            console.log(`🏥 Overall Health Score: ${healthStats.overall_score}%`);
-                            console.log(`📈 System Status: ${healthStats.overall_status}`);
-                            console.log(`⚡ Uptime 24h: ${healthStats.uptime_24h}%`);
-                            console.log(`🎯 Availability: ${healthStats.availability}%`);
-                        }
-                    }, 1000);
-                    
+                await msalInstance.initialize();
+                const accounts = msalInstance.getAllAccounts();
+                
+                if (accounts.length === 0) {
+                    await loginUser();
                 } else {
-                    console.log('⚠️ Health Modeling System not available, will auto-initialize');
-                    // The module will auto-initialize when loaded
+                    currentUser = accounts[0];
+                    updateUserDisplay();
+                    loadFactoryData();
+                    setupPullToRefresh();
                 }
             } catch (error) {
-                console.error('❌ Health Modeling initialization error:', error);
+                console.error('Authentication failed:', error);
+                document.getElementById('userAvatar').textContent = '🔒';
             }
-        }, 5000);
-    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
 
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
+        async function loginUser() {
+            try {
+                const response = await msalInstance.loginPopup();
+                currentUser = response.account;
+                updateUserDisplay();
+                loadFactoryData();
+                setupPullToRefresh();
+            } catch (error) {
+                console.error('Login failed:', error);
             }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
-</script>
 
-    <!-- 🔐 Enhanced Security Integration -->
-    <script type="module">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // Import and initialize Enhanced Security
-        import EnhancedSecurityManager from '../src/security/enhanced-security.js';
-        
-        // Initialize security after dashboard loads
-        setTimeout(() => {
-            console.log('🔐 Initializing Enhanced Security...');
-            
-            const security = new EnhancedSecurityManager();
-            
-            // Add security status to dashboard
-            const addSecurityPanel = () => {\n                const securityPanel = document.createElement('div');\n                securityPanel.id = 'security-status-panel';\n                securityPanel.innerHTML = `\n                    <div style=\"\n                        position: fixed;\n                        top: 380px;\n                        right: 20px;\n                        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);\n                        color: white;\n                        padding: 15px;\n                        border-radius: 10px;\n                        box-shadow: 0 4px 15px rgba(244,67,54,0.3);\n                        backdrop-filter: blur(10px);\n                        z-index: 1000;\n                        min-width: 280px;\n                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n                    \">\n                        <div style=\"display: flex; align-items: center; margin-bottom: 10px;\">\n                            <div style=\"width: 12px; height: 12px; border-radius: 50%; background: #4CAF50; margin-right: 8px;\"></div>\n                            <h3 style=\"margin: 0; font-size: 14px; font-weight: 600;\">🔐 Security Monitor</h3>\n                        </div>\n                        \n                        <div style=\"font-size: 12px; opacity: 0.9; line-height: 1.4;\">\n                            <div style=\"margin: 5px 0;\">🛡️ Events 24h: <span id=\"security-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🚨 High Risk: <span id=\"high-risk-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🔍 Threats: <span id=\"threat-detections\">0</span></div>\n                            <div style=\"margin: 5px 0;\">📊 Risk Score: <span id=\"avg-risk-score\">0.0</span></div>\n                        </div>\n                        \n                        <div style=\"margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);\">\n                            <div style=\"font-size: 11px; opacity: 0.8;\">\n                                🔒 Enhanced security monitoring active\n                            </div>\n                        </div>\n                    </div>\n                `;\n                \n                document.body.appendChild(securityPanel);\n                \n                // Update security metrics every 30 seconds\n                const updateSecurityMetrics = () => {\n                    const metrics = security.getSecurityMetrics();\n                    \n                    document.getElementById('security-events').textContent = metrics.total_events_24h;\n                    document.getElementById('high-risk-events').textContent = metrics.high_risk_events;\n                    document.getElementById('threat-detections').textContent = metrics.threat_detections;\n                    document.getElementById('avg-risk-score').textContent = metrics.average_risk_score.toFixed(1);\n                };\n                \n                updateSecurityMetrics();\n                setInterval(updateSecurityMetrics, 30000);\n            };\n            \n            addSecurityPanel();\n            \n            console.log('✅ Enhanced Security initialized and monitoring');\n        }, 4000);\n    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
+        function updateUserDisplay() {
+            if (currentUser) {
+                const initials = getInitials(currentUser.name || currentUser.username);
+                document.getElementById('userAvatar').textContent = initials;
             }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
 
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
-    }
-}
-</script>\n\n    <!-- 🤖 AI Agent Integration -->
-    <script type="module">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // Import and initialize AI Agent
-        import AgentDashboardIntegration from '../src/ai-agent/index.js';
-        
-        // Initialize agent after dashboard is ready
-        setTimeout(() => {
-            console.log('🤖 Initializing Smart Factory AI Agent...');
-            
-            // The agent will auto-initialize via the module
-            // We can also manually trigger initialization if needed
-            if (window.FactoryBotAgent) {\n                console.log('✅ AI Agent available and ready');\n            } else {\n                console.log('⚠️ AI Agent not yet available, will auto-initialize');\n            }\n        }, 3000);\n    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
 
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>\n\n    <!-- 🏭 Advanced 3D Visualization Systems -->\n    <script type=\"module\">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};\n        // Import advanced 3D visualization modules\n        import AdvancedSmartFactory3D from '../src/visualization/advanced-3d-digital-twins.js';\n        import Advanced3DMaterials from '../src/visualization/advanced-3d-materials.js';\n        import DigitalTwinParticleSystem from '../src/visualization/particle-systems.js';\n        \n        // Initialize advanced 3D system after dashboard loads\n        setTimeout(() => {\n            console.log('🚀 Initializing Advanced 3D Digital Twin Visualization...');\n            \n            try {\n                // Initialize advanced materials system\n                window.advanced3DMaterials = new Advanced3DMaterials();\n                \n                // Initialize advanced particle system\n                // Will be initialized after 3D scene is ready\n                \n                // Replace basic 3D with advanced system\n                if (window.factory3D) {\n                    console.log('🔄 Upgrading to Advanced 3D System...');\n                    window.factory3D.dispose();\n                }\n                \n                // Create new advanced 3D system\n                window.factory3D = new AdvancedSmartFactory3D();\n                \n                // Initialize particle system after scene is ready\n                setTimeout(() => {\n                    if (window.factory3D && window.factory3D.scene) {\n                        window.particleSystem = new DigitalTwinParticleSystem(\n                            window.factory3D.scene, \n                            window.advanced3DMaterials\n                        );\n                        console.log('✨ Particle systems initialized');\n                    }\n                }, 2000);\n                \n                console.log('✅ Advanced 3D Digital Twin System initialized successfully!');\n                console.log('🎨 Features enabled: Realistic materials, particle effects, post-processing');\n                \n            } catch (error) {\n                console.error('❌ Advanced 3D system failed, using fallback:', error);\n                // Fallback to basic 3D if advanced fails\n                if (!window.factory3D) {\n                    window.factory3D = new SmartFactory3D();\n                }\n            }\n        }, 6000); // Start after other systems are loaded\n    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>\n\n    <!-- 🏭 Factory 3D Engine -->
-    <script src="factory-3d.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    
-    <!-- 🚨 Testing & Telemetry Systems -->
-    <script>
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // Load testing systems after everything else is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                console.log('🧪 Loading testing systems...');
-                
-                // Load anomaly generator
-                const anomalyScript = document.createElement('script');
-                anomalyScript.src = '../../src/testing/anomaly-generator.js';
-                anomalyScript.onload = () => {
-                    console.log('✅ Anomaly Generator loaded');
-                    
-                    // Load telemetry system
-                    const telemetryScript = document.createElement('script');
-                    telemetryScript.src = '../../src/testing/telemetry-system.js';
-                    telemetryScript.onload = () => {
-                        console.log('✅ Telemetry System loaded');
-                        initializeTestingSystems();
-                    };
-                    document.head.appendChild(telemetryScript);
-                };
-                document.head.appendChild(anomalyScript);
-                
-            }, 5000); // Load after all other systems
-        });
-        
-        // 🧪 Testing Mode Control
-        let testingModeEnabled = false;
-        
-        function toggleTestingMode() {
-            testingModeEnabled = !testingModeEnabled;
-            
-            const testingPanels = document.querySelectorAll('#anomaly-generator-panel, #telemetry-dashboard');
-            testingPanels.forEach(panel => {
-                if (panel) {
-                    panel.style.display = testingModeEnabled ? 'block' : 'none';
+        // API helper with retry
+        async function fetchWithRetry(url, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { timeout: 8000 });
+                    if (response.ok) {
+                        return await response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
                 }
-            });
-            
-            const btn = document.querySelector('button[onclick="toggleTestingMode()"]');
-            if (btn) {
-                btn.style.background = testingModeEnabled ? '#e74c3c' : 'rgba(255, 255, 255, 0.1)';
-                btn.querySelector('span:last-child').textContent = testingModeEnabled ? 'Exit Test' : 'Test Mode';
             }
-            
-            showAlert(testingModeEnabled ? 
-                '🧪 Testing mode activated - Ready for end-to-end anomaly testing' : 
-                '📊 Testing mode deactivated - Normal operation resumed'
-            );
         }
-        
-        function initializeTestingSystems() {
-            console.log('🧪 Initializing testing systems...');
-            
-            // Check if testing systems are loaded
-            if (typeof SmartFactoryAnomalyGenerator !== 'undefined' && 
-                typeof EndToEndTelemetrySystem !== 'undefined') {
+
+        // Load factory data
+        async function loadFactoryData() {
+            try {
+                showLoading(true);
                 
-                // Initialize systems
-                if (!window.anomalyGenerator) {
-                    window.anomalyGenerator = new SmartFactoryAnomalyGenerator();
-                }
-                
-                if (!window.telemetrySystem) {
-                    window.telemetrySystem = new EndToEndTelemetrySystem();
-                }
-                
-                // Hide testing panels initially
-                const testingPanels = document.querySelectorAll('#anomaly-generator-panel, #telemetry-dashboard');
-                testingPanels.forEach(panel => {
-                    if (panel) {
-                        panel.style.display = 'none';
+                const promises = FACTORY_DEVICES.map(async (device) => {
+                    try {
+                        const [maintenance, quality] = await Promise.all([
+                            fetchWithRetry(
+                                `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                            ),
+                            fetchWithRetry(
+                                `${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
+                            )
+                        ]);
+
+                        return {
+                            deviceId: device,
+                            name: DEVICE_NAMES[device],
+                            maintenance,
+                            quality,
+                            status: maintenance.confidence > 0.7 ? 'online' : 
+                                   maintenance.confidence > 0.5 ? 'warning' : 'offline'
+                        };
+                    } catch (error) {
+                        return {
+                            deviceId: device,
+                            name: DEVICE_NAMES[device],
+                            maintenance: { confidence: 0.5, prediction: 'unknown' },
+                            quality: { qualityScore: 50, qualityGrade: 'C' },
+                            status: 'offline'
+                        };
                     }
                 });
-                
-                // Add testing button to header
-                addTestingButton();
-                
-                console.log('✅ Testing systems ready');
-                
-                // Add keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if (e.ctrlKey && e.key === 't') {
-                        e.preventDefault();
-                        toggleTestingMode();
-                    }
-                    if (e.ctrlKey && e.key === 'd' && testingModeEnabled) {
-                        e.preventDefault();
-                        runFullDemo();
-                    }
-                });
-                
-                setTimeout(() => {
-                    showAlert('🧪 Testing systems loaded - Press Ctrl+T to activate testing mode');
-                }, 2000);
-                
-            } else {
-                console.log('⏳ Waiting for testing systems to load...');
-                setTimeout(initializeTestingSystems, 1000);
+
+                const results = await Promise.all(promises);
+                machineData = results.reduce((acc, result) => {
+                    acc[result.deviceId] = result;
+                    return acc;
+                }, {});
+
+                renderMachines();
+                updateStatusBar();
+                generateAlerts();
+                showLoading(false);
+
+            } catch (error) {
+                console.error('Failed to load factory data:', error);
+                showError('Failed to load factory data. Please try again.');
+                showLoading(false);
             }
         }
-        
-        function addTestingButton() {
-            // Find the header controls
-            const userInfo = document.querySelector('.user-info');
-            if (userInfo && !document.getElementById('testing-btn')) {
-                const testingBtn = document.createElement('button');
-                testingBtn.id = 'testing-btn';
-                testingBtn.className = 'dashboard-btn';
-                testingBtn.onclick = toggleTestingMode;
-                testingBtn.title = 'Toggle Testing Mode (Ctrl+T)';
-                testingBtn.innerHTML = '<span>🧪</span><span>Test Mode</span>';
-                testingBtn.style.cssText = `
-                    background: rgba(255, 255, 255, 0.1);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    color: white;
-                    padding: 8px 15px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 14px;
-                    margin-right: 15px;
-                    transition: all 0.3s ease;
+
+        // Render machines
+        function renderMachines() {
+            const container = document.getElementById('machinesGrid');
+            const machines = Object.values(machineData);
+
+            let html = '';
+            machines.forEach(machine => {
+                const confidencePercent = Math.round(machine.maintenance.confidence * 100);
+                const qualityScore = machine.quality.qualityScore || 50;
+                
+                html += `
+                    <div class="machine-card" onclick="showMachineDetails('${machine.deviceId}')">
+                        <div class="machine-header">
+                            <div class="machine-name">${machine.name}</div>
+                            <div class="machine-status ${machine.status}"></div>
+                        </div>
+                        <div class="machine-metrics">
+                            <div class="metric">
+                                <div class="metric-value ${getStatusClass(confidencePercent)}">${confidencePercent}%</div>
+                                <div class="metric-label">Health</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value ${getStatusClass(qualityScore)}">${qualityScore}%</div>
+                                <div class="metric-label">Quality</div>
+                            </div>
+                        </div>
+                    </div>
                 `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Update status bar
+        function updateStatusBar() {
+            const machines = Object.values(machineData);
+            const onlineCount = machines.filter(m => m.status === 'online').length;
+            const alertCount = machines.filter(m => m.status !== 'online').length;
+            const avgQuality = machines.reduce((sum, m) => sum + (m.quality.qualityScore || 50), 0) / machines.length;
+            const avgHealth = machines.reduce((sum, m) => sum + (m.maintenance.confidence * 100), 0) / machines.length;
+
+            const statusBar = document.getElementById('statusBar');
+            statusBar.innerHTML = `
+                <div class="status-chip ${onlineCount === 9 ? 'good' : 'warning'}">
+                    <div>${onlineCount} Online</div>
+                </div>
+                <div class="status-chip ${alertCount === 0 ? 'good' : 'warning'}">
+                    <div>${alertCount} Alerts</div>
+                </div>
+                <div class="status-chip ${avgHealth > 75 ? 'good' : 'warning'}">
+                    <div>${Math.round(avgHealth)}% Health</div>
+                </div>
+                <div class="status-chip ${avgQuality > 75 ? 'good' : 'warning'}">
+                    <div>${Math.round(avgQuality)}% Quality</div>
+                </div>
+            `;
+        }
+
+        // Generate alerts
+        function generateAlerts() {
+            const container = document.getElementById('alertsContainer');
+            const machines = Object.values(machineData);
+            const alerts = [];
+
+            machines.forEach(machine => {
+                if (machine.status === 'warning') {
+                    alerts.push({
+                        title: `${machine.name} Performance Warning`,
+                        description: `Machine health at ${Math.round(machine.maintenance.confidence * 100)}%. Consider maintenance.`,
+                        time: '2 min ago',
+                        severity: 'warning'
+                    });
+                } else if (machine.status === 'offline') {
+                    alerts.push({
+                        title: `${machine.name} Critical Alert`,
+                        description: `Low health score. Immediate attention required.`,
+                        time: '5 min ago',
+                        severity: 'critical'
+                    });
+                }
+            });
+
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #00e676;">
+                        ✅ No active alerts<br>
+                        <small style="opacity: 0.7;">All systems operating normally</small>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                alerts.forEach(alert => {
+                    html += `
+                        <div class="alert-card">
+                            <div class="alert-header">
+                                <div class="alert-title">${alert.title}</div>
+                                <div class="alert-time">${alert.time}</div>
+                            </div>
+                            <div class="alert-description">${alert.description}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        }
+
+        // Helper functions
+        function getStatusClass(value) {
+            if (value >= 80) return 'good';
+            if (value >= 60) return 'warning';
+            return 'critical';
+        }
+
+        function showLoading(show) {
+            // Loading states are handled by initial HTML content
+        }
+
+        function showError(message) {
+            console.error(message);
+        }
+
+        // Navigation
+        function showSection(section) {
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Simple vibration feedback if supported
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Machine details modal (simplified for mobile)
+        function showMachineDetails(deviceId) {
+            const machine = machineData[deviceId];
+            if (!machine) return;
+
+            const confidence = Math.round(machine.maintenance.confidence * 100);
+            const quality = machine.quality.qualityScore || 50;
+
+            alert(`${machine.name}\n\nHealth: ${confidence}%\nQuality: ${quality}%\nStatus: ${machine.status.toUpperCase()}\n\nPrediction: ${machine.maintenance.prediction}`);
+            
+            // Vibration feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        }
+
+        // Refresh data
+        async function refreshData() {
+            document.querySelector('.refresh-btn').textContent = '⏳ Loading...';
+            await loadFactoryData();
+            document.querySelector('.refresh-btn').textContent = '🔄 Refresh';
+            
+            // Vibration feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        // Pull to refresh setup
+        function setupPullToRefresh() {
+            let startY = 0;
+            let currentY = 0;
+            let pullThreshold = 100;
+            let refreshTriggered = false;
+
+            const container = document.querySelector('.mobile-container');
+            const refreshIndicator = document.getElementById('pullToRefresh');
+
+            container.addEventListener('touchstart', (e) => {
+                if (container.scrollTop === 0) {
+                    startY = e.touches[0].pageY;
+                }
+            });
+
+            container.addEventListener('touchmove', (e) => {
+                if (container.scrollTop === 0 && startY) {
+                    currentY = e.touches[0].pageY;
+                    const pullDistance = currentY - startY;
+
+                    if (pullDistance > 0 && pullDistance < pullThreshold * 2) {
+                        e.preventDefault();
+                        const opacity = Math.min(pullDistance / pullThreshold, 1);
+                        refreshIndicator.style.opacity = opacity;
+                        
+                        if (pullDistance > pullThreshold && !refreshTriggered) {
+                            refreshTriggered = true;
+                            refreshIndicator.textContent = '🔄 Release to refresh';
+                            refreshIndicator.classList.add('active');
+                        } else if (pullDistance <= pullThreshold && refreshTriggered) {
+                            refreshTriggered = false;
+                            refreshIndicator.textContent = '🔄 Pull to refresh';
+                            refreshIndicator.classList.remove('active');
+                        }
+                    }
+                }
+            });
+
+            container.addEventListener('touchend', () => {
+                if (refreshTriggered) {
+                    refreshData();
+                }
                 
-                // Insert before user info
-                userInfo.parentNode.insertBefore(testingBtn, userInfo);
-            }
-        }
-        
-        // 🎬 Full Demo for Tomorrow's Presentation
-        function runFullDemo() {
-            console.log('🎬 Starting full end-to-end demo...');
-            
-            // Start telemetry recording
-            if (window.telemetrySystem && !window.telemetrySystem.isRecording) {
-                window.telemetrySystem.toggleRecording();
-            }
-            
-            // Wait a moment, then start demo scenario
-            setTimeout(() => {
-                if (window.anomalyGenerator) {
-                    window.anomalyGenerator.runDemoScenario();
-                    showAlert('🎭 Demo scenario started - Watch the complete end-to-end impact!');
-                }
-            }, 3000);
-        }
-        
-        // Make functions global for HTML onclick handlers
-        window.toggleTestingMode = toggleTestingMode;
-        window.runFullDemo = runFullDemo;
-        
-    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
+                // Reset
+                startY = 0;
+                currentY = 0;
+                refreshTriggered = false;
+                refreshIndicator.style.opacity = '0';
+                refreshIndicator.classList.remove('active');
+                refreshIndicator.textContent = '🔄 Pull to refresh';
             });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
 
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
+        // Auto refresh every 2 minutes
+        setInterval(() => {
+            if (currentUser) {
+                loadFactoryData();
+            }
+        }, 120000);
 
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
+        // Initialize app on load
+        window.addEventListener('load', initializeApp);
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Service Worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
             });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
-</script>
-
-<!-- Enhanced Azure ML API Error Handling -->
-<script>
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Global configuration for Azure ML APIs
-const AZURE_CONFIG = {
-    baseUrl: 'https://smartfactory-ml-api.azurewebsites.net',
-    timeout: 15000,
-    maxRetries: 3,
-    retryDelay: 1000
-};
-
-// Enhanced fetch with retry logic for Azure APIs
-async function fetchAzureMLAPI(endpoint, options = {}) {
-    const url = AZURE_CONFIG.baseUrl + endpoint;
-    
-    for (let attempt = 1; attempt <= AZURE_CONFIG.maxRetries; attempt++) {
-        try {
-            console.log(🔄 Attempt /: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), AZURE_CONFIG.timeout);
-            
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                }
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log(✅ Success: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true, data);
-                return data;
-            } else {
-                throw new Error(HTTP : );
-            }
-            
-        } catch (error) {
-            console.warn(⚠️ Attempt  failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true:, error.message);
-            
-            if (attempt === AZURE_CONFIG.maxRetries) {
-                console.error(❌ All attempts failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
-                return generateFallbackData(endpoint, error);
-            }
-            
-            // Progressive delay between retries
-            await new Promise(resolve => setTimeout(resolve, AZURE_CONFIG.retryDelay * attempt));
-        }
-    }
-}
-
-// Generate fallback data when Azure API is unavailable
-function generateFallbackData(endpoint, error) {
-    const deviceId = new URLSearchParams(endpoint.split('?')[1] || '').get('deviceId') || 'UNKNOWN';
-    const timestamp = new Date().toISOString();
-    
-    console.log(🔄 Generating fallback data for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
-    
-    if (endpoint.includes('/ml/maintenance')) {
-        return {
-            deviceId,
-            prediction: 'maintenance_ok',
-            confidence: 0.65,
-            riskScore: 0.3,
-            estimatedDays: 25,
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/quality')) {
-        return {
-            deviceId,
-            qualityGrade: 'B',
-            qualityScore: 82,
-            confidence: 0.70,
-            defectProbability: 0.18,
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/energy')) {
-        return {
-            deviceId,
-            currentEfficiency: 78,
-            optimizedEfficiency: 85,
-            potentialSavings: 7,
-            recommendations: ['Azure API unavailable - using cached data'],
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/anomaly')) {
-        return {
-            deviceId,
-            isAnomaly: false,
-            anomalyScore: 0.25,
-            confidence: 0.68,
-            severity: 'low',
-            detectedAnomalies: [],
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    }
-    
-    return { 
-        error: true, 
-        message: 'Service temporarily unavailable', 
-        fallback: true,
-        timestamp 
-    };
-}
-
-// Update UI to show when using Azure vs fallback data
-function updateDataSourceIndicator(data, elementId = null) {
-    const isAzure = !data.fallback;
-    const indicator = document.getElementById('data-source-indicator') || createDataSourceIndicator();
-    
-    indicator.innerHTML = 
-        <div class="data-source ">
-            <span class="indicator ">●</span>
-            
-            <small></small>
-        </div>
-    ;
-}
-
-function createDataSourceIndicator() {
-    const indicator = document.createElement('div');
-    indicator.id = 'data-source-indicator';
-    indicator.style.cssText = 
-        position: fixed; 
-        top: 10px; 
-        right: 10px; 
-        background: rgba(0,0,0,0.8); 
-        color: white; 
-        padding: 8px 12px; 
-        border-radius: 4px; 
-        font-size: 12px; 
-        z-index: 1000;
-        font-family: monospace;
-    ;
-    document.body.appendChild(indicator);
-    return indicator;
-}
-
-// Override original fetch calls to use enhanced version
-const originalFetch = window.fetch;
-window.fetch = function(url, options) {
-    if (typeof url === 'string' && url.includes('/api/ml/')) {
-        const endpoint = new URL(url).pathname + new URL(url).search;
-        return fetchAzureMLAPI(endpoint, options);
-    }
-    return originalFetch.call(this, url, options);
-};
-
-console.log('🚀 Enhanced Azure ML API integration loaded');
-console.log('📍 Azure Function URL:', AZURE_CONFIG.baseUrl);
-</script>
+    </script>
 </body>
 </html>
-
-
