@@ -350,22 +350,28 @@
         let machines = {};
         let animationId;
 
-        // Factory layout: 3 production lines with 3 machines each
+        // Real Smart Factory Configuration: 3 production lines with 3 machines each (9 total)
+        const FACTORY_DEVICES = [
+            'LINE_1_CNC_01', 'LINE_1_ROBOT_01', 'LINE_1_CONV_01',
+            'LINE_2_CNC_02', 'LINE_2_ROBOT_02', 'LINE_2_CONV_02', 
+            'LINE_3_CNC_03', 'LINE_3_ROBOT_03', 'LINE_3_CONV_03'
+        ];
+
         const FACTORY_LAYOUT = {
             LINE_1: [
-                { id: 'LINE_1_CNC_01', type: 'CNC', position: [-6, 0, 2], color: 0x4CAF50 },
-                { id: 'LINE_1_ROBOT_01', type: 'ROBOT', position: [-2, 0, 2], color: 0x2196F3 },
-                { id: 'LINE_1_CONV_01', type: 'CONVEYOR', position: [2, 0, 2], color: 0xFF9800 }
+                { id: 'LINE_1_CNC_01', type: 'CNC', position: [-8, 0, 3], color: 0x4CAF50, name: '🔧 CNC Mill 01' },
+                { id: 'LINE_1_ROBOT_01', type: 'ROBOT', position: [-2, 0, 3], color: 0x2196F3, name: '🤖 Robot Arm 01' },
+                { id: 'LINE_1_CONV_01', type: 'CONVEYOR', position: [4, 0, 3], color: 0xFF9800, name: '📦 Conveyor 01' }
             ],
             LINE_2: [
-                { id: 'LINE_2_CNC_02', type: 'CNC', position: [-6, 0, 0], color: 0x4CAF50 },
-                { id: 'LINE_2_ROBOT_02', type: 'ROBOT', position: [-2, 0, 0], color: 0x2196F3 },
-                { id: 'LINE_2_CONV_02', type: 'CONVEYOR', position: [2, 0, 0], color: 0xFF9800 }
+                { id: 'LINE_2_CNC_02', type: 'CNC', position: [-8, 0, 0], color: 0x4CAF50, name: '🔧 CNC Mill 02' },
+                { id: 'LINE_2_ROBOT_02', type: 'ROBOT', position: [-2, 0, 0], color: 0x2196F3, name: '🤖 Robot Arm 02' },
+                { id: 'LINE_2_CONV_02', type: 'CONVEYOR', position: [4, 0, 0], color: 0xFF9800, name: '📦 Conveyor 02' }
             ],
             LINE_3: [
-                { id: 'LINE_3_CNC_03', type: 'CNC', position: [-6, 0, -2], color: 0x4CAF50 },
-                { id: 'LINE_3_ROBOT_03', type: 'ROBOT', position: [-2, 0, -2], color: 0x2196F3 },
-                { id: 'LINE_3_CONV_03', type: 'CONVEYOR', position: [2, 0, -2], color: 0xFF9800 }
+                { id: 'LINE_3_CNC_03', type: 'CNC', position: [-8, 0, -3], color: 0x4CAF50, name: '🔧 CNC Mill 03' },
+                { id: 'LINE_3_ROBOT_03', type: 'ROBOT', position: [-2, 0, -3], color: 0x2196F3, name: '🤖 Robot Arm 03' },
+                { id: 'LINE_3_CONV_03', type: 'CONVEYOR', position: [4, 0, -3], color: 0xFF9800, name: '📦 Conveyor 03' }
             ]
         };
 
@@ -447,8 +453,14 @@
                 }
             });
 
-            // Start render loop
-            animate();
+            // Add production line labels
+            createProductionLineLabels();
+            
+            // Create all 9 machines in 3 production lines
+            createProductionLines();
+            
+            // Start camera controls
+            setupCameraControls();
         }
 
         function createProductionLines() {
@@ -457,6 +469,47 @@
                     createMachine(machineConfig);
                 });
             });
+        }
+
+        function createProductionLineLabels() {
+            // Line 1 label
+            createLineLabel('PRODUCTION LINE 1', [-8, 2, 5], 0x4CAF50);
+            // Line 2 label  
+            createLineLabel('PRODUCTION LINE 2', [-8, 2, 2], 0x2196F3);
+            // Line 3 label
+            createLineLabel('PRODUCTION LINE 3', [-8, 2, -1], 0xFF9800);
+        }
+
+        function createLineLabel(text, position, color) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 128;
+            context.fillStyle = `#${color.toString(16)}`;
+            context.font = 'bold 32px Arial';
+            context.textAlign = 'center';
+            context.fillText(text, 256, 80);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(material);
+            sprite.position.set(...position);
+            sprite.scale.set(4, 1, 1);
+            scene.add(sprite);
+        }
+
+        function setupCameraControls() {
+            // Simple camera rotation
+            let angle = 0;
+            setInterval(() => {
+                angle += 0.01;
+                camera.position.x = Math.cos(angle) * 12;
+                camera.position.z = Math.sin(angle) * 12;
+                camera.lookAt(0, 0, 0);
+            }, 100);
+            
+            // Start render loop
+            animate();
         }
 
         function createMachine(config) {
@@ -481,20 +534,21 @@
             indicator.position.set(0, 0.6, 0);
             group.add(indicator);
 
-            // Label
+            // Label with machine name
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.width = 256;
             canvas.height = 64;
             context.fillStyle = 'white';
-            context.font = '20px Arial';
-            context.fillText(config.id, 10, 40);
+            context.font = 'bold 16px Arial';
+            context.textAlign = 'center';
+            context.fillText(config.name || config.id, 128, 40);
 
             const texture = new THREE.CanvasTexture(canvas);
             const labelMaterial = new THREE.SpriteMaterial({ map: texture });
             const label = new THREE.Sprite(labelMaterial);
             label.position.set(0, 1.5, 0);
-            label.scale.set(2, 0.5, 1);
+            label.scale.set(3, 0.75, 1);
             group.add(label);
 
             // Position the machine
@@ -525,12 +579,12 @@
             renderer.render(scene, camera);
         }
 
-        // Real-time updates with Azure ML APIs
+            // Real-time updates with Azure ML APIs
         function startRealTimeUpdates() {
-            // Update every 10 seconds
+            // Update every 8 seconds for responsive dashboard
             setInterval(() => {
                 updateMachineDataFromAzure();
-            }, 10000);
+            }, 8000);
             
             // First update immediately
             updateMachineDataFromAzure();
@@ -539,8 +593,8 @@
         async function updateMachineDataFromAzure() {
             console.log('🔄 Updating machine data from Azure ML APIs...');
             
-            // All machines from 3 production lines
-            const machineIds = Object.keys(machines);
+            // All 9 machines from 3 production lines
+            const machineIds = FACTORY_DEVICES;
             
             let totalProduction = 0;
             let totalEfficiency = 0;
