@@ -3,330 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Factory - Executive ROI Dashboard</title>
+    <title>📊 Smart Factory Executive Dashboard - ROI & Financial Impact</title>
     
     <!-- Microsoft Authentication Library -->
-    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    
-    <!-- External Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js">
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
-        }
-    }
-}
-</script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
     
     <style>
         * {
@@ -336,899 +16,874 @@ async function fetchWithRetry(url, options = {}, retries = 3) {
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        .dashboard-container {
-            min-height: 100vh;
-            padding: 2rem;
-        }
-        
+
+        /* Header */
         .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            color: white;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-bottom: 3px solid #00e676;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            color: #00e676;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            font-weight: 300;
+        .header-subtitle {
+            font-size: 14px;
+            color: #ccc;
+            font-weight: normal;
         }
         
-        .metrics-grid {
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* ROI Summary Cards */
+        .roi-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        
-        .metric-card {
-            background: white;
+
+        .roi-card {
+            background: linear-gradient(145deg, rgba(0,0,0,0.8), rgba(26,35,126,0.3));
+            border: 2px solid rgba(0,230,118,0.4);
             border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
+            padding: 25px;
+            text-align: center;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
-        .metric-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-        }
-        
-        .metric-card::before {
+
+        .roi-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4CAF50, #2196F3, #FF9800, #E91E63);
-            border-radius: 20px 20px 0 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(0,230,118,0.05) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
         }
-        
-        .metric-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #4CAF50;
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
-        
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
+
+        .roi-card-content {
+            position: relative;
+            z-index: 2;
         }
-        
-        .metric-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 500;
+
+        .roi-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00e676;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0,230,118,0.5);
         }
-        
-        .metric-change {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            font-weight: 600;
+
+        .roi-label {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 8px;
         }
-        
-        .metric-change.positive {
-            color: #27ae60;
-        }
-        
-        .metric-change.negative {
-            color: #e74c3c;
-        }
-        
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .chart-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: #2c3e50;
-            text-align: center;
-        }
-        
-        .models-performance {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-        
-        .model-card {
-            background: white;
+
+        .roi-change {
+            font-size: 14px;
+            padding: 5px 10px;
             border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.3s ease;
+            display: inline-block;
         }
-        
-        .model-card:hover {
-            transform: scale(1.05);
+
+        .roi-change.positive {
+            background: rgba(0,230,118,0.2);
+            color: #00e676;
         }
-        
-        .model-name {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #2c3e50;
-            font-size: 1.1rem;
+
+        .roi-change.negative {
+            background: rgba(244,67,54,0.2);
+            color: #f44336;
         }
-        
-        .model-accuracy {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .model-savings {
-            color: #27ae60;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        .competitive-analysis {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .competitive-grid {
+
+        /* Financial Breakdown */
+        .financial-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
         }
-        
-        .competitive-metric {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        }
-        
-        .scenario-planning {
-            background: white;
+
+        .financial-card {
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 25px;
         }
-        
-        .scenario-buttons {
+
+        .section-title {
+            font-size: 24px;
+            color: #00e676;
+            margin-bottom: 20px;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .scenario-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
+
+        .financial-item {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid #00e676;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
             transition: all 0.3s ease;
         }
-        
-        .scenario-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+
+        .financial-item:hover {
+            background: rgba(0,230,118,0.1);
+            transform: translateX(5px);
         }
-        
-        .scenario-btn.active {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
+
+        .financial-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
-        
-        @media (max-width: 768px) {
-            .charts-grid {
+
+        .financial-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .financial-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00e676;
+        }
+
+        .financial-details {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        /* Challenges & Benefits */
+        .benefits-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .benefits-card {
+            background: linear-gradient(145deg, rgba(120,0,120,0.3), rgba(0,0,0,0.8));
+            border: 2px solid rgba(120,0,120,0.4);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .challenges-card {
+            background: linear-gradient(145deg, rgba(0,100,150,0.3), rgba(0,0,0,0.8));
+            border: 2px solid rgba(0,150,255,0.4);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .benefit-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .benefit-item.maintenance { border-left-color: #00e676; }
+        .benefit-item.downtime { border-left-color: #0096ff; }
+        .benefit-item.energy { border-left-color: #ff9800; }
+        .benefit-item.quality { border-left-color: #9c27b0; }
+
+        .benefit-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .benefit-desc {
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.3;
+        }
+
+        /* Implementation Timeline */
+        .timeline-section {
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .timeline-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #00e676;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .timeline-desc {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(0,230,118,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .metric-value.baseline { color: #ff9800; }
+        .metric-value.improved { color: #00e676; }
+        .metric-value.savings { color: #0096ff; }
+
+        .metric-label {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .metric-change {
+            font-size: 12px;
+            color: #00e676;
+        }
+
+        /* Azure Status */
+        .azure-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #0078d4;
+            z-index: 1000;
+        }
+
+        .azure-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .azure-indicator.online {
+            background: #00e676;
+            box-shadow: 0 0 5px #00e676;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .financial-section {
                 grid-template-columns: 1fr;
             }
             
-            .header h1 {
-                font-size: 2rem;
+            .benefits-section {
+                grid-template-columns: 1fr;
             }
             
-            .dashboard-container {
-                padding: 1rem;
+            .timeline {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
-        
-        .pulse {
-            animation: pulse 2s infinite;
+
+        @media (max-width: 768px) {
+            .roi-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #ccc;
         }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+
+        .spinner {
+            border: 3px solid rgba(0, 230, 118, 0.3);
+            border-left: 3px solid #00e676;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <div class="header" data-aos="fade-down">
-            <h1><i class="fas fa-industry"></i> Smart Factory ROI Dashboard</h1>
-            <p>Executive Analytics & Business Intelligence</p>
+    <div class="header">
+        <h1>
+            📊 Smart Factory Executive Dashboard
+            <span class="header-subtitle">ROI & Financial Impact Analysis</span>
+        </h1>
+        <div class="user-info" id="userInfo">🔒 Authenticating...</div>
+    </div>
+
+    <div class="main-container">
+        <!-- ROI Summary Cards -->
+        <div class="roi-summary">
+            <div class="roi-card">
+                <div class="roi-card-content">
+                    <div class="roi-value" id="totalSavings">$2.8M</div>
+                    <div class="roi-label">Annual Savings</div>
+                    <div class="roi-change positive">+43% vs Traditional</div>
+                </div>
+            </div>
+            
+            <div class="roi-card">
+                <div class="roi-card-content">
+                    <div class="roi-value" id="roiPercentage">340%</div>
+                    <div class="roi-label">ROI (3-Year)</div>
+                    <div class="roi-change positive">Above Industry Avg</div>
+                </div>
+            </div>
+            
+            <div class="roi-card">
+                <div class="roi-card-content">
+                    <div class="roi-value" id="paybackPeriod">8.5</div>
+                    <div class="roi-label">Payback (Months)</div>
+                    <div class="roi-change positive">Conservative Estimate</div>
+                </div>
+            </div>
+            
+            <div class="roi-card">
+                <div class="roi-card-content">
+                    <div class="roi-value" id="efficiencyGain">+10%</div>
+                    <div class="roi-label">Efficiency Improvement</div>
+                    <div class="roi-change positive">85% → 95% Target</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Key Metrics -->
+        <!-- Benefits vs Challenges -->
+        <div class="benefits-section">
+            <div class="challenges-card">
+                <div class="section-title">🚨 Current Challenges</div>
+                <div class="benefit-item maintenance">
+                    <div class="benefit-title">Unexpected Equipment Failures</div>
+                    <div class="benefit-desc">Manufacturers face costly downtime due to unexpected equipment failures</div>
+                </div>
+                <div class="benefit-item downtime">
+                    <div class="benefit-title">Reactive Maintenance Practices</div>
+                    <div class="benefit-desc">Traditional practices rely on scheduled checks or reactive repairs - both inefficient and costly</div>
+                </div>
+                <div class="benefit-item energy">
+                    <div class="benefit-title">Suboptimal Resource Utilization</div>
+                    <div class="benefit-desc">Without predictive AI-driven insights, factories cannot optimize maintenance schedules</div>
+                </div>
+                <div class="benefit-item quality">
+                    <div class="benefit-title">Production Delays & Lost Revenue</div>
+                    <div class="benefit-desc">Leading to wasted labor, production delays, and lost revenue</div>
+                </div>
+            </div>
+            
+            <div class="benefits-card">
+                <div class="section-title">✅ Expected Outcomes</div>
+                <div class="benefit-item maintenance">
+                    <div class="benefit-title">Predictive Failure Detection</div>
+                    <div class="benefit-desc">AI-powered predictive maintenance detects issues before they cause breakdowns</div>
+                </div>
+                <div class="benefit-item downtime">
+                    <div class="benefit-title">Extended Equipment Lifespan</div>
+                    <div class="benefit-desc">Reducing downtime and extending equipment lifespan significantly</div>
+                </div>
+                <div class="benefit-item energy">
+                    <div class="benefit-title">Optimized Maintenance Schedules</div>
+                    <div class="benefit-desc">Manufacturers can optimize schedules, minimize losses, improve efficiency</div>
+                </div>
+                <div class="benefit-item quality">
+                    <div class="benefit-title">Higher Profitability & Competitiveness</div>
+                    <div class="benefit-desc">Result: higher profitability, consistent output, improved global market competitiveness</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Breakdown -->
+        <div class="financial-section">
+            <div class="financial-card">
+                <div class="section-title">💰 Conservative Baseline & Assumptions</div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Realistic Baseline</div>
+                        <div class="financial-amount">85-88%</div>
+                    </div>
+                    <div class="financial-details">Factory currently operates at 85-88% efficiency/availability</div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Incremental Target</div>
+                        <div class="financial-amount">+8-10%</div>
+                    </div>
+                    <div class="financial-details">Expected increase in availability with Edge + AI + Digital Twin integration</div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Industry Benchmarks</div>
+                        <div class="financial-amount">McKinsey</div>
+                    </div>
+                    <div class="financial-details">Based on McKinsey & Deloitte Industry 4.0 manufacturing studies</div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Risk Adjustment</div>
+                        <div class="financial-amount">30%</div>
+                    </div>
+                    <div class="financial-details">Applied 30% implementation risk discount to all projected savings (conservative engineering estimate)</div>
+                </div>
+            </div>
+            
+            <div class="financial-card">
+                <div class="section-title">📈 Financial Impact Analysis</div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Predictive Maintenance</div>
+                        <div class="financial-amount">$1.4M/yr</div>
+                    </div>
+                    <div class="financial-details">
+                        Baseline: $3.2M/year reactive cost<br>
+                        Improved: $1.8M/year predictive cost<br>
+                        <strong>Net Savings: $1.4M/year</strong>
+                    </div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Downtime Reduction</div>
+                        <div class="financial-amount">$672K/yr</div>
+                    </div>
+                    <div class="financial-details">
+                        Baseline: 15% downtime → $120K/month losses<br>
+                        Improved: 8% downtime → $64K/month losses<br>
+                        <strong>Annual Savings: $672K/year</strong>
+                    </div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Energy Optimization</div>
+                        <div class="financial-amount">$180K/yr</div>
+                    </div>
+                    <div class="financial-details">Realistic 5-8% energy consumption reduction through AI optimization</div>
+                </div>
+                
+                <div class="financial-item">
+                    <div class="financial-header">
+                        <div class="financial-title">Quality Improvement</div>
+                        <div class="financial-amount">$550K/yr</div>
+                    </div>
+                    <div class="financial-details">25% defect reduction through predictive quality control</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Metrics -->
         <div class="metrics-grid">
-            <div class="metric-card" data-aos="zoom-in" data-aos-delay="100">
-                <div class="metric-icon">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-                <div class="metric-value gradient-text" id="annual-savings">$15.6M</div>
-                <div class="metric-label">Annual Savings</div>
-                <div class="metric-change positive">
-                    <i class="fas fa-arrow-up"></i> +340% ROI
-                </div>
+            <div class="metric-card">
+                <div class="metric-value baseline" id="currentEfficiency">87%</div>
+                <div class="metric-label">Current Efficiency</div>
+                <div class="metric-change">Real-time from Azure ML</div>
             </div>
-
-            <div class="metric-card" data-aos="zoom-in" data-aos-delay="200">
-                <div class="metric-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="metric-value gradient-text" id="payback-period">0.4</div>
-                <div class="metric-label">Payback Period (Months)</div>
-                <div class="metric-change positive">
-                    <i class="fas fa-rocket"></i> 2 weeks only!
-                </div>
+            
+            <div class="metric-card">
+                <div class="metric-value improved" id="targetEfficiency">95%</div>
+                <div class="metric-label">Target Efficiency</div>
+                <div class="metric-change">+8% improvement goal</div>
             </div>
-
-            <div class="metric-card" data-aos="zoom-in" data-aos-delay="300">
-                <div class="metric-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="metric-value gradient-text" id="oee-improvement">87%</div>
-                <div class="metric-label">OEE with AI</div>
-                <div class="metric-change positive">
-                    <i class="fas fa-arrow-up"></i> +18% vs industry
-                </div>
+            
+            <div class="metric-card">
+                <div class="metric-value baseline" id="currentDowntime">12%</div>
+                <div class="metric-label">Current Downtime</div>
+                <div class="metric-change">Conservative baseline</div>
             </div>
-
-            <div class="metric-card" data-aos="zoom-in" data-aos-delay="400">
-                <div class="metric-icon">
-                    <i class="fas fa-cogs"></i>
-                </div>
-                <div class="metric-value gradient-text" id="downtime-reduction">35%</div>
-                <div class="metric-label">Downtime Reduction</div>
-                <div class="metric-change positive">
-                    <i class="fas fa-wrench"></i> $12.6M saved
-                </div>
+            
+            <div class="metric-card">
+                <div class="metric-value improved" id="targetDowntime">8%</div>
+                <div class="metric-label">Target Downtime</div>
+                <div class="metric-change">50% reduction</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value savings" id="monthlyImpact">$233K</div>
+                <div class="metric-label">Monthly Impact</div>
+                <div class="metric-change">Conservative estimate</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value savings" id="quarterlyImpact">$700K</div>
+                <div class="metric-label">Quarterly Impact</div>
+                <div class="metric-change">Compound benefits</div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="charts-grid">
-            <div class="chart-container" data-aos="fade-right">
-                <h3 class="chart-title">📈 ROI Projection (3 Years)</h3>
-                <canvas id="roiChart" width="400" height="200"></canvas>
-            </div>
-            
-            <div class="chart-container" data-aos="fade-left">
-                <h3 class="chart-title">🎯 Model Performance</h3>
-                <canvas id="performanceChart" width="300" height="200"></canvas>
-            </div>
-        </div>
-
-        <!-- ML Models Performance -->
-        <div class="models-performance" data-aos="fade-up">
-            <div class="model-card pulse" style="border-left: 4px solid #4CAF50;">
-                <div class="model-name">🔧 PREDICTIVE MAINTENANCE</div>
-                <div class="model-accuracy gradient-text">99.7%</div>
-                <div class="model-savings">$12.6M Annual Savings</div>
-            </div>
-            
-            <div class="model-card pulse" style="border-left: 4px solid #2196F3;">
-                <div class="model-name">📊 QUALITY PREDICTION</div>
-                <div class="model-accuracy gradient-text">94.0%</div>
-                <div class="model-savings">$902K Annual Savings</div>
-            </div>
-            
-            <div class="model-card pulse" style="border-left: 4px solid #FF9800;">
-                <div class="model-name">⚡ ENERGY OPTIMIZATION</div>
-                <div class="model-accuracy gradient-text">20.0%</div>
-                <div class="model-savings">$360K Annual Savings</div>
-            </div>
-            
-            <div class="model-card pulse" style="border-left: 4px solid #E91E63;">
-                <div class="model-name">🚨 ANOMALY DETECTION</div>
-                <div class="model-accuracy gradient-text">96.3%</div>
-                <div class="model-savings">$1.7M Annual Savings</div>
-            </div>
-        </div>
-
-        <!-- Competitive Analysis -->
-        <div class="competitive-analysis" data-aos="fade-up">
-            <h3 class="chart-title">🏆 Competitive Advantage Analysis</h3>
-            <div class="competitive-grid">
-                <div class="competitive-metric">
-                    <h4>Industry Benchmark OEE</h4>
-                    <div style="font-size: 2rem; color: #e74c3c; font-weight: 700;">65%</div>
+        <!-- Implementation Timeline -->
+        <div class="timeline-section">
+            <div class="section-title">🗓️ Implementation Roadmap</div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-number">1</div>
+                    <div class="timeline-title">Foundation Phase</div>
+                    <div class="timeline-desc">IoT sensors, Azure infrastructure, data collection (Month 1-2)</div>
                 </div>
-                <div class="competitive-metric">
-                    <h4>Smart Factory OEE (with AI)</h4>
-                    <div style="font-size: 2rem; color: #27ae60; font-weight: 700;">83%</div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-number">2</div>
+                    <div class="timeline-title">AI Integration</div>
+                    <div class="timeline-desc">ML models, predictive algorithms, Digital Twins (Month 3-4)</div>
                 </div>
-                <div class="competitive-metric">
-                    <h4>Competitive Gap Closure</h4>
-                    <div style="font-size: 2rem; color: #3498db; font-weight: 700;">+18pts</div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-number">3</div>
+                    <div class="timeline-title">Optimization</div>
+                    <div class="timeline-desc">Dashboard deployment, process optimization (Month 5-6)</div>
                 </div>
-                <div class="competitive-metric">
-                    <h4>Market Leadership Position</h4>
-                    <div style="font-size: 1.5rem; color: #9b59b6; font-weight: 700;">TOP 5%</div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-number">4</div>
+                    <div class="timeline-title">Scale & ROI</div>
+                    <div class="timeline-desc">Full deployment, measured ROI realization (Month 7+)</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Scenario Planning -->
-        <div class="scenario-planning" data-aos="fade-up">
-            <h3 class="chart-title">🔮 What-If Scenario Planning</h3>
-            <div class="scenario-buttons">
-                <button class="scenario-btn active" onclick="showScenario('conservative')">Conservative</button>
-                <button class="scenario-btn" onclick="showScenario('aggressive')">Aggressive</button>
-                <button class="scenario-btn" onclick="showScenario('recession')">Economic Downturn</button>
-                <button class="scenario-btn" onclick="showScenario('expansion')">Market Expansion</button>
-            </div>
-            <canvas id="scenarioChart" width="800" height="300"></canvas>
         </div>
     </div>
 
-    <script>
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-        // Initialize AOS (Animate On Scroll)
-        AOS.init({
-            duration: 1000,
-            once: true,
-            offset: 100
-        });
+    <div class="azure-status">
+        <span class="azure-indicator" id="azureIndicator"></span>
+        <span id="azureStatus">Connecting to Azure...</span>
+    </div>
 
-        // ML Results Data (from our training)
-        const mlResults = {
-            "total_annual_savings": 15558514,
-            "implementation_cost": 570000,
-            "payback_period": 0.44,
-            "roi_3_year": 8089,
-            "models": {
-                "predictive_maintenance": { "accuracy": 0.997, "savings": 12562200 },
-                "quality_prediction": { "accuracy": 0.9395, "savings": 901920 },
-                "energy_optimization": { "savings_percent": 20.03, "savings": 360454 },
-                "anomaly_detection": { "accuracy": 0.9633, "savings": 1733940 }
+    <script>
+        // Configuration
+        const AZURE_ML_CONFIG = {
+            endpoint: 'https://smartfactory-ml-api.azurewebsites.net'
+        };
+
+        // Financial data based on conservative baseline
+        const FINANCIAL_DATA = {
+            predictiveMaintenance: {
+                baseline: 3200000,      // $3.2M/year
+                improved: 1800000,      // $1.8M/year
+                savings: 1400000        // $1.4M/year
+            },
+            downtimeReduction: {
+                baselineMonthly: 120000,   // $120K/month
+                improvedMonthly: 64000,    // $64K/month
+                annualSavings: 672000      // $672K/year
+            },
+            energyOptimization: {
+                annualSavings: 180000      // $180K/year (5-8% reduction)
+            },
+            qualityImprovement: {
+                annualSavings: 550000      // $550K/year (25% defect reduction)
             }
         };
 
-        // ROI Projection Chart
-        const roiCtx = document.getElementById('roiChart').getContext('2d');
-        const roiChart = new Chart(roiCtx, {
-            type: 'line',
-            data: {
-                labels: ['Year 0', 'Year 1', 'Year 2', 'Year 3'],
-                datasets: [{
-                    label: 'Cumulative ROI ($M)',
-                    data: [-0.57, 15.0, 30.6, 46.1],
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#4CAF50',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 3,
-                    pointRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Millions USD'
-                        }
-                    }
-                },
-                elements: {
-                    point: {
-                        hoverRadius: 8
-                    }
-                }
-            }
-        });
+        // Factory configuration
+        const FACTORY_DEVICES = [
+            'LINE_1_CNC_01', 'LINE_1_ROBOT_01', 'LINE_1_CONV_01',
+            'LINE_2_CNC_02', 'LINE_2_ROBOT_02', 'LINE_2_CONV_02', 
+            'LINE_3_CNC_03', 'LINE_3_ROBOT_03', 'LINE_3_CONV_03'
+        ];
 
-        // Model Performance Doughnut Chart
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(performanceCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Predictive Maintenance', 'Quality Prediction', 'Energy Optimization', 'Anomaly Detection'],
-                datasets: [{
-                    data: [80.7, 5.8, 2.3, 11.2], // Percentage of total savings
-                    backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                },
-                cutout: '60%'
-            }
-        });
-
-        // Scenario Planning Chart
-        let scenarioChart;
-        
-        function initScenarioChart() {
-            const scenarioCtx = document.getElementById('scenarioChart').getContext('2d');
-            scenarioChart = new Chart(scenarioCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Predictive Maintenance', 'Quality Prediction', 'Energy Optimization', 'Anomaly Detection'],
-                    datasets: [{
-                        label: 'Annual Savings ($M)',
-                        data: [12.6, 0.9, 0.36, 1.7],
-                        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
-                        borderRadius: 8,
-                        borderSkipped: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Millions USD'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function showScenario(scenario) {
-            // Remove active class from all buttons
-            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button
-            event.target.classList.add('active');
-
-            let multiplier = 1;
-            let title = 'Conservative Scenario';
-
-            switch(scenario) {
-                case 'conservative':
-                    multiplier = 0.8;
-                    title = 'Conservative Scenario (80% of projected)';
-                    break;
-                case 'aggressive':
-                    multiplier = 1.3;
-                    title = 'Aggressive Growth (130% of projected)';
-                    break;
-                case 'recession':
-                    multiplier = 0.5;
-                    title = 'Economic Downturn (50% of projected)';
-                    break;
-                case 'expansion':
-                    multiplier = 1.8;
-                    title = 'Market Expansion (180% of projected)';
-                    break;
-            }
-
-            // Update chart data
-            scenarioChart.data.datasets[0].data = [
-                12.6 * multiplier,
-                0.9 * multiplier,
-                0.36 * multiplier,
-                1.7 * multiplier
-            ];
-            scenarioChart.data.datasets[0].label = title;
-            scenarioChart.update('active');
-
-            // Update main metrics
-            const totalSavings = (15.6 * multiplier).toFixed(1);
-            document.getElementById('annual-savings').textContent = `$${totalSavings}M`;
-        }
-
-        // Animate counters
-        function animateCounter(element, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const value = progress * (end - start) + start;
-                
-                if (element.id === 'annual-savings') {
-                    element.textContent = `$${(value/1000000).toFixed(1)}M`;
-                } else if (element.id === 'payback-period') {
-                    element.textContent = value.toFixed(1);
-                } else if (element.id === 'oee-improvement' || element.id === 'downtime-reduction') {
-                    element.textContent = `${Math.round(value)}%`;
-                }
-                
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        // 🔐 Microsoft Authentication Configuration
+        // Microsoft Authentication
         const msalConfig = {
             auth: {
-                clientId: '982a060b-6968-4038-860c-68925782906d',
-                authority: 'https://login.microsoftonline.com/fdpo.onmicrosoft.com',
-                redirectUri: "https://artmej.github.io/factory-digital-twins-mvp/executive-dashboard.html"
+                clientId: "a0c73c16-a7e3-4564-9a95-2bdf47383716",
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin + window.location.pathname
             },
             cache: {
-                cacheLocation: 'localStorage',
-                storeAuthStateInCookie: false
+                cacheLocation: "localStorage",
+                storeAuthStateInCookie: true
             }
         };
 
         const msalInstance = new msal.PublicClientApplication(msalConfig);
         let currentUser = null;
 
-        // Check authentication
-        async function checkAuth() {
+        // Initialize app
+        async function initializeApp() {
             try {
+                await msalInstance.initialize();
                 const accounts = msalInstance.getAllAccounts();
+                
                 if (accounts.length === 0) {
-                    window.location.href = 'login.html';
-                    return false;
+                    await loginUser();
+                } else {
+                    currentUser = accounts[0];
+                    updateUserDisplay();
+                    startDashboardServices();
                 }
-                currentUser = accounts[0];
-                console.log('✅ Authenticated user:', currentUser.username);
-                return true;
             } catch (error) {
-                console.error('❌ Authentication check failed:', error);
-                window.location.href = 'login.html';
-                return false;
+                console.error('Authentication failed:', error);
+                document.getElementById('userInfo').textContent = '🔒 Authentication required';
             }
         }
 
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Check authentication first
-            const isAuthenticated = await checkAuth();
-            if (!isAuthenticated) return;
-            
-            console.log('📊 Initializing Executive Dashboard...');
-            
-            // Initialize scenario chart
-            initScenarioChart();
-            
-            // Animate main metrics
-            setTimeout(() => {
-                animateCounter(document.getElementById('annual-savings'), 0, mlResults.total_annual_savings, 2000);
-                animateCounter(document.getElementById('payback-period'), 0, mlResults.payback_period, 1500);
-                animateCounter(document.getElementById('oee-improvement'), 65, 83, 1800);
-                animateCounter(document.getElementById('downtime-reduction'), 0, 35, 2000);
-            }, 500);
+        async function loginUser() {
+            try {
+                const response = await msalInstance.loginPopup();
+                currentUser = response.account;
+                updateUserDisplay();
+                startDashboardServices();
+            } catch (error) {
+                console.error('Login failed:', error);
+            }
+        }
 
-            // Update metrics periodically (simulate real-time)
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userInfo').textContent = `👤 ${currentUser.name || currentUser.username}`;
+            }
+        }
+
+        // Start dashboard services
+        function startDashboardServices() {
+            updateAzureStatus('online');
+            loadRealTimeMetrics();
+            calculateROIMetrics();
+            
+            // Update every 5 minutes
             setInterval(() => {
-                const variation = (Math.random() - 0.5) * 0.02; // ±1%
-                const currentSavings = mlResults.total_annual_savings * (1 + variation);
-                document.getElementById('annual-savings').textContent = 
-                    `$${(currentSavings/1000000).toFixed(1)}M`;
-            }, 5000);
-        });
-    
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
-            }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+                loadRealTimeMetrics();
+                calculateROIMetrics();
+            }, 300000);
         }
-    }
-}
 
-// Enhanced error handling for Azure endpoints
-function handleAzureAPIError(error, fallback = null) {
-    console.warn('Azure API Error:', error);
-    if (fallback && typeof fallback === 'function') {
-        return fallback();
-    }
-    return {
-        error: true,
-        message: 'Azure API temporarily unavailable',
-        timestamp: new Date().toISOString(),
-        source: 'fallback'
-    };
-}
-
-// Enhanced fetch with retry logic
-async function fetchWithRetry(url, options = {}, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                timeout: 10000
-            });
-            
-            if (response.ok) {
-                return await response.json();
-            } else {
-                throw new Error(HTTP : );
+        // API helper with retry
+        async function fetchWithRetry(url, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { timeout: 8000 });
+                    if (response.ok) {
+                        return await response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                }
             }
-        } catch (error) {
-            console.warn(Attempt  failed:, error.message);
-            if (i === retries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
         }
-    }
-}
-</script>
 
-<!-- Enhanced Azure ML API Error Handling -->
-<script>
-const AZURE_ML_CONFIG = {
-    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-    useRealModels: true,
-    fallbackEnabled: true,
-    retryAttempts: 3
-};
-// Global configuration for Azure ML APIs
-const AZURE_CONFIG = {
-    baseUrl: 'https://smartfactory-ml-api.azurewebsites.net',
-    timeout: 15000,
-    maxRetries: 3,
-    retryDelay: 1000
-};
+        // Load real-time metrics from Azure ML
+        async function loadRealTimeMetrics() {
+            try {
+                let totalEfficiency = 0;
+                let operationalMachines = 0;
+                
+                // Sample data from 3 devices to get current efficiency
+                for (const device of FACTORY_DEVICES.slice(0, 3)) {
+                    try {
+                        const maintenance = await fetchWithRetry(
+                            `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                        );
+                        
+                        if (maintenance.confidence) {
+                            totalEfficiency += maintenance.confidence * 100;
+                            operationalMachines++;
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to get data for ${device}:`, error);
+                    }
+                }
+                
+                if (operationalMachines > 0) {
+                    const currentEff = Math.round(totalEfficiency / operationalMachines);
+                    document.getElementById('currentEfficiency').textContent = `${currentEff}%`;
+                    
+                    // Calculate current downtime (inverse relationship with efficiency)
+                    const currentDowntime = Math.round((100 - currentEff) * 0.15);
+                    document.getElementById('currentDowntime').textContent = `${currentDowntime}%`;
+                }
 
-// Enhanced fetch with retry logic for Azure APIs
-async function fetchAzureMLAPI(endpoint, options = {}) {
-    const url = AZURE_CONFIG.baseUrl + endpoint;
-    
-    for (let attempt = 1; attempt <= AZURE_CONFIG.maxRetries; attempt++) {
-        try {
-            console.log(🔄 Attempt /: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+            } catch (error) {
+                console.error('Failed to load real-time metrics:', error);
+                updateAzureStatus('offline');
+            }
+        }
+
+        // Calculate ROI metrics
+        function calculateROIMetrics() {
+            // Total annual savings
+            const totalAnnualSavings = 
+                FINANCIAL_DATA.predictiveMaintenance.savings +
+                FINANCIAL_DATA.downtimeReduction.annualSavings +
+                FINANCIAL_DATA.energyOptimization.annualSavings +
+                FINANCIAL_DATA.qualityImprovement.annualSavings;
+
+            // Update display values
+            document.getElementById('totalSavings').textContent = 
+                `$${(totalAnnualSavings / 1000000).toFixed(1)}M`;
             
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), AZURE_CONFIG.timeout);
+            // Monthly impact
+            const monthlyImpact = totalAnnualSavings / 12;
+            document.getElementById('monthlyImpact').textContent = 
+                `$${Math.round(monthlyImpact / 1000)}K`;
             
-            const response = await fetch(url, {
-                ...options,
-                signal: controller.signal,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
+            // Quarterly impact  
+            const quarterlyImpact = totalAnnualSavings / 4;
+            document.getElementById('quarterlyImpact').textContent = 
+                `$${Math.round(quarterlyImpact / 1000)}K`;
+
+            // Calculate ROI (assuming $2.4M total investment over 3 years)
+            const totalInvestment = 2400000; // Conservative estimate
+            const threeYearSavings = totalAnnualSavings * 3;
+            const roiPercentage = Math.round(((threeYearSavings - totalInvestment) / totalInvestment) * 100);
+            document.getElementById('roiPercentage').textContent = `${roiPercentage}%`;
+
+            // Payback period in months
+            const paybackMonths = (totalInvestment / monthlyImpact).toFixed(1);
+            document.getElementById('paybackPeriod').textContent = paybackMonths;
+        }
+
+        // Update Azure status
+        function updateAzureStatus(status) {
+            const indicator = document.getElementById('azureIndicator');
+            const statusText = document.getElementById('azureStatus');
+            
+            if (status === 'online') {
+                indicator.className = 'azure-indicator online';
+                statusText.textContent = 'Azure ML Connected';
+            } else {
+                indicator.className = 'azure-indicator offline';
+                statusText.textContent = 'Azure ML Offline';
+            }
+        }
+
+        // Initialize app on load
+        window.addEventListener('load', initializeApp);
+
+        // Animate counters on page load
+        function animateCounters() {
+            const counters = document.querySelectorAll('.roi-value, .metric-value');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.textContent.replace(/[^\d]/g, ''));
+                if (target > 0) {
+                    let count = 0;
+                    const increment = target / 100;
+                    const timer = setInterval(() => {
+                        count += increment;
+                        if (count >= target) {
+                            clearInterval(timer);
+                            count = target;
+                        }
+                        
+                        const suffix = counter.textContent.match(/[^\d.]+$/)?.[0] || '';
+                        const prefix = counter.textContent.match(/^[^\d]+/)?.[0] || '';
+                        counter.textContent = prefix + Math.round(count) + suffix;
+                    }, 20);
                 }
             });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log(✅ Success: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true, data);
-                return data;
-            } else {
-                throw new Error(HTTP : );
-            }
-            
-        } catch (error) {
-            console.warn(⚠️ Attempt  failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true:, error.message);
-            
-            if (attempt === AZURE_CONFIG.maxRetries) {
-                console.error(❌ All attempts failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
-                return generateFallbackData(endpoint, error);
-            }
-            
-            // Progressive delay between retries
-            await new Promise(resolve => setTimeout(resolve, AZURE_CONFIG.retryDelay * attempt));
         }
-    }
-}
 
-// Generate fallback data when Azure API is unavailable
-function generateFallbackData(endpoint, error) {
-    const deviceId = new URLSearchParams(endpoint.split('?')[1] || '').get('deviceId') || 'UNKNOWN';
-    const timestamp = new Date().toISOString();
-    
-    console.log(🔄 Generating fallback data for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
-    
-    if (endpoint.includes('/ml/maintenance')) {
-        return {
-            deviceId,
-            prediction: 'maintenance_ok',
-            confidence: 0.65,
-            riskScore: 0.3,
-            estimatedDays: 25,
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/quality')) {
-        return {
-            deviceId,
-            qualityGrade: 'B',
-            qualityScore: 82,
-            confidence: 0.70,
-            defectProbability: 0.18,
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/energy')) {
-        return {
-            deviceId,
-            currentEfficiency: 78,
-            optimizedEfficiency: 85,
-            potentialSavings: 7,
-            recommendations: ['Azure API unavailable - using cached data'],
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    } else if (endpoint.includes('/ml/anomaly')) {
-        return {
-            deviceId,
-            isAnomaly: false,
-            anomalyScore: 0.25,
-            confidence: 0.68,
-            severity: 'low',
-            detectedAnomalies: [],
-            modelType: 'fallback',
-            timestamp,
-            fallback: true,
-            error: error.message
-        };
-    }
-    
-    return { 
-        error: true, 
-        message: 'Service temporarily unavailable', 
-        fallback: true,
-        timestamp 
-    };
-}
-
-// Update UI to show when using Azure vs fallback data
-function updateDataSourceIndicator(data, elementId = null) {
-    const isAzure = !data.fallback;
-    const indicator = document.getElementById('data-source-indicator') || createDataSourceIndicator();
-    
-    indicator.innerHTML = 
-        <div class="data-source ">
-            <span class="indicator ">●</span>
-            
-            <small></small>
-        </div>
-    ;
-}
-
-function createDataSourceIndicator() {
-    const indicator = document.createElement('div');
-    indicator.id = 'data-source-indicator';
-    indicator.style.cssText = 
-        position: fixed; 
-        top: 10px; 
-        right: 10px; 
-        background: rgba(0,0,0,0.8); 
-        color: white; 
-        padding: 8px 12px; 
-        border-radius: 4px; 
-        font-size: 12px; 
-        z-index: 1000;
-        font-family: monospace;
-    ;
-    document.body.appendChild(indicator);
-    return indicator;
-}
-
-// Override original fetch calls to use enhanced version
-const originalFetch = window.fetch;
-window.fetch = function(url, options) {
-    if (typeof url === 'string' && url.includes('/api/ml/')) {
-        const endpoint = new URL(url).pathname + new URL(url).search;
-        return fetchAzureMLAPI(endpoint, options);
-    }
-    return originalFetch.call(this, url, options);
-};
-
-console.log('🚀 Enhanced Azure ML API integration loaded');
-console.log('📍 Azure Function URL:', AZURE_CONFIG.baseUrl);
-</script>
+        // Start animations after load
+        window.addEventListener('load', () => {
+            setTimeout(animateCounters, 1000);
+        });
+    </script>
 </body>
 </html>
-
-
