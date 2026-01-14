@@ -12,7 +12,7 @@
         // MSAL Configuration - Force Microsoft Authentication
         const msalConfig = {
             auth: {
-                clientId: "a0c73c16-a7e3-4564-9a95-2bdf47383716", // Demo App ID
+                clientId: "1950a258-227b-4e31-a9cf-717495945fc2", // Updated client ID
                 authority: "https://login.microsoftonline.com/common",
                 redirectUri: window.location.origin + window.location.pathname
             },
@@ -29,19 +29,24 @@
         
         async function initializeAuth() {
             try {
+                console.log('🔒 Initializing Microsoft Authentication...');
                 await msalInstance.initialize();
                 const accounts = msalInstance.getAllAccounts();
                 
+                console.log('📋 Found accounts:', accounts.length);
+                
                 if (accounts.length === 0) {
+                    console.log('👤 No existing accounts, forcing login...');
                     // Force login
                     await loginWithMicrosoft();
                 } else {
+                    console.log('✅ Using existing account:', accounts[0].name);
                     currentUser = accounts[0];
                     updateUserDisplay();
                     startApplication();
                 }
             } catch (error) {
-                console.error('Authentication failed:', error);
+                console.error('❌ Authentication failed:', error);
                 document.body.innerHTML = '<div style="padding:50px;text-align:center;color:white;background:#1e3c72;height:100vh;"><h2>🔒 Microsoft Authentication Required</h2><p>Please refresh and login with your Microsoft account.</p></div>';
             }
         }
@@ -61,13 +66,22 @@
         }
 
         function updateUserDisplay() {
+            console.log('👤 Updating user display...', currentUser);
             if (currentUser) {
-                document.getElementById('user-info').innerHTML = `
-                    <div style="font-size: 12px; color: #00ff88;">
-                        👤 ${currentUser.name || currentUser.username}
-                        <button onclick="logout()" style="margin-left:10px;padding:2px 8px;background:#ff6b6b;color:white;border:none;border-radius:3px;cursor:pointer;">Logout</button>
-                    </div>
-                `;
+                const userElement = document.getElementById('user-info');
+                if (userElement) {
+                    userElement.innerHTML = `
+                        <div style="font-size: 12px; color: #00ff88;">
+                            👤 ${currentUser.name || currentUser.username}
+                            <button onclick="logout()" style="margin-left:10px;padding:2px 8px;background:#ff6b6b;color:white;border:none;border-radius:3px;cursor:pointer;">Logout</button>
+                        </div>
+                    `;
+                    console.log('✅ User display updated successfully');
+                } else {
+                    console.error('❌ user-info element not found');
+                }
+            } else {
+                console.warn('⚠️ No current user to display');
             }
         }
 
