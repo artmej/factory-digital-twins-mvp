@@ -1,0 +1,87 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.1",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {}
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.4",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.4",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            },
+            "env": {
+              "OptimizeForPerformance": {
+                "value": "false"
+              },
+              "MaxUpstreamBatchSize": {
+                "value": "10"
+              },
+              "MaxUpstreamRetries": {
+                "value": "3"
+              }
+            }
+          }
+        },
+        "modules": {
+          "factorySimulator": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "node:18-alpine",
+              "createOptions": "{\"WorkingDir\":\"/app\",\"Cmd\":[\"node\",\"simulator.js\"],\"Env\":[\"DEVICE_CONN_STRING=$DEVICE_CONN_STRING\",\"SEND_INTERVAL_MS=5000\"]}"
+            },
+            "env": {
+              "DEVICE_CONN_STRING": {
+                "value": "$DEVICE_CONN_STRING"
+              },
+              "SEND_INTERVAL_MS": {
+                "value": "5000"
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.1",
+        "routes": {
+          "factorySimulatorToIoTHub": "FROM /messages/modules/factorySimulator/outputs/* INTO $upstream",
+          "sensorToIoTHub": "FROM /messages/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 3600
+        }
+      }
+    },
+    "factorySimulator": {
+      "properties.desired": {
+        "SendIntervalMs": 5000,
+        "FactoryId": "factory1",
+        "LineId": "lineA",
+        "MachineId": "machineA",
+        "SensorId": "sensorA"
+      }
+    }
+  }
+}

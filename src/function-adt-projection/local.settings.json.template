@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DIGITAL_TWINS_URL": "https://your-adt-instance.api.region.digitaltwins.azure.net",
+    "IOTHUB_CONNECTION": "Endpoint=sb://your-iothub.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=your-key;EntityPath=messages/events"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  }
+}
