@@ -283,6 +283,43 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Tooltip for machine details */
+        .machine-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            border: 2px solid #00e676;
+            min-width: 200px;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+        }
+        
+        .tooltip-header {
+            font-weight: bold;
+            color: #00e676;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .tooltip-metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+        
+        .tooltip-value {
+            font-weight: bold;
+        }
+        
+        .tooltip-value.good { color: #4CAF50; }
+        .tooltip-value.warning { color: #FF9800; }
+        .tooltip-value.critical { color: #f44336; }
     </style>
 </head>
 <body>
@@ -427,6 +464,13 @@
             createProductionLines();
 
             // Simple camera controls
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+            let tooltip = null;
+            let hoveredMachine = null;
+            let machineObjects = {}; // Store machine objects with their IDs
+            let machineData = {}; // Store real-time machine data
+            
             let mouseX = 0, mouseY = 0;
             let isMouseDown = false;
 
@@ -441,6 +485,12 @@
             });
 
             renderer.domElement.addEventListener('mousemove', (event) => {
+                // Update mouse position for raycasting
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                // Handle camera movement
                 if (isMouseDown) {
                     const deltaX = event.clientX - mouseX;
                     const deltaY = event.clientY - mouseY;
@@ -450,7 +500,15 @@
 
                     mouseX = event.clientX;
                     mouseY = event.clientY;
+                } else {
+                    // Handle hover detection
+                    handleMachineHover(event);
                 }
+            });
+            
+            // Hide tooltip when mouse leaves canvas
+            renderer.domElement.addEventListener('mouseleave', () => {
+                hideTooltip();
             });
 
             // Add production line labels
@@ -553,6 +611,15 @@
 
             // Position the machine
             group.position.set(...config.position);
+            
+            // Store machine reference with ID for hover detection
+            group.userData = { 
+                id: config.id, 
+                name: config.name || config.id,
+                type: config.type || 'Machine'
+            };
+            machineObjects[config.id] = group;
+            
             scene.add(group);
 
             // Store reference
@@ -697,6 +764,126 @@
             // Update indicator color
             machine.indicator.material.color.setHex(color);
             machine.indicator.material.emissive.setHex(color);
+        }
+
+        // Hover and tooltip functions
+        function handleMachineHover(event) {
+            // Update raycaster
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Get intersections with all objects
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            if (intersects.length > 0) {
+                // Find the machine object
+                let machineObject = null;
+                for (let i = 0; i < intersects.length; i++) {
+                    let obj = intersects[i].object;
+                    while (obj.parent && !obj.userData.id) {
+                        obj = obj.parent;
+                    }
+                    if (obj.userData && obj.userData.id) {
+                        machineObject = obj;
+                        break;
+                    }
+                }
+                
+                if (machineObject && machineObject.userData.id) {
+                    const machineId = machineObject.userData.id;
+                    if (hoveredMachine !== machineId) {
+                        hoveredMachine = machineId;
+                        showTooltip(machineId, event.clientX, event.clientY);
+                    }
+                } else {
+                    hideTooltip();
+                }
+            } else {
+                hideTooltip();
+            }
+        }
+        
+        async function showTooltip(machineId, x, y) {
+            // Hide existing tooltip
+            hideTooltip();
+            
+            // Create new tooltip
+            tooltip = document.createElement('div');
+            tooltip.className = 'machine-tooltip';
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+            
+            // Show loading state
+            const machineName = machineObjects[machineId]?.userData?.name || machineId;
+            tooltip.innerHTML = `
+                <div class="tooltip-header">${machineName}</div>
+                <div>Loading real-time data...</div>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            try {
+                // Fetch real-time data from API
+                const [maintenance, quality, energy, anomaly] = await Promise.all([
+                    fetchWithRetry(`${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${machineId}&real=true`),
+                    fetchWithRetry(`${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${machineId}&real=true`),
+                    fetchWithRetry(`${AZURE_ML_CONFIG.endpoint}/api/ml/energy?deviceId=${machineId}&real=true`),
+                    fetchWithRetry(`${AZURE_ML_CONFIG.endpoint}/api/ml/anomaly?deviceId=${machineId}&real=true`)
+                ]);
+                
+                // Update tooltip with real data
+                const confidencePercent = Math.round(maintenance.confidence * 100);
+                const qualityScore = Math.round(quality.qualityScore || 80);
+                const energyEfficiency = Math.round(energy.efficiency || 85);
+                
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">${machineName}</div>
+                    <div class="tooltip-metric">
+                        <span>Health:</span>
+                        <span class="tooltip-value ${getStatusClass(confidencePercent)}">${confidencePercent}%</span>
+                    </div>
+                    <div class="tooltip-metric">
+                        <span>Quality:</span>
+                        <span class="tooltip-value ${getStatusClass(qualityScore)}">${quality.qualityGrade || 'B'} (${qualityScore}%)</span>
+                    </div>
+                    <div class="tooltip-metric">
+                        <span>Energy:</span>
+                        <span class="tooltip-value ${getStatusClass(energyEfficiency)}">${energyEfficiency}%</span>
+                    </div>
+                    <div class="tooltip-metric">
+                        <span>Status:</span>
+                        <span class="tooltip-value ${maintenance.prediction === 'maintenance_required' ? 'warning' : 'good'}">
+                            ${maintenance.prediction === 'maintenance_required' ? 'Maintenance Due' : 'Operating Normal'}
+                        </span>
+                    </div>
+                    <div class="tooltip-metric">
+                        <span>Anomaly:</span>
+                        <span class="tooltip-value ${anomaly.detected ? 'critical' : 'good'}">
+                            ${anomaly.detected ? 'Detected' : 'None'}
+                        </span>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Failed to fetch machine data:', error);
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">${machineName}</div>
+                    <div style="color: #f44336;">Failed to load data</div>
+                `;
+            }
+        }
+        
+        function hideTooltip() {
+            if (tooltip) {
+                document.body.removeChild(tooltip);
+                tooltip = null;
+                hoveredMachine = null;
+            }
+        }
+        
+        function getStatusClass(value) {
+            if (value >= 80) return 'good';
+            if (value >= 60) return 'warning';
+            return 'critical';
         }
 
         // Control functions
