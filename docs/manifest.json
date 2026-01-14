@@ -1,0 +1,24 @@
+{
+  "name": "Smart Factory Mobile",
+  "short_name": "SmartFactory",
+  "description": "Mobile dashboard for Smart Factory monitoring and analytics",
+  "start_url": "/factory-digital-twins-mvp/mobile-dashboard.html",
+  "display": "standalone",
+  "theme_color": "#00e676",
+  "background_color": "#0f0f0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%2300e676' width='192' height='192' rx='40'/%3E%3Ctext x='96' y='120' font-family='Arial' font-size='80' fill='black' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%2300e676' width='512' height='512' rx='100'/%3E%3Ctext x='256' y='320' font-family='Arial' font-size='200' fill='black' text-anchor='middle'%3E📱%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
