@@ -568,7 +568,6 @@
         // Initialize app
         async function initializeApp() {
             try {
-                await msalInstance.initialize();
                 const accounts = msalInstance.getAllAccounts();
                 
                 if (accounts.length === 0) {
@@ -586,12 +585,15 @@
 
         async function loginUser() {
             try {
-                const response = await msalInstance.loginPopup();
+                const response = await msalInstance.loginPopup({
+                    scopes: ["user.read"]
+                });
                 currentUser = response.account;
                 updateUserDisplay();
                 startDataCollection();
             } catch (error) {
                 console.error('Login failed:', error);
+                document.getElementById('userInfo').textContent = '🔒 Login failed - please refresh';
             }
         }
 
