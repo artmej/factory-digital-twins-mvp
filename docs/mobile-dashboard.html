@@ -14,11 +14,245 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23667eea' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='60' font-family='Arial' font-size='40' fill='white' text-anchor='middle'%3E🏢%3C/text%3E%3C/svg%3E">
     
     <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
     
     <!-- Microsoft Authentication Library (MSAL) -->
-    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
     
     <style>
         * {
@@ -387,6 +621,12 @@
     </div>
 
     <script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // 🔐 Microsoft Authentication Library Configuration
         const msalConfig = {
             auth: {
@@ -725,10 +965,88 @@
                 }, 5000); // Ask after 5 seconds
             }
         }
-    </script>
+    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
 
     <!-- 🏥 Health Modeling Integration -->
     <script type="module">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // Import and initialize Health Modeling System
         import SmartFactoryHealthModel from '../src/observability/health-modeling.js';
         
@@ -764,10 +1082,88 @@
                 console.error('❌ Health Modeling initialization error:', error);
             }
         }, 5000);
-    </script>
+    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
 
     <!-- 🔐 Enhanced Security Integration -->
     <script type="module">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // Import and initialize Enhanced Security
         import EnhancedSecurityManager from '../src/security/enhanced-security.js';
         
@@ -778,8 +1174,86 @@
             const security = new EnhancedSecurityManager();
             
             // Add security status to dashboard
-            const addSecurityPanel = () => {\n                const securityPanel = document.createElement('div');\n                securityPanel.id = 'security-status-panel';\n                securityPanel.innerHTML = `\n                    <div style=\"\n                        position: fixed;\n                        top: 380px;\n                        right: 20px;\n                        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);\n                        color: white;\n                        padding: 15px;\n                        border-radius: 10px;\n                        box-shadow: 0 4px 15px rgba(244,67,54,0.3);\n                        backdrop-filter: blur(10px);\n                        z-index: 1000;\n                        min-width: 280px;\n                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n                    \">\n                        <div style=\"display: flex; align-items: center; margin-bottom: 10px;\">\n                            <div style=\"width: 12px; height: 12px; border-radius: 50%; background: #4CAF50; margin-right: 8px;\"></div>\n                            <h3 style=\"margin: 0; font-size: 14px; font-weight: 600;\">🔐 Security Monitor</h3>\n                        </div>\n                        \n                        <div style=\"font-size: 12px; opacity: 0.9; line-height: 1.4;\">\n                            <div style=\"margin: 5px 0;\">🛡️ Events 24h: <span id=\"security-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🚨 High Risk: <span id=\"high-risk-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🔍 Threats: <span id=\"threat-detections\">0</span></div>\n                            <div style=\"margin: 5px 0;\">📊 Risk Score: <span id=\"avg-risk-score\">0.0</span></div>\n                        </div>\n                        \n                        <div style=\"margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);\">\n                            <div style=\"font-size: 11px; opacity: 0.8;\">\n                                🔒 Enhanced security monitoring active\n                            </div>\n                        </div>\n                    </div>\n                `;\n                \n                document.body.appendChild(securityPanel);\n                \n                // Update security metrics every 30 seconds\n                const updateSecurityMetrics = () => {\n                    const metrics = security.getSecurityMetrics();\n                    \n                    document.getElementById('security-events').textContent = metrics.total_events_24h;\n                    document.getElementById('high-risk-events').textContent = metrics.high_risk_events;\n                    document.getElementById('threat-detections').textContent = metrics.threat_detections;\n                    document.getElementById('avg-risk-score').textContent = metrics.average_risk_score.toFixed(1);\n                };\n                \n                updateSecurityMetrics();\n                setInterval(updateSecurityMetrics, 30000);\n            };\n            \n            addSecurityPanel();\n            \n            console.log('✅ Enhanced Security initialized and monitoring');\n        }, 4000);\n    </script>\n\n    <!-- 🤖 AI Agent Integration -->
+            const addSecurityPanel = () => {\n                const securityPanel = document.createElement('div');\n                securityPanel.id = 'security-status-panel';\n                securityPanel.innerHTML = `\n                    <div style=\"\n                        position: fixed;\n                        top: 380px;\n                        right: 20px;\n                        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);\n                        color: white;\n                        padding: 15px;\n                        border-radius: 10px;\n                        box-shadow: 0 4px 15px rgba(244,67,54,0.3);\n                        backdrop-filter: blur(10px);\n                        z-index: 1000;\n                        min-width: 280px;\n                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n                    \">\n                        <div style=\"display: flex; align-items: center; margin-bottom: 10px;\">\n                            <div style=\"width: 12px; height: 12px; border-radius: 50%; background: #4CAF50; margin-right: 8px;\"></div>\n                            <h3 style=\"margin: 0; font-size: 14px; font-weight: 600;\">🔐 Security Monitor</h3>\n                        </div>\n                        \n                        <div style=\"font-size: 12px; opacity: 0.9; line-height: 1.4;\">\n                            <div style=\"margin: 5px 0;\">🛡️ Events 24h: <span id=\"security-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🚨 High Risk: <span id=\"high-risk-events\">0</span></div>\n                            <div style=\"margin: 5px 0;\">🔍 Threats: <span id=\"threat-detections\">0</span></div>\n                            <div style=\"margin: 5px 0;\">📊 Risk Score: <span id=\"avg-risk-score\">0.0</span></div>\n                        </div>\n                        \n                        <div style=\"margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);\">\n                            <div style=\"font-size: 11px; opacity: 0.8;\">\n                                🔒 Enhanced security monitoring active\n                            </div>\n                        </div>\n                    </div>\n                `;\n                \n                document.body.appendChild(securityPanel);\n                \n                // Update security metrics every 30 seconds\n                const updateSecurityMetrics = () => {\n                    const metrics = security.getSecurityMetrics();\n                    \n                    document.getElementById('security-events').textContent = metrics.total_events_24h;\n                    document.getElementById('high-risk-events').textContent = metrics.high_risk_events;\n                    document.getElementById('threat-detections').textContent = metrics.threat_detections;\n                    document.getElementById('avg-risk-score').textContent = metrics.average_risk_score.toFixed(1);\n                };\n                \n                updateSecurityMetrics();\n                setInterval(updateSecurityMetrics, 30000);\n            };\n            \n            addSecurityPanel();\n            \n            console.log('✅ Enhanced Security initialized and monitoring');\n        }, 4000);\n    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>\n\n    <!-- 🤖 AI Agent Integration -->
     <script type="module">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // Import and initialize AI Agent
         import AgentDashboardIntegration from '../src/ai-agent/index.js';
         
@@ -789,11 +1263,245 @@
             
             // The agent will auto-initialize via the module
             // We can also manually trigger initialization if needed
-            if (window.FactoryBotAgent) {\n                console.log('✅ AI Agent available and ready');\n            } else {\n                console.log('⚠️ AI Agent not yet available, will auto-initialize');\n            }\n        }, 3000);\n    </script>\n\n    <!-- 🏭 Advanced 3D Visualization Systems -->\n    <script type=\"module\">\n        // Import advanced 3D visualization modules\n        import AdvancedSmartFactory3D from '../src/visualization/advanced-3d-digital-twins.js';\n        import Advanced3DMaterials from '../src/visualization/advanced-3d-materials.js';\n        import DigitalTwinParticleSystem from '../src/visualization/particle-systems.js';\n        \n        // Initialize advanced 3D system after dashboard loads\n        setTimeout(() => {\n            console.log('🚀 Initializing Advanced 3D Digital Twin Visualization...');\n            \n            try {\n                // Initialize advanced materials system\n                window.advanced3DMaterials = new Advanced3DMaterials();\n                \n                // Initialize advanced particle system\n                // Will be initialized after 3D scene is ready\n                \n                // Replace basic 3D with advanced system\n                if (window.factory3D) {\n                    console.log('🔄 Upgrading to Advanced 3D System...');\n                    window.factory3D.dispose();\n                }\n                \n                // Create new advanced 3D system\n                window.factory3D = new AdvancedSmartFactory3D();\n                \n                // Initialize particle system after scene is ready\n                setTimeout(() => {\n                    if (window.factory3D && window.factory3D.scene) {\n                        window.particleSystem = new DigitalTwinParticleSystem(\n                            window.factory3D.scene, \n                            window.advanced3DMaterials\n                        );\n                        console.log('✨ Particle systems initialized');\n                    }\n                }, 2000);\n                \n                console.log('✅ Advanced 3D Digital Twin System initialized successfully!');\n                console.log('🎨 Features enabled: Realistic materials, particle effects, post-processing');\n                \n            } catch (error) {\n                console.error('❌ Advanced 3D system failed, using fallback:', error);\n                // Fallback to basic 3D if advanced fails\n                if (!window.factory3D) {\n                    window.factory3D = new SmartFactory3D();\n                }\n            }\n        }, 6000); // Start after other systems are loaded\n    </script>\n\n    <!-- 🏭 Factory 3D Engine -->
-    <script src="factory-3d.js"></script>
+            if (window.FactoryBotAgent) {\n                console.log('✅ AI Agent available and ready');\n            } else {\n                console.log('⚠️ AI Agent not yet available, will auto-initialize');\n            }\n        }, 3000);\n    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>\n\n    <!-- 🏭 Advanced 3D Visualization Systems -->\n    <script type=\"module\">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};\n        // Import advanced 3D visualization modules\n        import AdvancedSmartFactory3D from '../src/visualization/advanced-3d-digital-twins.js';\n        import Advanced3DMaterials from '../src/visualization/advanced-3d-materials.js';\n        import DigitalTwinParticleSystem from '../src/visualization/particle-systems.js';\n        \n        // Initialize advanced 3D system after dashboard loads\n        setTimeout(() => {\n            console.log('🚀 Initializing Advanced 3D Digital Twin Visualization...');\n            \n            try {\n                // Initialize advanced materials system\n                window.advanced3DMaterials = new Advanced3DMaterials();\n                \n                // Initialize advanced particle system\n                // Will be initialized after 3D scene is ready\n                \n                // Replace basic 3D with advanced system\n                if (window.factory3D) {\n                    console.log('🔄 Upgrading to Advanced 3D System...');\n                    window.factory3D.dispose();\n                }\n                \n                // Create new advanced 3D system\n                window.factory3D = new AdvancedSmartFactory3D();\n                \n                // Initialize particle system after scene is ready\n                setTimeout(() => {\n                    if (window.factory3D && window.factory3D.scene) {\n                        window.particleSystem = new DigitalTwinParticleSystem(\n                            window.factory3D.scene, \n                            window.advanced3DMaterials\n                        );\n                        console.log('✨ Particle systems initialized');\n                    }\n                }, 2000);\n                \n                console.log('✅ Advanced 3D Digital Twin System initialized successfully!');\n                console.log('🎨 Features enabled: Realistic materials, particle effects, post-processing');\n                \n            } catch (error) {\n                console.error('❌ Advanced 3D system failed, using fallback:', error);\n                // Fallback to basic 3D if advanced fails\n                if (!window.factory3D) {\n                    window.factory3D = new SmartFactory3D();\n                }\n            }\n        }, 6000); // Start after other systems are loaded\n    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>\n\n    <!-- 🏭 Factory 3D Engine -->
+    <script src="factory-3d.js">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
     
     <!-- 🚨 Testing & Telemetry Systems -->
     <script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // Load testing systems after everything else is ready
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -947,6 +1655,253 @@
         window.toggleTestingMode = toggleTestingMode;
         window.runFullDemo = runFullDemo;
         
-    </script>
+    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
+
+<!-- Enhanced Azure ML API Error Handling -->
+<script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Global configuration for Azure ML APIs
+const AZURE_CONFIG = {
+    baseUrl: 'https://smartfactory-ml-api.azurewebsites.net',
+    timeout: 15000,
+    maxRetries: 3,
+    retryDelay: 1000
+};
+
+// Enhanced fetch with retry logic for Azure APIs
+async function fetchAzureMLAPI(endpoint, options = {}) {
+    const url = AZURE_CONFIG.baseUrl + endpoint;
+    
+    for (let attempt = 1; attempt <= AZURE_CONFIG.maxRetries; attempt++) {
+        try {
+            console.log(🔄 Attempt /: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), AZURE_CONFIG.timeout);
+            
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(✅ Success: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true, data);
+                return data;
+            } else {
+                throw new Error(HTTP : );
+            }
+            
+        } catch (error) {
+            console.warn(⚠️ Attempt  failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true:, error.message);
+            
+            if (attempt === AZURE_CONFIG.maxRetries) {
+                console.error(❌ All attempts failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+                return generateFallbackData(endpoint, error);
+            }
+            
+            // Progressive delay between retries
+            await new Promise(resolve => setTimeout(resolve, AZURE_CONFIG.retryDelay * attempt));
+        }
+    }
+}
+
+// Generate fallback data when Azure API is unavailable
+function generateFallbackData(endpoint, error) {
+    const deviceId = new URLSearchParams(endpoint.split('?')[1] || '').get('deviceId') || 'UNKNOWN';
+    const timestamp = new Date().toISOString();
+    
+    console.log(🔄 Generating fallback data for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+    
+    if (endpoint.includes('/ml/maintenance')) {
+        return {
+            deviceId,
+            prediction: 'maintenance_ok',
+            confidence: 0.65,
+            riskScore: 0.3,
+            estimatedDays: 25,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/quality')) {
+        return {
+            deviceId,
+            qualityGrade: 'B',
+            qualityScore: 82,
+            confidence: 0.70,
+            defectProbability: 0.18,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/energy')) {
+        return {
+            deviceId,
+            currentEfficiency: 78,
+            optimizedEfficiency: 85,
+            potentialSavings: 7,
+            recommendations: ['Azure API unavailable - using cached data'],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/anomaly')) {
+        return {
+            deviceId,
+            isAnomaly: false,
+            anomalyScore: 0.25,
+            confidence: 0.68,
+            severity: 'low',
+            detectedAnomalies: [],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    }
+    
+    return { 
+        error: true, 
+        message: 'Service temporarily unavailable', 
+        fallback: true,
+        timestamp 
+    };
+}
+
+// Update UI to show when using Azure vs fallback data
+function updateDataSourceIndicator(data, elementId = null) {
+    const isAzure = !data.fallback;
+    const indicator = document.getElementById('data-source-indicator') || createDataSourceIndicator();
+    
+    indicator.innerHTML = 
+        <div class="data-source ">
+            <span class="indicator ">●</span>
+            
+            <small></small>
+        </div>
+    ;
+}
+
+function createDataSourceIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'data-source-indicator';
+    indicator.style.cssText = 
+        position: fixed; 
+        top: 10px; 
+        right: 10px; 
+        background: rgba(0,0,0,0.8); 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 4px; 
+        font-size: 12px; 
+        z-index: 1000;
+        font-family: monospace;
+    ;
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Override original fetch calls to use enhanced version
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+    if (typeof url === 'string' && url.includes('/api/ml/')) {
+        const endpoint = new URL(url).pathname + new URL(url).search;
+        return fetchAzureMLAPI(endpoint, options);
+    }
+    return originalFetch.call(this, url, options);
+};
+
+console.log('🚀 Enhanced Azure ML API integration loaded');
+console.log('📍 Azure Function URL:', AZURE_CONFIG.baseUrl);
+</script>
 </body>
 </html>
+
+

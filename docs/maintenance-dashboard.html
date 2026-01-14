@@ -581,6 +581,12 @@
     </div>
 
     <script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // Generate trend chart
         function generateTrendChart() {
             const chart = document.getElementById('trendChart');
@@ -667,7 +673,79 @@
                 }
             });
         }, 60000); // Update every minute
-    </script>
+    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
 
     <style>
         @keyframes spin {
@@ -675,5 +753,180 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+
+<!-- Enhanced Azure ML API Error Handling -->
+<script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Global configuration for Azure ML APIs
+const AZURE_CONFIG = {
+    baseUrl: 'https://smartfactory-ml-api.azurewebsites.net',
+    timeout: 15000,
+    maxRetries: 3,
+    retryDelay: 1000
+};
+
+// Enhanced fetch with retry logic for Azure APIs
+async function fetchAzureMLAPI(endpoint, options = {}) {
+    const url = AZURE_CONFIG.baseUrl + endpoint;
+    
+    for (let attempt = 1; attempt <= AZURE_CONFIG.maxRetries; attempt++) {
+        try {
+            console.log(🔄 Attempt /: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), AZURE_CONFIG.timeout);
+            
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(✅ Success: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true, data);
+                return data;
+            } else {
+                throw new Error(HTTP : );
+            }
+            
+        } catch (error) {
+            console.warn(⚠️ Attempt  failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true:, error.message);
+            
+            if (attempt === AZURE_CONFIG.maxRetries) {
+                console.error(❌ All attempts failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+                return generateFallbackData(endpoint, error);
+            }
+            
+            // Progressive delay between retries
+            await new Promise(resolve => setTimeout(resolve, AZURE_CONFIG.retryDelay * attempt));
+        }
+    }
+}
+
+// Generate fallback data when Azure API is unavailable
+function generateFallbackData(endpoint, error) {
+    const deviceId = new URLSearchParams(endpoint.split('?')[1] || '').get('deviceId') || 'UNKNOWN';
+    const timestamp = new Date().toISOString();
+    
+    console.log(🔄 Generating fallback data for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+    
+    if (endpoint.includes('/ml/maintenance')) {
+        return {
+            deviceId,
+            prediction: 'maintenance_ok',
+            confidence: 0.65,
+            riskScore: 0.3,
+            estimatedDays: 25,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/quality')) {
+        return {
+            deviceId,
+            qualityGrade: 'B',
+            qualityScore: 82,
+            confidence: 0.70,
+            defectProbability: 0.18,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/energy')) {
+        return {
+            deviceId,
+            currentEfficiency: 78,
+            optimizedEfficiency: 85,
+            potentialSavings: 7,
+            recommendations: ['Azure API unavailable - using cached data'],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/anomaly')) {
+        return {
+            deviceId,
+            isAnomaly: false,
+            anomalyScore: 0.25,
+            confidence: 0.68,
+            severity: 'low',
+            detectedAnomalies: [],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    }
+    
+    return { 
+        error: true, 
+        message: 'Service temporarily unavailable', 
+        fallback: true,
+        timestamp 
+    };
+}
+
+// Update UI to show when using Azure vs fallback data
+function updateDataSourceIndicator(data, elementId = null) {
+    const isAzure = !data.fallback;
+    const indicator = document.getElementById('data-source-indicator') || createDataSourceIndicator();
+    
+    indicator.innerHTML = 
+        <div class="data-source ">
+            <span class="indicator ">●</span>
+            
+            <small></small>
+        </div>
+    ;
+}
+
+function createDataSourceIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'data-source-indicator';
+    indicator.style.cssText = 
+        position: fixed; 
+        top: 10px; 
+        right: 10px; 
+        background: rgba(0,0,0,0.8); 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 4px; 
+        font-size: 12px; 
+        z-index: 1000;
+        font-family: monospace;
+    ;
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Override original fetch calls to use enhanced version
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+    if (typeof url === 'string' && url.includes('/api/ml/')) {
+        const endpoint = new URL(url).pathname + new URL(url).search;
+        return fetchAzureMLAPI(endpoint, options);
+    }
+    return originalFetch.call(this, url, options);
+};
+
+console.log('🚀 Enhanced Azure ML API integration loaded');
+console.log('📍 Azure Function URL:', AZURE_CONFIG.baseUrl);
+</script>
 </body>
 </html>
+
+

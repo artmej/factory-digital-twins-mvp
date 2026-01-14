@@ -4,6 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 Smart Factory Copilot - AI Agent Dashboard</title>
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js">
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
     <style>
         * {
             margin: 0;
@@ -689,44 +768,44 @@
             <div class="chat-interface">
                 <div class="chat-messages" id="chat-messages">
                     <div class="message agent fade-in">
-                        <div class="message-header">Factory Copilot • Now</div>
+                        <div class="message-header">Factory Copilot • Ahora</div>
                         <div class="message-content">
-                            👋 Hi! I'm your Smart Factory Copilot. I'm monitoring all factory operations and ready to help you with insights, recommendations and automation. 
+                            👋 ¡Hola! Soy tu Smart Factory Copilot. Estoy monitoreando todas las operaciones de la fábrica y listo para ayudarte con insights, recomendaciones y automatización. 
                             
-                            You can ask me things like:
-                            • "Which line has the next maintenance?"
-                            • "When is the next maintenance?"
-                            • "How is LINE 2 functioning?"
+                            Puedes preguntarme cosas como:
+                            • "¿En qué línea tengo el siguiente mantenimiento?"
+                            • "¿Cuándo es el próximo mantenimiento?"
+                            • "¿Cómo está funcionando la LÍNEA 2?"
                             
-                            How can I help you today?
+                            ¿En qué puedo ayudarte hoy?
                         </div>
                     </div>
                     
                     <div class="message agent fade-in">
-                        <div class="message-header">Factory Copilot • 2 min ago</div>
+                        <div class="message-header">Factory Copilot • Hace 2 min</div>
                         <div class="message-content">
-                            🚨 I've detected a temperature anomaly in LINE-2-CNC-02. The machine is running 15°C above normal. I recommend immediate inspection. Should I schedule emergency maintenance?
+                            🚨 He detectado una anomalía de temperatura en LINE-2-CNC-02. La máquina está funcionando 15°C por encima del nivel normal. Recomiendo inspección inmediata. ¿Debo programar mantenimiento de emergencia?
                         </div>
                     </div>
                 </div>
                 
                 <div class="quick-actions">
-                    <div class="quick-actions-title">Quick Questions:</div>
+                    <div class="quick-actions-title">Preguntas Rápidas:</div>
                     <div class="quick-buttons">
-                        <span class="quick-btn" onclick="sendQuickMessage('What is the production status?')">Production Status</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('When is the next maintenance?')">Next Maintenance</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Which line needs urgent maintenance?')">Urgent Maintenance</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('How is LINE 2 performing?')">LINE 2 Status</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Optimize energy consumption')">Optimize Energy</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('How are quality metrics?')">Quality Metrics</span>
-                        <span class="quick-btn" onclick="sendQuickMessage('Help with diagnostics')">Help</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cuál es el estado de producción?')">Estado Producción</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cuándo es el próximo mantenimiento?')">Próximo Mantenimiento</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Qué línea necesita mantenimiento urgente?')">Mantenimiento Urgente</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cómo está funcionando la LÍNEA 2?')">Estado LÍNEA 2</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('Optimizar consumo energético')">Optimizar Energía</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('¿Cómo están las métricas de calidad?')">Métricas Calidad</span>
+                        <span class="quick-btn" onclick="sendQuickMessage('Ayuda con diagnósticos')">Ayuda</span>
                     </div>
                 </div>
                 
                 <div class="chat-input-container">
                     <div class="chat-input-group">
-                        <input type="text" class="chat-input" id="chat-input" placeholder="Ask me about the factory... When is the next maintenance?" onkeypress="handleChatInput(event)">
-                        <button class="send-btn" onclick="sendMessage()">Send</button>
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Pregúntame sobre la fábrica... ¿Cuándo es el próximo mantenimiento?" onkeypress="handleChatInput(event)">
+                        <button class="send-btn" onclick="sendMessage()">Enviar</button>
                     </div>
                 </div>
             </div>
@@ -734,6 +813,12 @@
     </div>
 
     <script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
         // 🤖 Smart Factory Copilot - Main Logic with Real API Integration
         let chatHistory = [];
         let agentStatus = {
@@ -744,7 +829,7 @@
         };
         
         // API Configuration
-        const API_BASE = 'https://smartfactory-prod-func-blue.azurewebsites.net/api/copilot';
+        const API_BASE = 'https://smartfactory-ml-api.azurewebsites.net';
         
         // Machine data for operations
         const factoryMachines = [
@@ -1279,6 +1364,253 @@
         
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initializeCopilot);
-    </script>
+    
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+
+// Enhanced error handling for Azure endpoints
+function handleAzureAPIError(error, fallback = null) {
+    console.warn('Azure API Error:', error);
+    if (fallback && typeof fallback === 'function') {
+        return fallback();
+    }
+    return {
+        error: true,
+        message: 'Azure API temporarily unavailable',
+        timestamp: new Date().toISOString(),
+        source: 'fallback'
+    };
+}
+
+// Enhanced fetch with retry logic
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                timeout: 10000
+            });
+            
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(HTTP : );
+            }
+        } catch (error) {
+            console.warn(Attempt  failed:, error.message);
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Progressive delay
+        }
+    }
+}
+</script>
+
+<!-- Enhanced Azure ML API Error Handling -->
+<script>
+const AZURE_ML_CONFIG = {
+    endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
+    useRealModels: true,
+    fallbackEnabled: true,
+    retryAttempts: 3
+};
+// Global configuration for Azure ML APIs
+const AZURE_CONFIG = {
+    baseUrl: 'https://smartfactory-ml-api.azurewebsites.net',
+    timeout: 15000,
+    maxRetries: 3,
+    retryDelay: 1000
+};
+
+// Enhanced fetch with retry logic for Azure APIs
+async function fetchAzureMLAPI(endpoint, options = {}) {
+    const url = AZURE_CONFIG.baseUrl + endpoint;
+    
+    for (let attempt = 1; attempt <= AZURE_CONFIG.maxRetries; attempt++) {
+        try {
+            console.log(🔄 Attempt /: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), AZURE_CONFIG.timeout);
+            
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(✅ Success: https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true, data);
+                return data;
+            } else {
+                throw new Error(HTTP : );
+            }
+            
+        } catch (error) {
+            console.warn(⚠️ Attempt  failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true:, error.message);
+            
+            if (attempt === AZURE_CONFIG.maxRetries) {
+                console.error(❌ All attempts failed for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+                return generateFallbackData(endpoint, error);
+            }
+            
+            // Progressive delay between retries
+            await new Promise(resolve => setTimeout(resolve, AZURE_CONFIG.retryDelay * attempt));
+        }
+    }
+}
+
+// Generate fallback data when Azure API is unavailable
+function generateFallbackData(endpoint, error) {
+    const deviceId = new URLSearchParams(endpoint.split('?')[1] || '').get('deviceId') || 'UNKNOWN';
+    const timestamp = new Date().toISOString();
+    
+    console.log(🔄 Generating fallback data for https://smartfactory-ml-api.azurewebsites.net/api/ml/anomaly?deviceId=TEST&temperature=75&real=true);
+    
+    if (endpoint.includes('/ml/maintenance')) {
+        return {
+            deviceId,
+            prediction: 'maintenance_ok',
+            confidence: 0.65,
+            riskScore: 0.3,
+            estimatedDays: 25,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/quality')) {
+        return {
+            deviceId,
+            qualityGrade: 'B',
+            qualityScore: 82,
+            confidence: 0.70,
+            defectProbability: 0.18,
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/energy')) {
+        return {
+            deviceId,
+            currentEfficiency: 78,
+            optimizedEfficiency: 85,
+            potentialSavings: 7,
+            recommendations: ['Azure API unavailable - using cached data'],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    } else if (endpoint.includes('/ml/anomaly')) {
+        return {
+            deviceId,
+            isAnomaly: false,
+            anomalyScore: 0.25,
+            confidence: 0.68,
+            severity: 'low',
+            detectedAnomalies: [],
+            modelType: 'fallback',
+            timestamp,
+            fallback: true,
+            error: error.message
+        };
+    }
+    
+    return { 
+        error: true, 
+        message: 'Service temporarily unavailable', 
+        fallback: true,
+        timestamp 
+    };
+}
+
+// Update UI to show when using Azure vs fallback data
+function updateDataSourceIndicator(data, elementId = null) {
+    const isAzure = !data.fallback;
+    const indicator = document.getElementById('data-source-indicator') || createDataSourceIndicator();
+    
+    indicator.innerHTML = 
+        <div class="data-source ">
+            <span class="indicator ">●</span>
+            
+            <small></small>
+        </div>
+    ;
+}
+
+function createDataSourceIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'data-source-indicator';
+    indicator.style.cssText = 
+        position: fixed; 
+        top: 10px; 
+        right: 10px; 
+        background: rgba(0,0,0,0.8); 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 4px; 
+        font-size: 12px; 
+        z-index: 1000;
+        font-family: monospace;
+    ;
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Override original fetch calls to use enhanced version
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+    if (typeof url === 'string' && url.includes('/api/ml/')) {
+        const endpoint = new URL(url).pathname + new URL(url).search;
+        return fetchAzureMLAPI(endpoint, options);
+    }
+    return originalFetch.call(this, url, options);
+};
+
+console.log('🚀 Enhanced Azure ML API integration loaded');
+console.log('📍 Azure Function URL:', AZURE_CONFIG.baseUrl);
+</script>
 </body>
 </html>
+
+
