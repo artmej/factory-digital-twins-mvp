@@ -597,7 +597,20 @@
 
         function updateUserDisplay() {
             if (currentUser) {
-                document.getElementById('userInfo').textContent = `👤 ${currentUser.name || currentUser.username}`;
+                console.log('Updating user display:', currentUser.name || currentUser.username);
+                const userElement = document.getElementById('userInfo');
+                if (userElement) {
+                    userElement.textContent = `👤 ${currentUser.name || currentUser.username}`;
+                } else {
+                    console.error('userInfo element not found');
+                    // Try again in a moment
+                    setTimeout(() => {
+                        const retryElement = document.getElementById('userInfo');
+                        if (retryElement) {
+                            retryElement.textContent = `👤 ${currentUser.name || currentUser.username}`;
+                        }
+                    }, 500);
+                }
             }
         }
 
