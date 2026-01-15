@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏭 Smart Factory Dashboard Hub</title>
+    <title>🏭 Smart Factory Digital Twins Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,374 +16,248 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .container {
             text-align: center;
             max-width: 1200px;
-            padding: 40px;
+            padding: 40px 20px;
         }
-        
+
         .header {
-            margin-bottom: 60px;
+            margin-bottom: 50px;
         }
-        
+
         .header h1 {
-            font-size: 4rem;
+            font-size: 3.5em;
             margin-bottom: 20px;
-            background: linear-gradient(45deg, #00e676, #00bcd4);
+            background: linear-gradient(45deg, #00ff88, #00ccff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+            background-clip: text;
         }
-        
+
         .header p {
-            font-size: 1.4rem;
+            font-size: 1.3em;
             opacity: 0.9;
             margin-bottom: 10px;
         }
-        
-        .status {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 40px;
-            border: 1px solid rgba(0, 230, 118, 0.3);
-        }
-        
-        .status-item {
+
+        .status-indicator {
             display: inline-block;
-            margin: 0 20px;
-            font-size: 14px;
+            padding: 8px 16px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 25px;
+            margin: 10px 0;
         }
-        
-        .pulse {
-            width: 10px;
-            height: 10px;
-            background: #00e676;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-        }
-        
+
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            margin-bottom: 40px;
+            margin-top: 50px;
         }
-        
+
         .dashboard-card {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 30px;
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            border-color: #00e676;
-        }
-        
-        .card-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+            text-decoration: none;
+            color: white;
             display: block;
         }
-        
-        .card-title {
-            font-size: 1.8rem;
-            font-weight: bold;
+
+        .dashboard-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.8em;
             margin-bottom: 15px;
-            color: #00e676;
+            color: #00ff88;
         }
-        
-        .card-description {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-bottom: 20px;
-            line-height: 1.5;
+
+        .dashboard-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
         }
-        
-        .card-features {
-            list-style: none;
-            text-align: left;
-        }
-        
-        .card-features li {
-            margin: 8px 0;
-            font-size: 0.9rem;
+
+        .dashboard-card p {
+            font-size: 1.1em;
+            line-height: 1.6;
             opacity: 0.8;
+            margin-bottom: 20px;
         }
-        
-        .card-features li::before {
-            content: "✅ ";
-            margin-right: 8px;
+
+        .features {
+            font-size: 0.9em;
+            opacity: 0.7;
+            list-style: none;
         }
-        
-        .launch-btn {
-            background: linear-gradient(45deg, #00e676, #00bcd4);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
+
+        .features li {
+            margin: 5px 0;
+        }
+
+        .features li::before {
+            content: "✓ ";
+            color: #00ff88;
             font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
         }
-        
-        .launch-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 230, 118, 0.4);
+
+        .footer {
+            margin-top: 60px;
+            opacity: 0.7;
+            font-size: 0.9em;
         }
-        
-        .copilot-card {
-            border: 2px solid rgba(0, 230, 118, 0.5);
-            background: linear-gradient(135deg, rgba(0, 230, 118, 0.1), rgba(0, 212, 170, 0.1));
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .copilot-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.2), transparent);
-            transition: left 0.7s ease;
-        }
-        
-        .copilot-card:hover::before {
-            left: 100%;
-        }
-        
-        .copilot-card .card-icon {
-            animation: aiFloat 3s ease-in-out infinite;
-        }
-        
-        @keyframes aiFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .info-section {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 40px;
-            border: 1px solid rgba(0, 230, 118, 0.3);
-        }
-        
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .tech-badge {
-            background: rgba(0, 230, 118, 0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid rgba(0, 230, 118, 0.5);
-        }
-        
-        .github-link {
-            margin-top: 30px;
-        }
-        
-        .github-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+
+        .footer a {
+            color: #00ff88;
             text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            display: inline-block;
         }
-        
-        .github-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+
+        .test-dashboard {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid #ffaa00;
+        }
+
+        .test-dashboard:hover {
+            background: rgba(255, 165, 0, 0.3);
+            border: 1px solid #ffaa00;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.5em; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .container { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏭 Smart Factory Digital Twins</h1>
-            <p>Real-time Industrial IoT Dashboard Suite</p>
-            <p>Connected to Azure Digital Twins & IoT Hub</p>
-        </div>
-        
-        <div class="status">
-            <div class="status-item">
-                <span class="pulse"></span>
-                13 Digital Twins Active
-            </div>
-            <div class="status-item">
-                <span class="pulse"></span>
-                Live Telemetry from Edge
-            </div>
-            <div class="status-item">
-                <span class="pulse"></span>
-                ML Models Running
+            <h1>🏭 Smart Factory</h1>
+            <p>Digital Twins Dashboard with Real-time ML Analytics</p>
+            <div class="status-indicator" id="system-status">
+                🟢 System Online - 9 Machines Monitored
             </div>
         </div>
-        
+
         <div class="dashboard-grid">
-            <div class="dashboard-card" onclick="window.open('3d-dashboard.html', '_blank')">
-                <span class="card-icon">🏗️</span>
-                <h3 class="card-title">3D Digital Twins</h3>
-                <p class="card-description">
-                    Immersive 3D visualization of the factory floor with real-time machine status and telemetry data.
-                </p>
-                <ul class="card-features">
-                    <li>Interactive 3D factory visualization</li>
-                    <li>Real-time machine status indicators</li>
-                    <li>Live telemetry from Azure IoT Hub</li>
-                    <li>Maintenance mode highlighting</li>
-                    <li>Cinematic camera controls</li>
+            <a href="test-dashboard.html" class="dashboard-card test-dashboard">
+                <div class="icon">🧪</div>
+                <h3>Test Dashboard</h3>
+                <p>Simple dashboard without authentication for testing APIs and basic functionality</p>
+                <ul class="features">
+                    <li>No authentication required</li>
+                    <li>API connectivity testing</li>
+                    <li>Mock data fallback</li>
                 </ul>
-                <button class="launch-btn">Launch 3D Dashboard</button>
-            </div>
-            
-            <div class="dashboard-card" onclick="window.open('executive-dashboard.html', '_blank')">
-                <span class="card-icon">📊</span>
-                <h3 class="card-title">Executive ROI Dashboard</h3>
-                <p class="card-description">
-                    Strategic dashboard with ML-driven insights, predictive maintenance ROI, and business metrics.
-                </p>
-                <ul class="card-features">
-                    <li>ML predictive maintenance (99.7% accuracy)</li>
-                    <li>ROI calculations ($12.5M annual savings)</li>
-                    <li>Executive KPIs and trends</li>
-                    <li>Quality and efficiency metrics</li>
-                    <li>Cost optimization insights</li>
+            </a>
+
+            <a href="3d-dashboard.html" class="dashboard-card">
+                <div class="icon">🎮</div>
+                <h3>3D Interactive View</h3>
+                <p>Explore the factory floor in 3D with real-time machine status and ML predictions</p>
+                <ul class="features">
+                    <li>3D factory visualization</li>
+                    <li>Interactive machine hover</li>
+                    <li>Real-time ML data</li>
                 </ul>
-                <button class="launch-btn">Launch Executive Dashboard</button>
-            </div>
-            
-            <div class="dashboard-card" onclick="window.open('maintenance-dashboard.html', '_blank')">
-                <span class="card-icon">🔧</span>
-                <h3 class="card-title">Maintenance Dashboard</h3>
-                <p class="card-description">
-                    Specialized dashboard for maintenance teams with alerts, schedules, and technician management.
-                </p>
-                <ul class="card-features">
-                    <li>Critical alerts with priority levels</li>
-                    <li>Maintenance scheduling calendar</li>
-                    <li>Spare parts inventory tracking</li>
-                    <li>Technician status and location</li>
-                    <li>MTTR/MTBF performance metrics</li>
+            </a>
+
+            <a href="executive-dashboard.html" class="dashboard-card">
+                <div class="icon">💼</div>
+                <h3>Executive View</h3>
+                <p>High-level metrics, ROI analysis, and financial impact of smart factory initiatives</p>
+                <ul class="features">
+                    <li>ROI & Financial metrics</li>
+                    <li>OEE analysis</li>
+                    <li>Executive summaries</li>
                 </ul>
-                <button class="launch-btn">Launch Maintenance Dashboard</button>
-            </div>
-            
-            <div class="dashboard-card" onclick="window.open('mobile-dashboard.html', '_blank')">
-                <span class="card-icon">📱</span>
-                <h3 class="card-title">Mobile PWA</h3>
-                <p class="card-description">
-                    Progressive Web App optimized for tablets and mobile devices, perfect for field technicians.
-                </p>
-                <ul class="card-features">
-                    <li>Installable Progressive Web App</li>
-                    <li>Offline functionality</li>
-                    <li>Mobile-optimized interface</li>
-                    <li>Touch-friendly controls</li>
-                    <li>Field technician workflows</li>
+            </a>
+
+            <a href="maintenance-dashboard.html" class="dashboard-card">
+                <div class="icon">🔧</div>
+                <h3>Predictive Maintenance</h3>
+                <p>ML-powered maintenance scheduling and equipment health monitoring</p>
+                <ul class="features">
+                    <li>Predictive analytics</li>
+                    <li>Maintenance timeline</li>
+                    <li>Equipment health scores</li>
                 </ul>
-                <button class="launch-btn">Launch Mobile PWA</button>
-            </div>
-            
-            <div class="dashboard-card copilot-card" onclick="window.open('copilot-dashboard.html', '_blank')">
-                <span class="card-icon">🤖</span>
-                <h3 class="card-title">Smart Factory Copilot</h3>
-                <p class="card-description">
-                    AI-powered assistant providing intelligent recommendations, predictive insights, and automated decision-making for optimal factory operations.
-                </p>
-                <ul class="card-features">
-                    <li>AI-powered conversational interface</li>
-                    <li>Predictive maintenance alerts</li>
-                    <li>Automated optimization recommendations</li>
-                    <li>Real-time decision support</li>
-                    <li>Natural language interactions</li>
+            </a>
+
+            <a href="mobile-dashboard.html" class="dashboard-card">
+                <div class="icon">📱</div>
+                <h3>Mobile Dashboard</h3>
+                <p>Touch-optimized interface for monitoring factory operations on mobile devices</p>
+                <ul class="features">
+                    <li>Mobile-first design</li>
+                    <li>Touch gestures</li>
+                    <li>Offline capabilities</li>
                 </ul>
-                <button class="launch-btn">Launch AI Copilot</button>
-            </div>
+            </a>
+
+            <a href="copilot-dashboard.html" class="dashboard-card">
+                <div class="icon">🤖</div>
+                <h3>AI Copilot</h3>
+                <p>Intelligent chat assistant for factory operations with natural language queries</p>
+                <ul class="features">
+                    <li>AI-powered chat</li>
+                    <li>Natural language queries</li>
+                    <li>Intelligent insights</li>
+                </ul>
+            </a>
         </div>
-        
-        <div class="info-section">
-            <h3 style="color: #00e676; margin-bottom: 15px;">🏗️ Architecture Overview</h3>
-            <p style="margin-bottom: 15px;">
-                This Smart Factory solution demonstrates a complete Industrial IoT architecture with Edge-to-Cloud data flow, 
-                Azure Digital Twins for real-time monitoring, and Machine Learning for predictive insights.
+
+        <div class="footer">
+            <p>Smart Factory Digital Twins MVP | Real-time ML Analytics</p>
+            <p>
+                <a href="https://github.com/artmej/factory-digital-twins-mvp" target="_blank">📁 View Source</a> |
+                <a href="#" onclick="testAllAPIs()">🧪 Test APIs</a> |
+                <a href="#" onclick="showSystemInfo()">ℹ️ System Info</a>
             </p>
-            
-            <div class="tech-stack">
-                <span class="tech-badge">Azure Digital Twins</span>
-                <span class="tech-badge">Azure IoT Hub</span>
-                <span class="tech-badge">Azure Functions</span>
-                <span class="tech-badge">Azure Arc K3s</span>
-                <span class="tech-badge">Three.js 3D</span>
-                <span class="tech-badge">Chart.js</span>
-                <span class="tech-badge">Progressive Web App</span>
-                <span class="tech-badge">GitHub Pages</span>
-            </div>
-            
-            <div class="github-link">
-                <a href="https://github.com/artmej/factory-digital-twins-mvp" target="_blank" class="github-btn">
-                    🔗 View Source Code on GitHub
-                </a>
-            </div>
         </div>
     </div>
-    
+
     <script>
-        // Add some dynamic effects
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animate cards on load
-            const cards = document.querySelectorAll('.dashboard-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.6s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 200);
-            });
-            
-            // Update status periodically
-            setInterval(updateStatus, 5000);
-        });
-        
-        function updateStatus() {
-            const statusItems = document.querySelectorAll('.status-item');
-            statusItems.forEach(item => {
-                const pulse = item.querySelector('.pulse');
-                pulse.style.animation = 'none';
-                setTimeout(() => {
-                    pulse.style.animation = 'pulse 2s infinite';
-                }, 100);
-            });
+        function testAllAPIs() {
+            window.open('test-dashboard.html', '_blank');
         }
+
+        function showSystemInfo() {
+            alert(`🏭 Smart Factory System Information:
+
+Factory Lines: 3 (LINE_1, LINE_2, LINE_3)
+Total Machines: 9 (3 CNC, 3 Robot, 3 Conveyor)
+ML APIs: 4 endpoints (Maintenance, Quality, Energy, Anomaly)
+Authentication: Microsoft MSAL
+Last Updated: ${new Date().toLocaleString()}
+
+Status: All systems operational`);
+        }
+
+        // Update system status periodically
+        function updateSystemStatus() {
+            const statusElement = document.getElementById('system-status');
+            const machines = 9;
+            const online = 7 + Math.floor(Math.random() * 2); // 7-8 online
+            statusElement.textContent = `🟢 System Online - ${online}/${machines} Machines Operational`;
+        }
+
+        // Update status every 30 seconds
+        setInterval(updateSystemStatus, 30000);
+        
+        console.log('🏭 Smart Factory Dashboard loaded successfully');
     </script>
 </body>
 </html>

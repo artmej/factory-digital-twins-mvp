@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory Test Dashboard - No Auth</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card h3 {
+            margin: 0 0 15px 0;
+            color: #00ff88;
+        }
+        .metric {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+        .status.online { background: #00ff88; color: #000; }
+        .status.warning { background: #ffaa00; color: #000; }
+        .status.offline { background: #ff6b6b; color: #fff; }
+        .test-button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .test-button:hover {
+            background: #00dd77;
+        }
+        .api-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .api-success { background: rgba(0, 255, 136, 0.2); }
+        .api-error { background: rgba(255, 107, 107, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 Smart Factory Test Dashboard</h1>
+        <p>Dashboard sin autenticación para probar APIs y funcionalidad básica</p>
+        
+        <div class="card">
+            <h3>🧪 API Testing</h3>
+            <button class="test-button" onclick="testMainAPI()">Test Main API</button>
+            <button class="test-button" onclick="testMLAPIs()">Test ML APIs</button>
+            <button class="test-button" onclick="loadMockData()">Load Mock Data</button>
+            <div id="api-results"></div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🏭 Factory Status</h3>
+                <div class="metric" id="factory-efficiency">88%</div>
+                <div>Overall Equipment Effectiveness</div>
+                <div class="status online">OPERATIONAL</div>
+            </div>
+
+            <div class="card">
+                <h3>🤖 Machines Status</h3>
+                <div id="machines-status">
+                    <div>LINE_1_CNC_01: <span class="status online">ONLINE</span></div>
+                    <div>LINE_1_ROBOT_01: <span class="status online">ONLINE</span></div>
+                    <div>LINE_1_CONV_01: <span class="status warning">WARNING</span></div>
+                    <div>LINE_2_CNC_02: <span class="status online">ONLINE</span></div>
+                    <div>LINE_2_ROBOT_02: <span class="status online">ONLINE</span></div>
+                    <div>LINE_2_CONV_02: <span class="status online">ONLINE</span></div>
+                    <div>LINE_3_CNC_03: <span class="status online">ONLINE</span></div>
+                    <div>LINE_3_ROBOT_03: <span class="status warning">WARNING</span></div>
+                    <div>LINE_3_CONV_03: <span class="status online">ONLINE</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔧 Maintenance Predictions</h3>
+                <div id="maintenance-data">
+                    <div>Next maintenance in: <strong>3 days</strong></div>
+                    <div>Predicted confidence: <strong>87%</strong></div>
+                    <div>Critical machines: <strong>2</strong></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Energy Efficiency</h3>
+                <div class="metric" id="energy-efficiency">92%</div>
+                <div>Current power usage: <strong>450 kW</strong></div>
+                <div>Optimization potential: <strong>8%</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_CONFIG = {
+            mainAPI: 'https://smartfactory-ml-api.azurewebsites.net',
+            fallbackAPI: 'https://smartfactory-pwa-func-prod.azurewebsites.net/api',
+            timeout: 10000
+        };
+
+        // Test main API endpoint
+        async function testMainAPI() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="api-status">🔄 Testing main API...</div>';
+
+            try {
+                const response = await fetch(`${API_CONFIG.mainAPI}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        <div class="api-status api-success">
+                            ✅ Main API: WORKING<br>
+                            Status: ${response.status}<br>
+                            Response: ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="api-status api-error">
+                            ❌ Main API: ERROR ${response.status}<br>
+                            ${response.statusText}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="api-status api-error">
+                        ❌ Main API: CONNECTION FAILED<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+                
+                // Try fallback API
+                tryFallbackAPI();
+            }
+        }
+
+        // Try fallback API
+        async function tryFallbackAPI() {
+            try {
+                const response = await fetch(`${API_CONFIG.fallbackAPI}/dashboard`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('api-results').innerHTML += `
+                        <div class="api-status api-success">
+                            ✅ Fallback API: WORKING<br>
+                            Status: ${response.status}<br>
+                            Data received: ${Object.keys(data).length} properties
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('api-results').innerHTML += `
+                        <div class="api-status api-error">
+                            ❌ Fallback API: ERROR ${response.status}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('api-results').innerHTML += `
+                    <div class="api-status api-error">
+                        ❌ Fallback API: CONNECTION FAILED<br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Test ML APIs
+        async function testMLAPIs() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="api-status">🔄 Testing ML APIs...</div>';
+
+            const mlEndpoints = [
+                '/predict/maintenance',
+                '/predict/quality',
+                '/predict/energy',
+                '/predict/anomaly'
+            ];
+
+            let results = [];
+
+            for (const endpoint of mlEndpoints) {
+                try {
+                    const response = await fetch(`${API_CONFIG.mainAPI}${endpoint}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            deviceId: 'LINE_1_CNC_01',
+                            temperature: 72,
+                            vibration: 0.5,
+                            pressure: 105
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push(`✅ ${endpoint}: ${response.status} - Confidence: ${data.confidence || 'N/A'}%`);
+                    } else {
+                        results.push(`❌ ${endpoint}: ERROR ${response.status}`);
+                    }
+                } catch (error) {
+                    results.push(`❌ ${endpoint}: CONNECTION FAILED`);
+                }
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="api-status ${results.some(r => r.includes('✅')) ? 'api-success' : 'api-error'}">
+                    <strong>ML APIs Results:</strong><br>
+                    ${results.join('<br>')}
+                </div>
+            `;
+        }
+
+        // Load mock data
+        function loadMockData() {
+            const resultsDiv = document.getElementById('api-results');
+            
+            // Update with mock data
+            document.getElementById('factory-efficiency').textContent = `${85 + Math.floor(Math.random() * 10)}%`;
+            document.getElementById('energy-efficiency').textContent = `${88 + Math.floor(Math.random() * 8)}%`;
+            
+            resultsDiv.innerHTML = `
+                <div class="api-status api-success">
+                    ✅ Mock data loaded successfully<br>
+                    Updated: Factory efficiency, Energy efficiency<br>
+                    Timestamp: ${new Date().toLocaleTimeString()}
+                </div>
+            `;
+        }
+
+        // Auto-test APIs on load
+        window.addEventListener('load', () => {
+            console.log('🏭 Factory Test Dashboard loaded');
+            setTimeout(testMainAPI, 1000);
+        });
+
+        // Update data every 30 seconds
+        setInterval(() => {
+            loadMockData();
+        }, 30000);
+    </script>
+</body>
+</html>
