@@ -296,18 +296,27 @@
             };
         }
 
-        function generateRealisticPredictions() {
-            // Generate ML predictions based on real patterns
-            const criticalMachines = realTimeData.machines.filter(m => m.efficiency < 80);
-            
-            return criticalMachines.map(machine => ({
-                deviceId: machine.id,
-                daysUntilMaintenance: Math.floor(Math.random() * 14) + 3,
-                confidence: Math.floor(Math.random() * 25) + 70, // 70-95%
-                priority: machine.efficiency < 75 ? 'high' : 'medium',
-                predictedIssue: machine.id.includes('CNC') ? 'Tool wear' : 
-                               machine.id.includes('ROBOT') ? 'Joint maintenance' : 'Belt replacement'
-            }));
+        async function generateRealisticPredictions() {
+            // Get real ML predictions from Azure - NO random generation allowed
+            try {
+                const token = await getAzureAccessToken();
+                const response = await fetch('/api/ml/maintenance-predictions', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                }
+                throw new Error('Azure ML API call failed');
+                
+            } catch (error) {
+                console.error('❌ Failed to get real ML predictions:', error);
+                // Integration phase - NO fallback to random data
+                throw new Error('Real ML predictions required from Azure in integration phase');
+            }
         }
 
         async function loadRealTimeData() {
