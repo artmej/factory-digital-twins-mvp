@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory Digital Twins - Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=./docs/">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 50px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .redirect-message {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        a {
+            color: #00e676;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: #00ff88;
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        // Fallback redirect if meta refresh doesn't work
+        setTimeout(function() {
+            if (window.location.pathname === '/factory-digital-twins-mvp/' || window.location.pathname === '/') {
+                window.location.href = './docs/';
+            }
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div class="redirect-message">
+        <h1>🏭 Smart Factory Digital Twins</h1>
+        <div class="spinner"></div>
+        <p>Redirecting to dashboard...</p>
+        <p style="font-size: 14px; margin-top: 20px;">
+            If you're not redirected automatically, 
+            <a href="./docs/">click here to access the dashboards</a>
+        </p>
+        <p style="font-size: 12px; color: #ccc; margin-top: 15px;">
+            Smart Factory Integration | Microsoft Azure | Digital Twins MVP
+        </p>
+    </div>
+</body>
+</html>
