@@ -1,0 +1,11 @@
+include:
+  - ".nojekyll"
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+markdown: kramdown
