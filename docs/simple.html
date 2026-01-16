@@ -227,8 +227,8 @@
             try {
                 const token = await getAzureAccessToken();
                 
-                // Simulate real Azure Cosmos DB query
-                const response = await fetch('/api/factory/status', {
+                // Real Azure Cosmos DB query - NO fallback allowed
+                const response = await fetch('/api/cosmos/factory/status', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -236,14 +236,14 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Azure API Error: ${response.status}`);
+                    throw new Error(`Azure Cosmos DB API Error: ${response.status}`);
                 }
 
                 return await response.json();
             } catch (error) {
                 console.error('❌ Azure API call failed:', error);
-                // Graceful fallback with realistic data patterns
-                return generateRealisticFactoryData();
+                // Integration phase - NO graceful fallback to mock data
+                throw new Error('Real Azure Cosmos DB data required in integration phase. Mock data not allowed.');
             }
         }
 
@@ -269,31 +269,27 @@
             }
         }
 
-        function generateRealisticFactoryData() {
-            // Generate realistic data based on actual factory patterns
-            // This is temporary until Azure APIs are fully connected
-            const baseEfficiency = 85;
-            const timeOfDay = new Date().getHours();
-            const shiftModifier = (timeOfDay >= 6 && timeOfDay <= 14) ? 1.1 : 
-                                 (timeOfDay >= 14 && timeOfDay <= 22) ? 1.05 : 0.9;
-            
-            return {
-                machines: FACTORY_DEVICES.map((deviceId, index) => {
-                    const basePerformance = 85 + (index * 2);
-                    const efficiency = Math.min(95, Math.max(70, 
-                        basePerformance * shiftModifier + (Math.random() * 10 - 5)));
-                    
-                    return {
-                        id: deviceId,
-                        status: efficiency > 80 ? 'online' : 'warning',
-                        efficiency: Math.round(efficiency),
-                        lastUpdate: new Date().toISOString(),
-                        temperature: 65 + Math.random() * 15,
-                        vibration: 0.1 + Math.random() * 0.3
-                    };
-                }),
-                timestamp: new Date().toISOString()
-            };
+        async function getFactoryDataFromAzure() {
+            // INTEGRATION PHASE - Real Azure Cosmos DB data ONLY
+            try {
+                const token = await getAzureAccessToken();
+                const response = await fetch('/api/cosmos/factory/realtime', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                }
+                throw new Error('Cosmos DB API call failed');
+                
+            } catch (error) {
+                console.error('❌ Failed to get real factory data from Azure:', error);
+                // Integration phase - NO fallback to generated data
+                throw new Error('Real Cosmos DB data required in integration phase. No mock data allowed.');
+            }
         }
 
         async function generateRealisticPredictions() {
