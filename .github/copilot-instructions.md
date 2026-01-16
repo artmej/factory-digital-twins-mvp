@@ -3,6 +3,12 @@
 ## Project Context
 This is an **Azure Smart Factory Integration Project** in **INTEGRATION PHASE**. All code generation must follow production-ready patterns with real Azure services.
 
+⚠️ **CRITICAL VALIDATION REQUIREMENT:**
+- **NO MOCK DATA ALLOWED** - Any mock data will cause validation failures
+- **NO FAKE APIs** - Only real Azure service endpoints permitted  
+- **NO HARDCODED VALUES** - All data must come from Azure services
+- **NO SIMULATION MODE** - Production integration phase requires real connections
+
 ## Code Generation Rules
 
 ### 🌐 UI AND DOCUMENTATION LANGUAGE
@@ -12,17 +18,26 @@ This is an **Azure Smart Factory Integration Project** in **INTEGRATION PHASE**.
 - ✅ **REQUIRED:** API response messages and field names in English
 - ❌ **FORBIDDEN:** Spanish, Portuguese, or any non-English text in user interfaces
 
-### 🚫 FORBIDDEN CODE PATTERNS
+### 🚫 FORBIDDEN CODE PATTERNS - WILL CAUSE VALIDATION FAILURES
 ```typescript
-// ❌ NEVER generate mock data
+// ❌ NEVER generate mock data - VALIDATION FAILURE
 const mockData = { temperature: 25, pressure: 100 };
+const machines = [{id: 'fake', status: 'online'}]; // ❌ FORBIDDEN
 
-// ❌ NEVER use fake APIs
+// ❌ NEVER use fake APIs - VALIDATION FAILURE  
 const fakeApiUrl = 'http://localhost:3000/fake-ml';
+const mockEndpoint = 'https://example.com/fake'; // ❌ FORBIDDEN
+
+// ❌ NEVER use hardcoded arrays - VALIDATION FAILURE
+const hardcodedPredictions = [
+    {machine: 'LINE_1', days: 3, confidence: 87} // ❌ FORBIDDEN
+];
 
 // ❌ NEVER use connection strings in code
 const connectionString = 'Server=...;Database=...';
 ```
+
+⚠️ **ANY MOCK DATA USAGE WILL CAUSE INTEGRATION VALIDATION TO FAIL**
 
 ### ✅ REQUIRED CODE PATTERNS
 
