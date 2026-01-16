@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Factory - Simple Test</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Arial; 
+            padding: 20px; 
+            background: #1e3c72; 
+            color: white; 
+            text-align: center; 
+        }
+        h1 { color: #00ff88; }
+        .card { 
+            background: rgba(255,255,255,0.1); 
+            padding: 20px; 
+            margin: 20px; 
+            border-radius: 10px; 
+        }
+        button { 
+            background: #00ff88; 
+            color: black; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 10px;
+        }
+        .data { 
+            background: #333; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏭 Smart Factory - Basic Dashboard</h1>
+    <p>Simple working dashboard - No external dependencies</p>
+    
+    <div class="card">
+        <h2>📊 Factory Status</h2>
+        <div class="data">
+            <strong>Overall Efficiency:</strong> <span id="efficiency">88%</span><br>
+            <strong>Machines Online:</strong> <span id="machines">8/9</span><br>
+            <strong>Last Update:</strong> <span id="timestamp">Loading...</span>
+        </div>
+        <button onclick="updateData()">🔄 Update Data</button>
+    </div>
+
+    <div class="card">
+        <h2>🤖 Machine Status</h2>
+        <div class="data" id="machine-list">
+            Loading machines...
+        </div>
+        <button onclick="generateReport()">📋 Generate Report</button>
+    </div>
+
+    <div class="card">
+        <h2>🔧 Maintenance Predictions</h2>
+        <div class="data" id="maintenance-data">
+            Loading predictions...
+        </div>
+        <button onclick="testAPI()">🧪 Test API Connection</button>
+    </div>
+
+    <div class="card">
+        <h2>🌐 System Status</h2>
+        <div class="data" id="system-status">
+            ✅ Dashboard: Online<br>
+            ⚠️ External APIs: Testing...<br>
+            📡 GitHub Pages: Active
+        </div>
+    </div>
+
+    <script>
+        // Simple working JavaScript - no external dependencies
+        const machines = [
+            {id: 'LINE_1_CNC_01', status: 'online', efficiency: 92},
+            {id: 'LINE_1_ROBOT_01', status: 'online', efficiency: 88},
+            {id: 'LINE_1_CONV_01', status: 'warning', efficiency: 75},
+            {id: 'LINE_2_CNC_02', status: 'online', efficiency: 91},
+            {id: 'LINE_2_ROBOT_02', status: 'online', efficiency: 89},
+            {id: 'LINE_2_CONV_02', status: 'online', efficiency: 93},
+            {id: 'LINE_3_CNC_03', status: 'online', efficiency: 87},
+            {id: 'LINE_3_ROBOT_03', status: 'warning', efficiency: 72},
+            {id: 'LINE_3_CONV_03', status: 'online', efficiency: 90}
+        ];
+
+        function updateData() {
+            // Update efficiency with realistic variation
+            const efficiency = 85 + Math.floor(Math.random() * 10);
+            document.getElementById('efficiency').textContent = efficiency + '%';
+            
+            // Count online machines
+            const onlineMachines = machines.filter(m => m.status === 'online').length;
+            document.getElementById('machines').textContent = onlineMachines + '/9';
+            
+            // Update timestamp
+            document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+            
+            console.log('✅ Data updated successfully');
+        }
+
+        function generateMachineList() {
+            let html = '';
+            machines.forEach(machine => {
+                const statusColor = machine.status === 'online' ? '#00ff88' : 
+                                  machine.status === 'warning' ? '#ffaa00' : '#ff6666';
+                
+                html += `
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                        <strong>${machine.id}:</strong> 
+                        <span style="color: ${statusColor}">${machine.status.toUpperCase()}</span>
+                        (${machine.efficiency}%)
+                    </div>
+                `;
+            });
+            
+            document.getElementById('machine-list').innerHTML = html;
+        }
+
+        function generateMaintenanceData() {
+            const predictions = [
+                {machine: 'LINE_1_CONV_01', days: 3, confidence: 87},
+                {machine: 'LINE_3_ROBOT_03', days: 7, confidence: 82},
+                {machine: 'LINE_2_CNC_02', days: 14, confidence: 75}
+            ];
+
+            let html = '';
+            predictions.forEach(pred => {
+                html += `
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                        <strong>${pred.machine}:</strong> ${pred.days} days 
+                        <span style="color: #00ccff">(${pred.confidence}% confidence)</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('maintenance-data').innerHTML = html;
+        }
+
+        function generateReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                totalMachines: machines.length,
+                onlineMachines: machines.filter(m => m.status === 'online').length,
+                avgEfficiency: Math.round(machines.reduce((sum, m) => sum + m.efficiency, 0) / machines.length),
+                criticalMachines: machines.filter(m => m.status === 'warning').length
+            };
+
+            alert(`📋 Factory Report:
+            
+Total Machines: ${report.totalMachines}
+Online: ${report.onlineMachines}
+Average Efficiency: ${report.avgEfficiency}%
+Critical Machines: ${report.criticalMachines}
+Generated: ${new Date(report.timestamp).toLocaleString()}`);
+
+            console.log('📊 Report generated:', report);
+        }
+
+        async function testAPI() {
+            const statusDiv = document.getElementById('system-status');
+            statusDiv.innerHTML = `
+                ✅ Dashboard: Online<br>
+                🔄 External APIs: Testing...<br>
+                📡 GitHub Pages: Active
+            `;
+
+            try {
+                // Test with a simple fetch to a known endpoint
+                const response = await fetch('https://httpbin.org/json', { 
+                    method: 'GET',
+                    timeout: 5000 
+                });
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        ✅ Dashboard: Online<br>
+                        ✅ Network: Connected<br>
+                        📡 GitHub Pages: Active<br>
+                        🌐 Last test: ${new Date().toLocaleTimeString()}
+                    `;
+                } else {
+                    throw new Error('Network test failed');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    ✅ Dashboard: Online<br>
+                    ❌ Network: Limited connectivity<br>
+                    📡 GitHub Pages: Active<br>
+                    ⚠️ Working offline mode
+                `;
+            }
+        }
+
+        // Initialize dashboard when page loads
+        window.addEventListener('load', function() {
+            console.log('🏭 Smart Factory Dashboard initialized');
+            updateData();
+            generateMachineList();
+            generateMaintenanceData();
+            testAPI();
+        });
+
+        // Auto-update data every 30 seconds
+        setInterval(updateData, 30000);
+        
+        // Simple animation for better UX
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
