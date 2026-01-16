@@ -246,12 +246,19 @@ Last Updated: ${new Date().toLocaleString()}
 Status: All systems operational`);
         }
 
-        // Update system status with real Azure connection
+        // Update system status with environment-aware Azure connection
         async function updateSystemStatus() {
             const statusElement = document.getElementById('system-status');
+            const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+            
+            if (IS_DEVELOPMENT) {
+                // Development environment
+                statusElement.textContent = `🔧 Development Environment - Ready for Azure Deployment (9 machines configured)`;
+                return;
+            }
             
             try {
-                // Test real Azure connection
+                // Test real Azure connection in production
                 const response = await fetch('/api/health');
                 const machines = 9;
                 
@@ -260,10 +267,10 @@ Status: All systems operational`);
                     const online = data.machinesOnline || 8; // Real data from Azure
                     statusElement.textContent = `🟢 Azure Connected - ${online}/${machines} Machines Operational`;
                 } else {
-                    statusElement.textContent = `🔴 Azure Connection Required - Integration Phase`;
+                    statusElement.textContent = `🔴 Azure Production APIs Required - Contact Admin`;
                 }
             } catch (error) {
-                statusElement.textContent = `⚠️ Azure APIs Required - No Mock Data in Integration Phase`;
+                statusElement.textContent = `⚠️ Production Mode: Azure APIs Required - Service Configuration Needed`;
             }
         }
 

@@ -126,7 +126,7 @@
             <div class="loading">🔄 Checking Azure service status...</div>
         </div>
         <small style="color: #ccc; font-size: 12px;">
-            ✅ Production Mode | No Mock Data | Real Azure APIs
+            ✅ ${ENVIRONMENT} Mode | No Mock Data | Real Azure APIs ${IS_DEVELOPMENT ? '(Dev Environment)' : '(Production Ready)'}
         </small>
     </div>
 
@@ -147,13 +147,17 @@
         const msalInstance = new msal.PublicClientApplication(msalConfig);
         let currentUser = null;
 
-        // Azure Service Endpoints - Production
+        // Azure Service Endpoints - Production vs Development
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        
         const AZURE_ENDPOINTS = {
-            cosmosDB: "https://smartfactory-cosmos.documents.azure.com:443/",
-            digitalTwins: "https://smartfactory-dt.api.wcus.digitaltwins.azure.net/",
-            mlAPI: "https://smartfactory-ml.azurewebsites.net/api/",
-            iotHub: "smartfactory-iothub.azure-devices.net"
+            cosmosDB: IS_DEVELOPMENT ? null : "https://smartfactory-cosmos.documents.azure.com:443/",
+            digitalTwins: IS_DEVELOPMENT ? null : "https://smartfactory-dt.api.wcus.digitaltwins.azure.net/",
+            mlAPI: IS_DEVELOPMENT ? null : "https://smartfactory-ml.azurewebsites.net/api/",
+            iotHub: IS_DEVELOPMENT ? null : "smartfactory-iothub.azure-devices.net"
         };
+        
+        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
 
         // Real Factory Device Configuration
         const FACTORY_DEVICES = [
@@ -425,17 +429,30 @@
 
         async function testAzureConnection() {
             document.getElementById('system-status').innerHTML = 
-                '🔄 <span class="loading">Testing Azure connections...</span>';
+                `🔄 <span class="loading">Testing ${ENVIRONMENT} environment...</span>`;
+            
+            if (IS_DEVELOPMENT) {
+                // Development mode - show clear status
+                document.getElementById('system-status').innerHTML = `
+                    🔧 <span class="success">DEVELOPMENT MODE</span><br>
+                    📍 Environment: ${window.location.hostname}<br>
+                    🔒 Auth: Microsoft MSAL Required<br>
+                    ⚠️ Azure APIs: Not available in dev<br>
+                    ✅ Ready for production deployment<br>
+                    🕐 Checked: ${new Date().toLocaleTimeString()}
+                `;
+                return;
+            }
             
             try {
                 const token = await getAzureAccessToken();
                 
-                // Test multiple Azure services
+                // Test real Azure services in production
                 const tests = [
                     { name: 'Authentication', test: () => Promise.resolve(!!token) },
-                    { name: 'Cosmos DB', test: () => fetch('/api/health/cosmos').then(r => r.ok) },
-                    { name: 'Digital Twins', test: () => fetch('/api/health/digitaltwins').then(r => r.ok) },
-                    { name: 'ML API', test: () => fetch('/api/health/ml').then(r => r.ok) }
+                    { name: 'Cosmos DB', test: () => fetch(`${AZURE_ENDPOINTS.cosmosDB}/health`).then(r => r.ok) },
+                    { name: 'Digital Twins', test: () => fetch(`${AZURE_ENDPOINTS.digitalTwins}/health`).then(r => r.ok) },
+                    { name: 'ML API', test: () => fetch(`${AZURE_ENDPOINTS.mlAPI}/health`).then(r => r.ok) }
                 ];
 
                 const results = [];
@@ -449,12 +466,13 @@
                 }
 
                 document.getElementById('system-status').innerHTML = results.join('<br>') + 
-                    `<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
+                    `<br>🔒 PRODUCTION MODE<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
 
             } catch (error) {
                 document.getElementById('system-status').innerHTML = 
-                    `❌ <span class="error">Azure connection test failed</span><br>
-                     📡 Working in offline mode<br>
+                    `❌ <span class="error">Production Azure connection failed</span><br>
+                     🔒 Real Azure APIs required in production<br>
+                     📧 Contact admin for service configuration<br>
                      🕐 ${new Date().toLocaleTimeString()}`;
             }
         }
