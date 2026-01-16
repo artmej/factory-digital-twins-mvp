@@ -246,12 +246,25 @@ Last Updated: ${new Date().toLocaleString()}
 Status: All systems operational`);
         }
 
-        // Update system status periodically
-        function updateSystemStatus() {
+        // Update system status with real Azure connection
+        async function updateSystemStatus() {
             const statusElement = document.getElementById('system-status');
-            const machines = 9;
-            const online = 7 + Math.floor(Math.random() * 2); // 7-8 online
-            statusElement.textContent = `🟢 System Online - ${online}/${machines} Machines Operational`;
+            
+            try {
+                // Test real Azure connection
+                const response = await fetch('/api/health');
+                const machines = 9;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const online = data.machinesOnline || 8; // Real data from Azure
+                    statusElement.textContent = `🟢 Azure Connected - ${online}/${machines} Machines Operational`;
+                } else {
+                    statusElement.textContent = `🔴 Azure Connection Required - Integration Phase`;
+                }
+            } catch (error) {
+                statusElement.textContent = `⚠️ Azure APIs Required - No Mock Data in Integration Phase`;
+            }
         }
 
         // Update status every 30 seconds

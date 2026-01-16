@@ -791,15 +791,19 @@
 
         // Get maintenance data for specific machine
         async function getMaintenanceData(deviceId) {
-            const sensorData = {
-                temperature: 68 + Math.random() * 8,
-                vibration: 0.3 + Math.random() * 0.4,
-                pressure: 140 + Math.random() * 20
-            };
+            // Get real sensor data from Azure IoT Hub
+            let sensorData;
+            try {
+                const sensorResponse = await fetchWithRetry(`/api/iot/sensors/${deviceId}`);
+                sensorData = sensorResponse.telemetry || {};
+            } catch (error) {
+                console.error(`Failed to fetch real sensor data for ${deviceId}:`, error);
+                throw new Error('Real sensor data required in integration phase');
+            }
 
             try {
                 const response = await fetchWithRetry(
-                    `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${deviceId}&temperature=${sensorData.temperature.toFixed(1)}&vibration=${sensorData.vibration.toFixed(2)}&real=true`
+                    `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${deviceId}&temperature=${sensorData.temperature}&vibration=${sensorData.vibration}&real=true`
                 );
                 
                 return {
@@ -811,13 +815,8 @@
                 };
             } catch (error) {
                 console.warn(`Failed to get maintenance data for ${deviceId}:`, error);
-                return {
-                    prediction: 'unknown',
-                    confidence: 0.0,
-                    source: 'Unavailable',
-                    lastUpdated: 'Error',
-                    sensorData
-                };
+                throw new Error(`Azure ML API call failed for ${deviceId}. Real APIs required in integration phase.`);
+            }
             }
         }
 

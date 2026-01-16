@@ -81,7 +81,7 @@
             <h3>🧪 API Testing</h3>
             <button class="test-button" onclick="testMainAPI()">Test Main API</button>
             <button class="test-button" onclick="testMLAPIs()">Test ML APIs</button>
-            <button class="test-button" onclick="loadMockData()">Load Mock Data</button>
+            <button class="test-button" onclick="validateAzureConnection()">Validate Azure APIs</button>
             <div id="api-results"></div>
         </div>
 
@@ -261,21 +261,50 @@
             `;
         }
 
-        // Load mock data
-        function loadMockData() {
+        // Validate Azure APIs - NO MOCK DATA ALLOWED
+        async function validateAzureAPIs() {
             const resultsDiv = document.getElementById('api-results');
             
-            // Update with mock data
-            document.getElementById('factory-efficiency').textContent = `${85 + Math.floor(Math.random() * 10)}%`;
-            document.getElementById('energy-efficiency').textContent = `${88 + Math.floor(Math.random() * 8)}%`;
-            
             resultsDiv.innerHTML = `
-                <div class="api-status api-success">
-                    ✅ Mock data loaded successfully<br>
-                    Updated: Factory efficiency, Energy efficiency<br>
+                <div class="api-status api-warning">
+                    🔄 Testing real Azure APIs - NO mock data allowed<br>
+                    Integration phase validation in progress...<br>
                     Timestamp: ${new Date().toLocaleTimeString()}
                 </div>
             `;
+            
+            try {
+                // Real Azure API validation
+                const azureTests = await Promise.all([
+                    fetch('/api/cosmos/health'),
+                    fetch('/api/digitaltwins/health'),
+                    fetch('/api/ml/health')
+                ]);
+                
+                const successCount = azureTests.filter(r => r.ok).length;
+                
+                document.getElementById('factory-efficiency').textContent = 'Real APIs Required';
+                document.getElementById('energy-efficiency').textContent = 'Azure Only';
+                
+                resultsDiv.innerHTML = `
+                    <div class="api-status ${successCount === 3 ? 'api-success' : 'api-error'}">
+                        ${successCount === 3 ? '✅' : '❌'} Azure API Validation: ${successCount}/3 services<br>
+                        🔒 Integration Mode: Active<br>
+                        🚫 Mock Data: Disabled<br>
+                        Timestamp: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="api-status api-error">
+                        ❌ Azure validation failed<br>
+                        🔒 Integration phase requires real APIs<br>
+                        Error: ${error.message}<br>
+                        Timestamp: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+            }
         }
 
         // Auto-test APIs on load
@@ -284,9 +313,9 @@
             setTimeout(testMainAPI, 1000);
         });
 
-        // Update data every 30 seconds
+        // Update data every 30 seconds with real Azure validation
         setInterval(() => {
-            loadMockData();
+            validateAzureAPIs();
         }, 30000);
     </script>
 </body>
