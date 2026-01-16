@@ -93,15 +93,31 @@
         // Start authentication on page load
         window.addEventListener('load', initializeAuth);
 
-        // Azure ML Configuration - PRODUCTION INTEGRATION PHASE
+        // Azure Architecture - Function Apps (FD) + Application Gateway (GW) + WebApps
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        
         const AZURE_ML_CONFIG = {
-            endpoint: 'https://smartfactory-ml-api.azurewebsites.net',
-            fallbackEndpoint: 'https://smartfactory-pwa-func-prod.azurewebsites.net/api',
+            // Application Gateway (GW) - Main routing
+            gateway: IS_DEVELOPMENT ? null : 'https://smartfactory-gw.azurefd.net',
+            
+            // Function Apps (FD) - API middleware
+            functions: {
+                ml: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-func.azurewebsites.net',
+                data: IS_DEVELOPMENT ? null : 'https://smartfactory-data-func.azurewebsites.net'
+            },
+            
+            // WebApp APIs - Backend services
+            webApps: {
+                mlAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-api.azurewebsites.net',
+                fallbackAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-pwa-func-prod.azurewebsites.net/api'
+            },
+            
             useRealModels: true,
             mockDataDisabled: true, // 🔒 Integration phase - NO mock data allowed
             retryAttempts: 3,
             retryDelay: 2000,
-            timeout: 10000
+            timeout: 10000,
+            environment: IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION'
         };
 
         // Enhanced fetch with retry logic

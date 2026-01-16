@@ -147,14 +147,35 @@
         const msalInstance = new msal.PublicClientApplication(msalConfig);
         let currentUser = null;
 
-        // Azure Service Endpoints - Production vs Development
+        // Azure Architecture - Function Apps (FD) + Application Gateway (GW) + WebApps
         const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
         
-        const AZURE_ENDPOINTS = {
-            cosmosDB: IS_DEVELOPMENT ? null : "https://smartfactory-cosmos.documents.azure.com:443/",
-            digitalTwins: IS_DEVELOPMENT ? null : "https://smartfactory-dt.api.wcus.digitaltwins.azure.net/",
-            mlAPI: IS_DEVELOPMENT ? null : "https://smartfactory-ml.azurewebsites.net/api/",
-            iotHub: IS_DEVELOPMENT ? null : "smartfactory-iothub.azure-devices.net"
+        const AZURE_ARCHITECTURE = {
+            // Application Gateway (GW) - Main entry point
+            gateway: IS_DEVELOPMENT ? null : "https://smartfactory-gw.azurefd.net",
+            
+            // Function Apps (FD) - Middleware layer
+            functions: {
+                auth: IS_DEVELOPMENT ? null : "https://smartfactory-auth-func.azurewebsites.net",
+                data: IS_DEVELOPMENT ? null : "https://smartfactory-data-func.azurewebsites.net", 
+                ml: IS_DEVELOPMENT ? null : "https://smartfactory-ml-func.azurewebsites.net",
+                iot: IS_DEVELOPMENT ? null : "https://smartfactory-iot-func.azurewebsites.net"
+            },
+            
+            // WebApp APIs - Backend services
+            webApps: {
+                cosmosAPI: IS_DEVELOPMENT ? null : "https://smartfactory-cosmos-api.azurewebsites.net",
+                digitalTwinsAPI: IS_DEVELOPMENT ? null : "https://smartfactory-dt-api.azurewebsites.net",
+                mlAPI: IS_DEVELOPMENT ? null : "https://smartfactory-ml-api.azurewebsites.net",
+                iotAPI: IS_DEVELOPMENT ? null : "https://smartfactory-iot-api.azurewebsites.net"
+            },
+            
+            // Direct Azure Services (for fallback)
+            services: {
+                cosmosDB: IS_DEVELOPMENT ? null : "https://smartfactory-cosmos.documents.azure.com:443/",
+                digitalTwins: IS_DEVELOPMENT ? null : "https://smartfactory-dt.api.wcus.digitaltwins.azure.net/",
+                iotHub: IS_DEVELOPMENT ? null : "smartfactory-iothub.azure-devices.net"
+            }
         };
         
         const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
@@ -255,21 +276,30 @@
             try {
                 const token = await getAzureAccessToken();
                 
-                const response = await fetch('/api/ml/maintenance-predictions', {
+                // Route through ML Function App (FD) to ML WebApp API
+                const endpoint = AZURE_ARCHITECTURE.gateway ?
+                    `${AZURE_ARCHITECTURE.gateway}/api/ml/maintenance-predictions` :
+                    `${AZURE_ARCHITECTURE.functions.ml}/api/maintenance-predictions`;
+                
+                const response = await fetch(endpoint, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Functions-Key': 'ml-function-app-key',
+                        'X-Gateway-Route': 'ml-api',
+                        'X-ML-Model': 'maintenance-v2.1' // Specify ML model version
                     }
                 });
 
                 if (!response.ok) {
-                    throw new Error(`ML API Error: ${response.status}`);
+                    throw new Error(`ML Function/Gateway Error: ${response.status}`);
                 }
 
                 return await response.json();
             } catch (error) {
-                console.error('❌ ML API call failed:', error);
-                return generateRealisticPredictions();
+                console.error('❌ ML Function/Gateway call failed:', error);
+                // Integration phase - NO fallback
+                throw new Error('Real ML Function Apps required in integration phase. Direct ML API access not allowed.');
             }
         }
 
@@ -447,32 +477,57 @@
             try {
                 const token = await getAzureAccessToken();
                 
-                // Test real Azure services in production
+                // Test real Azure services in production - Function Apps Architecture
                 const tests = [
-                    { name: 'Authentication', test: () => Promise.resolve(!!token) },
-                    { name: 'Cosmos DB', test: () => fetch(`${AZURE_ENDPOINTS.cosmosDB}/health`).then(r => r.ok) },
-                    { name: 'Digital Twins', test: () => fetch(`${AZURE_ENDPOINTS.digitalTwins}/health`).then(r => r.ok) },
-                    { name: 'ML API', test: () => fetch(`${AZURE_ENDPOINTS.mlAPI}/health`).then(r => r.ok) }
+                    { 
+                        name: 'Authentication', 
+                        test: () => Promise.resolve(!!token),
+                        layer: 'Security'
+                    },
+                    { 
+                        name: 'Application Gateway', 
+                        test: () => fetch(`${AZURE_ARCHITECTURE.gateway}/health`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }).then(r => r.ok),
+                        layer: 'Gateway'
+                    },
+                    { 
+                        name: 'Function Apps (FD)', 
+                        test: () => fetch(`${AZURE_ARCHITECTURE.functions.data}/api/health`, {
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'X-Functions-Key': 'function-app-key'
+                            }
+                        }).then(r => r.ok),
+                        layer: 'Functions'
+                    },
+                    { 
+                        name: 'WebApp APIs', 
+                        test: () => fetch(`${AZURE_ARCHITECTURE.webApps.cosmosAPI}/health`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        }).then(r => r.ok),
+                        layer: 'WebApps'
+                    }
                 ];
 
                 const results = [];
                 for (const test of tests) {
                     try {
                         const result = await test.test();
-                        results.push(`✅ ${test.name}: Connected`);
+                        results.push(`✅ ${test.name} (${test.layer}): Connected`);
                     } catch {
-                        results.push(`❌ ${test.name}: Failed`);
+                        results.push(`❌ ${test.name} (${test.layer}): Failed`);
                     }
                 }
 
                 document.getElementById('system-status').innerHTML = results.join('<br>') + 
-                    `<br>🔒 PRODUCTION MODE<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
+                    `<br>🏗️ Architecture: Function Apps + Gateway + WebApps<br>🔒 PRODUCTION MODE<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
 
             } catch (error) {
                 document.getElementById('system-status').innerHTML = 
-                    `❌ <span class="error">Production Azure connection failed</span><br>
-                     🔒 Real Azure APIs required in production<br>
-                     📧 Contact admin for service configuration<br>
+                    `❌ <span class="error">Function Apps architecture connection failed</span><br>
+                     🏗️ Function Apps (FD) + Gateway (GW) + WebApps required<br>
+                     📧 Contact admin for architecture configuration<br>
                      🕐 ${new Date().toLocaleTimeString()}`;
             }
         }

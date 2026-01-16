@@ -131,12 +131,26 @@
         const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
         const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
         
-        // Configuration
+        // Azure Architecture - Function Apps (FD) + Application Gateway (GW) + WebApps
         const API_CONFIG = {
-            mainAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-api.azurewebsites.net',
-            fallbackAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-pwa-func-prod.azurewebsites.net/api',
+            // Application Gateway (GW) - Main entry point
+            gateway: IS_DEVELOPMENT ? null : 'https://smartfactory-gw.azurefd.net',
+            
+            // Function Apps (FD) - Middleware layer
+            functions: {
+                main: IS_DEVELOPMENT ? null : 'https://smartfactory-main-func.azurewebsites.net',
+                ml: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-func.azurewebsites.net'
+            },
+            
+            // WebApp APIs - Backend services
+            webApps: {
+                mainAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-api.azurewebsites.net',
+                fallbackAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-pwa-func-prod.azurewebsites.net/api'
+            },
+            
             timeout: 10000,
-            environment: ENVIRONMENT
+            environment: ENVIRONMENT,
+            useGateway: true // Force routing through gateway
         };
 
         // Test main API endpoint
