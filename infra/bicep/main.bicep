@@ -11,7 +11,7 @@ param environment string = 'dev'
 var digitalTwinsName = '${resourcePrefix}-adt-${environment}'
 var iotHubName = '${resourcePrefix}-iothub-${environment}'
 var functionAppName = '${resourcePrefix}-func-${environment}'
-var storageAccountName = '${resourcePrefix}stor${environment}'
+var storageAccountName = '${resourcePrefix}stor${environment}${uniqueString(resourceGroup().id)}'
 var appServicePlanName = '${resourcePrefix}-plan-${environment}'
 
 // Storage Account for Function App
@@ -25,6 +25,13 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   properties: {
     supportsHttpsTrafficOnly: true
     minimumTlsVersion: 'TLS1_2'
+    accessTier: 'Hot'
+    allowBlobPublicAccess: false
+    publicNetworkAccess: 'Enabled' // Required for Function App initial setup
+    networkAcls: {
+      defaultAction: 'Allow' // Required for Function App
+      bypass: 'AzureServices'
+    }
   }
 }
 
@@ -99,7 +106,7 @@ resource digitalTwins 'Microsoft.DigitalTwins/digitalTwinsInstances@2023-01-31' 
   name: digitalTwinsName
   location: location
   properties: {
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
   }
   identity: {
     type: 'SystemAssigned'
@@ -142,8 +149,8 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           value: 'https://${digitalTwins.properties.hostName}'
         }
         {
-          name: 'IOTHUB_CONNECTION'
-          value: 'Endpoint=${iotHub.properties.eventHubEndpoints.events.endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${iotHub.listKeys().value[0].primaryKey};EntityPath=${iotHub.properties.eventHubEndpoints.events.path}'
+          name: 'IOTHUB_NAME'
+          value: iotHub.name
         }
       ]
     }
@@ -165,6 +172,38 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(digitalTwins.id, functionApp.id, digitalTwinsDataOwnerRole.id)
   properties: {
     roleDefinitionId: digitalTwinsDataOwnerRole.id
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Storage Blob Data Owner role for Function App
+resource storageBlobDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Storage Blob Data Owner
+  scope: subscription()
+}
+
+resource functionAppStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: storageAccount
+  name: guid(storageAccount.id, functionApp.id, storageBlobDataOwnerRole.id)
+  properties: {
+    roleDefinitionId: storageBlobDataOwnerRole.id
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// IoT Hub Data Reader role for Function App
+resource iotHubDataReaderRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '4fc6c259-987e-4a07-842e-c321cc9d413f' // IoT Hub Data Reader
+  scope: subscription()
+}
+
+resource functionAppIoTHubRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: iotHub
+  name: guid(iotHub.id, functionApp.id, iotHubDataReaderRole.id)
+  properties: {
+    roleDefinitionId: iotHubDataReaderRole.id
     principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
   }

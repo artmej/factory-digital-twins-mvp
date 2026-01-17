@@ -3,7 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏭 Smart Factory Digital Twins Dashboard</title>
+    <title>🏭 Smart Factory Digital Twins MVP - Azure Integration Platform</title>
+    <meta name="description" content="Smart Factory Digital Twins with Azure ML, Cosmos DB, and Application Gateway architecture">
+    
+    <!-- Microsoft Authentication Library -->
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+    
+    <script>
+        // Environment Detection
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
+        
+        // Azure Architecture Configuration (Function Apps + Gateway Pattern)
+        const AZURE_ARCHITECTURE = {
+            // Application Gateway (GW) - Main entry point
+            gateway: IS_DEVELOPMENT ? null : "https://smartfactory-gw.azurefd.net",
+            
+            // Function Apps (FD) - Middleware layer
+            functions: {
+                auth: IS_DEVELOPMENT ? null : "https://smartfactory-auth-func.azurewebsites.net",
+                data: IS_DEVELOPMENT ? null : "https://smartfactory-data-func.azurewebsites.net",
+                ml: IS_DEVELOPMENT ? null : "https://smartfactory-ml-func.azurewebsites.net",
+                iot: IS_DEVELOPMENT ? null : "https://smartfactory-iot-func.azurewebsites.net"
+            },
+            
+            // WebApp APIs (Backend Layer)
+            webApps: {
+                mlAPI: "https://smartfactoryml-api.azurewebsites.net",
+                cosmosAPI: IS_DEVELOPMENT ? null : "https://smartfactory-cosmos-api.azurewebsites.net",
+                digitalTwinsAPI: IS_DEVELOPMENT ? null : "https://smartfactory-dt-api.azurewebsites.net",
+                mainAPI: 'https://smartfactory-prod-web.azurewebsites.net'
+            }
+        };
+
+        // Microsoft Authentication
+        const msalConfig = {
+            auth: {
+                clientId: window.ENV?.AZURE_CLIENT_ID || "your-client-id-here",
+                authority: "https://login.microsoftonline.com/common"
+            }
+        };
+        
+        console.log(`🏗️ Architecture: ${ENVIRONMENT} mode with ${IS_DEVELOPMENT ? 'local' : 'production'} routing`);
+        
+        // Authentication check
+        async function checkAuth() {
+            try {
+                const msalInstance = new msal.PublicClientApplication(msalConfig);
+                await msalInstance.initialize();
+                const accounts = msalInstance.getAllAccounts();
+                
+                if (accounts.length > 0) {
+                    console.log('✅ User authenticated:', accounts[0].name);
+                    return true;
+                } else {
+                    console.log('⚠️ No authentication found');
+                    return false;
+                }
+            } catch (error) {
+                console.warn('🔒 Auth check failed:', error);
+                return false;
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            checkAuth();
+            console.log(`🌐 Smart Factory Platform loaded - ${ENVIRONMENT} environment`);
+        });
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -277,7 +345,107 @@ Status: All systems operational`);
         // Update status every 30 seconds
         setInterval(updateSystemStatus, 30000);
         
+        // Update architecture status indicators
+        function updateArchitectureStatus() {
+            const statusDot = document.getElementById('archStatus');
+            const archText = document.getElementById('archText');
+            const envMode = document.getElementById('envMode');
+            
+            if (IS_DEVELOPMENT) {
+                statusDot.className = 'status-dot development';
+                archText.textContent = 'Azure Architecture: Development Mode';
+                envMode.textContent = 'GitHub Pages Development';
+            } else {
+                statusDot.className = 'status-dot production';
+                archText.textContent = 'Azure Architecture: Production Ready';
+                envMode.textContent = 'Azure Production Environment';
+            }
+        }
+
+        // Initialize status on load
+        window.addEventListener('load', () => {
+            updateArchitectureStatus();
+        });
+        
         console.log('🏭 Smart Factory Dashboard loaded successfully');
     </script>
+
+    <!-- Architecture Status Footer -->
+    <div class="footer">
+        <div class="architecture-info">
+            <div class="arch-indicator">
+                <span class="status-dot" id="archStatus"></span>
+                <span id="archText">Azure Architecture: Loading...</span>
+            </div>
+            <div class="env-indicator">
+                🔒 <span id="envMode">Detecting environment...</span>
+            </div>
+        </div>
+        <div class="footer-text">
+            <div class="subtitle">🏗️ Production-ready Azure ML platform with Application Gateway + Function Apps architecture</div>
+            <div>Built on Azure Digital Twins | Microsoft Authentication Required</div>
+            <div class="features">
+                <span>🤖 Real ML APIs</span> | <span>🔒 Azure AD Auth</span> | <span>🌐 Gateway Routing</span> | <span>⚡ Function Apps</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 30px;
+        }
+
+        .architecture-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .arch-indicator, .env-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.development {
+            background: #ffd700;
+        }
+
+        .status-dot.production {
+            background: #00ff88;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .footer-text {
+            opacity: 0.8;
+        }
+
+        .footer .features {
+            font-size: 0.9em;
+            margin-top: 10px;
+            color: #00ff88;
+        }
+    </style>
 </body>
 </html>

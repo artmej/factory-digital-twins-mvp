@@ -41,9 +41,9 @@ az ad app federated-credential create --id "04587f2d-c127-4244-be11-a929d3c8a23d
 En tu repositorio de GitHub, ve a **Settings** → **Secrets and variables** → **Actions** y agrega:
 
 ```
-AZURE_CLIENT_ID = 04587f2d-c127-4244-be11-a929d3c8a23d
-AZURE_TENANT_ID = 16b3c013-d300-468d-ac64-7eda0820b6d3
-AZURE_SUBSCRIPTION_ID = ab9fac11-f205-4caa-a081-9f71b839c5c0
+AZURE_CLIENT_ID = <your-client-id>
+AZURE_TENANT_ID = <your-tenant-id>
+AZURE_SUBSCRIPTION_ID = <your-subscription-id>
 ```
 
 ## 🎯 **GitHub Environments a Crear:**

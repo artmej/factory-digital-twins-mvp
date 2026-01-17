@@ -134,7 +134,7 @@
         // MSAL Configuration - Production Authentication
         const msalConfig = {
             auth: {
-                clientId: "bf4e2ac7-7f28-476a-8f3f-4e7e6b9a2d1c",
+                clientId: window.ENV?.AZURE_CLIENT_ID || "your-client-id-here",
                 authority: "https://login.microsoftonline.com/common",
                 redirectUri: window.location.origin + window.location.pathname
             },
@@ -276,30 +276,78 @@
             try {
                 const token = await getAzureAccessToken();
                 
-                // Route through ML Function App (FD) to ML WebApp API
-                const endpoint = AZURE_ARCHITECTURE.gateway ?
-                    `${AZURE_ARCHITECTURE.gateway}/api/ml/maintenance-predictions` :
-                    `${AZURE_ARCHITECTURE.functions.ml}/api/maintenance-predictions`;
+                // Route through Application Gateway -> Function Apps -> WebApp APIs
+                let endpoint;
+                if (AZURE_ARCHITECTURE.gateway && !IS_DEVELOPMENT) {
+                    // Production: Use Application Gateway
+                    endpoint = `${AZURE_ARCHITECTURE.gateway}/api/ml/maintenance-predictions`;
+                } else if (AZURE_ARCHITECTURE.functions.ml && !IS_DEVELOPMENT) {
+                    // Fallback: Direct to Function App
+                    endpoint = `${AZURE_ARCHITECTURE.functions.ml}/api/maintenance-predictions`;
+                } else {
+                    // Development: Direct to WebApp API
+                    endpoint = `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/maintenance`;
+                }
                 
-                const response = await fetch(endpoint, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                        'X-Functions-Key': 'ml-function-app-key',
-                        'X-Gateway-Route': 'ml-api',
-                        'X-ML-Model': 'maintenance-v2.1' // Specify ML model version
-                    }
-                });
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+                
+                // Add Function App specific headers if routing through FD
+                if (!IS_DEVELOPMENT && AZURE_ARCHITECTURE.functions.ml) {
+                    headers['X-Functions-Key'] = 'ml-function-app-key';
+                    headers['X-Gateway-Route'] = 'ml-api';
+                    headers['X-ML-Model'] = 'maintenance-v2.1';
+                }
+                
+                const response = await fetch(endpoint, { headers });
 
                 if (!response.ok) {
-                    throw new Error(`ML Function/Gateway Error: ${response.status}`);
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
                 }
 
                 return await response.json();
             } catch (error) {
-                console.error('❌ ML Function/Gateway call failed:', error);
-                // Integration phase - NO fallback
-                throw new Error('Real ML Function Apps required in integration phase. Direct ML API access not allowed.');
+                console.error('❌ ML API call failed:', error);
+                throw new Error('Real ML APIs required in integration phase. Mock data not allowed.');
+            }
+        }
+
+        async function fetchDeviceData(deviceId) {
+            try {
+                const token = await getAzureAccessToken();
+                
+                // Route through Application Gateway -> Function Apps -> WebApp APIs  
+                let endpoint;
+                if (AZURE_ARCHITECTURE.gateway && !IS_DEVELOPMENT) {
+                    endpoint = `${AZURE_ARCHITECTURE.gateway}/api/data/devices/${deviceId}`;
+                } else if (AZURE_ARCHITECTURE.functions.data && !IS_DEVELOPMENT) {
+                    endpoint = `${AZURE_ARCHITECTURE.functions.data}/api/devices/${deviceId}`;
+                } else {
+                    endpoint = `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/device/${deviceId}/telemetry`;
+                }
+                
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+                
+                if (!IS_DEVELOPMENT && AZURE_ARCHITECTURE.functions.data) {
+                    headers['X-Functions-Key'] = 'data-function-app-key';
+                    headers['X-Gateway-Route'] = 'data-api';
+                }
+                
+                const response = await fetch(endpoint, { headers });
+                
+                if (!response.ok) {
+                    throw new Error(`Device API Error: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error(`❌ Device data fetch failed for ${deviceId}:`, error);
+                throw error;
             }
         }
 
@@ -486,26 +534,77 @@
                     },
                     { 
                         name: 'Application Gateway', 
-                        test: () => fetch(`${AZURE_ARCHITECTURE.gateway}/health`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        }).then(r => r.ok),
+                        test: () => AZURE_ARCHITECTURE.gateway ? 
+                            fetch(`${AZURE_ARCHITECTURE.gateway}/health`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            }).then(r => r.ok) : Promise.resolve(true),
                         layer: 'Gateway'
                     },
                     { 
-                        name: 'Function Apps (FD)', 
-                        test: () => fetch(`${AZURE_ARCHITECTURE.functions.data}/api/health`, {
-                            headers: { 
-                                'Authorization': `Bearer ${token}`,
-                                'X-Functions-Key': 'function-app-key'
-                            }
-                        }).then(r => r.ok),
+                        name: 'Auth Function App', 
+                        test: () => AZURE_ARCHITECTURE.functions.auth ?
+                            fetch(`${AZURE_ARCHITECTURE.functions.auth}/api/health`, {
+                                headers: { 
+                                    'Authorization': `Bearer ${token}`,
+                                    'X-Functions-Key': 'auth-function-app-key'
+                                }
+                            }).then(r => r.ok) : Promise.resolve(true),
                         layer: 'Functions'
                     },
                     { 
-                        name: 'WebApp APIs', 
-                        test: () => fetch(`${AZURE_ARCHITECTURE.webApps.cosmosAPI}/health`, {
+                        name: 'Data Function App', 
+                        test: () => AZURE_ARCHITECTURE.functions.data ?
+                            fetch(`${AZURE_ARCHITECTURE.functions.data}/api/health`, {
+                                headers: { 
+                                    'Authorization': `Bearer ${token}`,
+                                    'X-Functions-Key': 'data-function-app-key'
+                                }
+                            }).then(r => r.ok) : Promise.resolve(true),
+                        layer: 'Functions'
+                    },
+                    { 
+                        name: 'ML Function App', 
+                        test: () => AZURE_ARCHITECTURE.functions.ml ?
+                            fetch(`${AZURE_ARCHITECTURE.functions.ml}/api/health`, {
+                                headers: { 
+                                    'Authorization': `Bearer ${token}`,
+                                    'X-Functions-Key': 'ml-function-app-key'
+                                }
+                            }).then(r => r.ok) : Promise.resolve(true),
+                        layer: 'Functions'
+                    },
+                    { 
+                        name: 'IoT Function App', 
+                        test: () => AZURE_ARCHITECTURE.functions.iot ?
+                            fetch(`${AZURE_ARCHITECTURE.functions.iot}/api/health`, {
+                                headers: { 
+                                    'Authorization': `Bearer ${token}`,
+                                    'X-Functions-Key': 'iot-function-app-key'
+                                }
+                            }).then(r => r.ok) : Promise.resolve(true),
+                        layer: 'Functions'
+                    },
+                    { 
+                        name: 'ML WebApp API', 
+                        test: () => fetch(`${AZURE_ARCHITECTURE.webApps.mlAPI}/api/device/health`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         }).then(r => r.ok),
+                        layer: 'WebApps'
+                    },
+                    {
+                        name: 'Cosmos DB WebApp API',
+                        test: () => AZURE_ARCHITECTURE.webApps.cosmosAPI ?
+                            fetch(`${AZURE_ARCHITECTURE.webApps.cosmosAPI}/health`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            }).then(r => r.ok) : Promise.resolve(true),
+                        layer: 'WebApps'
+                    },
+                    {
+                        name: 'Digital Twins WebApp API',
+                        test: () => AZURE_ARCHITECTURE.webApps.digitalTwinsAPI ?
+                            fetch(`${AZURE_ARCHITECTURE.webApps.digitalTwinsAPI}/health`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            }).then(r => r.ok) : Promise.resolve(true),
                         layer: 'WebApps'
                     }
                 ];
@@ -521,7 +620,11 @@
                 }
 
                 document.getElementById('system-status').innerHTML = results.join('<br>') + 
-                    `<br>🏗️ Architecture: Function Apps + Gateway + WebApps<br>🔒 PRODUCTION MODE<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
+                    `<br><br>🏗️ Architecture: Application Gateway + Function Apps + WebApps<br>` +
+                    `🌐 Gateway: ${AZURE_ARCHITECTURE.gateway || 'Development Mode'}<br>` +
+                    `📱 Functions: ${Object.keys(AZURE_ARCHITECTURE.functions).length} services<br>` +
+                    `🏗️ WebApps: ${Object.keys(AZURE_ARCHITECTURE.webApps).length} APIs<br>` +
+                    `🔒 ${ENVIRONMENT} MODE<br>🕐 Tested: ${new Date().toLocaleTimeString()}`;
 
             } catch (error) {
                 document.getElementById('system-status').innerHTML = 

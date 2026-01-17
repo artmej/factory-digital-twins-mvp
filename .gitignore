@@ -12,6 +12,17 @@ connectionstrings.json
 appsettings.json
 local.settings.json
 
+# Configuration files with sensitive data  
+appsettings.*.json
+config.local.js
+secrets.json
+
+# Deployment outputs with connection strings
+factory_config.env
+*-config.env
+deployment-outputs.json
+v2-endpoints.txt
+
 # Azure Functions
 bin/
 obj/

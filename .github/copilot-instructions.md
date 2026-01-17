@@ -11,6 +11,15 @@ This is an **Azure Smart Factory Integration Project** in **INTEGRATION PHASE**.
 
 ## Code Generation Rules
 
+### 🔒 CRITICAL SECURITY REQUIREMENTS
+- ✅ **MANDATORY:** All Azure services MUST use Managed Identity authentication ONLY
+- ❌ **FORBIDDEN:** Connection strings, access keys, or shared access signatures
+- ❌ **FORBIDDEN:** Public access on any Azure service (storage, databases, etc.)
+- ❌ **FORBIDDEN:** PublicNetworkAccess: 'Enabled' - Always use 'Disabled'
+- ✅ **REQUIRED:** All storage accounts must have allowBlobPublicAccess: false
+- ✅ **REQUIRED:** All services must use private endpoints or service endpoints
+- ⚠️ **SUBSCRIPTION POLICY:** This subscription enforces strict security policies that block public access
+
 ### 🌐 UI AND DOCUMENTATION LANGUAGE
 - ✅ **REQUIRED:** All UI text, labels, and user-facing content MUST be in **English**
 - ✅ **REQUIRED:** Dashboard titles, buttons, metrics, and status messages in English only
