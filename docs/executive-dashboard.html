@@ -707,12 +707,12 @@
                 try {
                     // Get maintenance data
                     const maintenance = await fetchWithRetry(
-                        `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                        `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
                     );
                     
                     // Get quality data
                     const quality = await fetchWithRetry(
-                        `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
+                        `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/quality?deviceId=${device}&real=true&temperature=70`
                     );
 
                     deviceCount++;

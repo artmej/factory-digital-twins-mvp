@@ -737,10 +737,10 @@
                 for (const device of FACTORY_DEVICES.slice(0, 3)) { // Sample 3 devices
                     try {
                         const maintenance = await fetchWithRetry(
-                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
                         );
                         const quality = await fetchWithRetry(
-                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
+                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/quality?deviceId=${device}&real=true&temperature=70`
                         );
 
                         onlineMachines++;
@@ -807,7 +807,7 @@
                 // Sample device for insights
                 const device = 'LINE_1_CNC_01';
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=72&vibration=0.5`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${device}&real=true&temperature=72&vibration=0.5`
                 );
                 
                 // Generate maintenance insight
@@ -923,7 +923,7 @@
             try {
                 const device = 'LINE_1_CNC_01';
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=71&vibration=0.4`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${device}&real=true&temperature=71&vibration=0.4`
                 );
                 
                 return `📊 Factory Status Summary:
@@ -959,7 +959,7 @@ Would you like specific details on any machine?`;
                 const deviceData = devices[0]; // Sample first device
                 
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${deviceData}&real=true&temperature=70&vibration=0.4`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${deviceData}&real=true&temperature=70&vibration=0.4`
                 );
                 
                 return `🏭 ${lineId} Status:

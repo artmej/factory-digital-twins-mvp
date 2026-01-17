@@ -830,7 +830,7 @@
 
             try {
                 const response = await fetchWithRetry(
-                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${deviceId}&temperature=${sensorData.temperature}&vibration=${sensorData.vibration}&real=true`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/maintenance?deviceId=${deviceId}&temperature=${sensorData.temperature}&vibration=${sensorData.vibration}&real=true`
                 );
                 
                 return {

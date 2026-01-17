@@ -186,9 +186,9 @@
             resultsDiv.innerHTML = '<div class="api-status">🔄 Testing main API...</div>';
 
             try {
-                console.log('🔗 Testing endpoint:', `${AZURE_ARCHITECTURE.webApps.mainAPI}/health`);
+                console.log('🔗 Testing endpoint:', `${AZURE_ARCHITECTURE.webApps.mainAPI}/api/device/health`);
                 
-                const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/health`, {
+                const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/api/device/health`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -215,7 +215,7 @@
                     <div class="api-status api-error">
                         ❌ Main API: CONNECTION FAILED<br>
                         Error: ${error.message}<br>
-                        Endpoint: ${AZURE_ARCHITECTURE.webApps.mainAPI}/health<br>
+                        Endpoint: ${AZURE_ARCHITECTURE.webApps.mainAPI}/api/device/health<br>
                         Environment: ${ENVIRONMENT}<br>
                         <small>This is expected in development mode on GitHub Pages</small>
                     </div>
@@ -307,11 +307,11 @@
                         ⚠️ Real ML APIs unavailable in development<br><br>
                         
                         <strong>Would test these endpoints in production:</strong><br>
-                        • GET /api/ml/health<br>
-                        • POST /api/ml/maintenance<br>
-                        • POST /api/ml/quality<br>
-                        • POST /api/ml/energy<br>
-                        • POST /api/ml/anomaly<br><br>
+                        • GET /api/device/health<br>
+                        • GET /api/predict/maintenance<br>
+                        • GET /api/predict/quality<br>
+                        • GET /api/predict/energy<br>
+                        • GET /api/predict/anomaly<br><br>
                         
                         ✅ ML API Configuration: Ready<br>
                         🚀 Status: Production deployment ready<br>
@@ -323,10 +323,10 @@
 
             // Production mode - test real ML APIs
             const mlEndpoints = [
-                { path: '/api/ml/health', method: 'GET', description: 'Health Check' },
-                { path: '/api/ml/maintenance', method: 'POST', description: 'Maintenance Prediction' },
-                { path: '/api/ml/quality', method: 'POST', description: 'Quality Prediction' },
-                { path: '/api/ml/energy', method: 'POST', description: 'Energy Optimization' }
+                { path: '/api/device/health', method: 'GET', description: 'Health Check' },
+                { path: '/api/predict/maintenance', method: 'GET', description: 'Maintenance Prediction' },
+                { path: '/api/predict/quality', method: 'GET', description: 'Quality Prediction' },
+                { path: '/api/predict/energy', method: 'GET', description: 'Energy Optimization' }
             ];
 
             let results = [];
@@ -412,7 +412,7 @@
             try {
                 // Test real Azure endpoints
                 const azureTests = await Promise.all([
-                    fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/health`),
+                    fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/api/device/health`),
                     fetch('/api/cosmos/health'),
                     fetch('/api/digitaltwins/health')
                 ]);
@@ -450,7 +450,7 @@
         function validateAzureAPIs() {
             // Silent API health check
             if (!IS_DEVELOPMENT) {
-                fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/health`)
+                fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/api/device/health`)
                     .then(response => {
                         if (response.ok) {
                             document.getElementById('factory-efficiency').textContent = '95%';

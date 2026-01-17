@@ -280,7 +280,7 @@
                 let endpoint;
                 if (AZURE_ARCHITECTURE.gateway && !IS_DEVELOPMENT) {
                     // Production: Use Application Gateway
-                    endpoint = `${AZURE_ARCHITECTURE.gateway}/api/ml/maintenance-predictions`;
+                    endpoint = `${AZURE_ARCHITECTURE.gateway}/api/predict/maintenance`;
                 } else if (AZURE_ARCHITECTURE.functions.ml && !IS_DEVELOPMENT) {
                     // Fallback: Direct to Function App
                     endpoint = `${AZURE_ARCHITECTURE.functions.ml}/api/maintenance-predictions`;
@@ -378,7 +378,7 @@
             // Get real ML predictions from Azure - NO random generation allowed
             try {
                 const token = await getAzureAccessToken();
-                const response = await fetch('/api/ml/maintenance-predictions', {
+                const response = await fetch('/api/predict/maintenance', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

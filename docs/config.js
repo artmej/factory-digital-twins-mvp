@@ -23,7 +23,8 @@ window.ENV = window.ENV || {
             iot: process?.env?.AZURE_IOT_FUNCTION_URL
         },
         webApps: {
-            mlAPI: process?.env?.AZURE_ML_API_URL || 'https://smartfactoryml-api.azurewebsites.net',
+            mlAPI: process?.env?.AZURE_ML_API_URL || 'https://smartfactoryml-api-v2.azurewebsites.net',
+            mlAPIFallback: 'https://smartfactoryml-api.azurewebsites.net', // v1 fallback
             cosmosAPI: process?.env?.AZURE_COSMOS_API_URL,
             digitalTwinsAPI: process?.env?.AZURE_DT_API_URL,
             mainAPI: process?.env?.AZURE_MAIN_API_URL || 'https://smartfactory-prod-web.azurewebsites.net'
