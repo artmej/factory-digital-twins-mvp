@@ -9,10 +9,13 @@
     <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
     
     <script>
+        // Environment Detection
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        
         // MSAL Configuration - Force Microsoft Authentication
         const msalConfig = {
             auth: {
-                clientId: window.ENV?.AZURE_CLIENT_ID || "your-client-id-here", // Configure in environment
+                clientId: window.ENV?.AZURE_CLIENT_ID || "b8f47171-4cc9-4937-8d97-3a01c42e4c8b", // Valid demo client ID
                 authority: "https://login.microsoftonline.com/common",
                 redirectUri: window.location.origin + window.location.pathname
             },
@@ -93,8 +96,6 @@
         // Start authentication on page load
         window.addEventListener('load', initializeAuth);
 
-        // Environment Detection
-        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
         const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
         
         // Azure Architecture Configuration (Function Apps + Gateway Pattern)

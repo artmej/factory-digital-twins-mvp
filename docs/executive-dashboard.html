@@ -575,10 +575,11 @@
             total: 1410000          // $1.41M total
         };
 
-        // Microsoft Authentication
+        // Microsoft Authentication (Optional in development)
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
         const msalConfig = {
             auth: {
-                clientId: window.ENV?.AZURE_CLIENT_ID || "your-client-id-here",
+                clientId: window.ENV?.AZURE_CLIENT_ID || "b8f47171-4cc9-4937-8d97-3a01c42e4c8b",
                 authority: "https://login.microsoftonline.com/common",
                 redirectUri: window.location.origin + window.location.pathname
             },
@@ -589,14 +590,19 @@
         };
 
         const msalInstance = new msal.PublicClientApplication(msalConfig);
-        let currentUser = null;
+        let currentUser = { name: "Demo User", username: "demo@smartfactory.com" }; // Default for development
         let dashboardData = {};
 
         // Initialize app
         async function initializeApp() {
             try {
-                await msalInstance.initialize();
-                const accounts = msalInstance.getAllAccounts();
+                if (!IS_DEVELOPMENT) {
+                    await msalInstance.initialize();
+                    const accounts = msalInstance.getAllAccounts();
+                } else {
+                    console.log('🚧 Development mode - skipping MSAL authentication');
+                    const accounts = [];
+                }
                 
                 if (accounts.length === 0) {
                     await loginUser();
