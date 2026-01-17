@@ -603,9 +603,39 @@
     </div>
 
     <script>
-        // Configuration
-        const AZURE_ML_CONFIG = {
-            endpoint: 'https://smartfactory-ml-api.azurewebsites.net'
+        // Environment Detection
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
+        
+        // Azure Architecture Configuration (Function Apps + Gateway Pattern)
+        const AZURE_ARCHITECTURE = {
+            // Environment-aware routing
+            environment: ENVIRONMENT,
+            
+            // Function Apps (Primary Layer)
+            functions: {
+                ml: IS_DEVELOPMENT ? 
+                    'https://smartfactory-ml-func.azurewebsites.net' : 
+                    'https://smartfactory-ml-func.azurewebsites.net',
+                data: IS_DEVELOPMENT ? 
+                    'https://smartfactory-data-func.azurewebsites.net' : 
+                    'https://smartfactory-data-func.azurewebsites.net',
+                telemetry: IS_DEVELOPMENT ? 
+                    'https://smartfactory-telemetry-func.azurewebsites.net' : 
+                    'https://smartfactory-telemetry-func.azurewebsites.net'
+            },
+            
+            // Application Gateway (Router Layer)
+            gateway: IS_DEVELOPMENT ? 
+                null : 
+                'https://smartfactory-gateway.azure-api.net',
+                
+            // WebApp APIs (Backend Layer)
+            webApps: {
+                mlAPI: 'https://smartfactory-ml-api.azurewebsites.net',
+                cosmosAPI: 'https://smartfactory-cosmos-api.azurewebsites.net',
+                mainAPI: 'https://smartfactoryfunctions.azurewebsites.net'
+            }
         };
 
         // Factory configuration
@@ -618,7 +648,7 @@
         // Microsoft Authentication
         const msalConfig = {
             auth: {
-                clientId: "a0c73c16-a7e3-4564-9a95-2bdf47383716",
+                clientId: "bf4e2ac7-7f28-476a-8f3f-4e7e6b9a2d1c",
                 authority: "https://login.microsoftonline.com/common",
                 redirectUri: window.location.origin + window.location.pathname
             },
@@ -710,10 +740,10 @@
                 for (const device of FACTORY_DEVICES.slice(0, 3)) { // Sample 3 devices
                     try {
                         const maintenance = await fetchWithRetry(
-                            `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
+                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=70&vibration=0.4`
                         );
                         const quality = await fetchWithRetry(
-                            `${AZURE_ML_CONFIG.endpoint}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
+                            `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/quality?deviceId=${device}&real=true&temperature=70`
                         );
 
                         onlineMachines++;
@@ -780,7 +810,7 @@
                 // Sample device for insights
                 const device = 'LINE_1_CNC_01';
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=72&vibration=0.5`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=72&vibration=0.5`
                 );
                 
                 // Generate maintenance insight
@@ -896,7 +926,7 @@
             try {
                 const device = 'LINE_1_CNC_01';
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${device}&real=true&temperature=71&vibration=0.4`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${device}&real=true&temperature=71&vibration=0.4`
                 );
                 
                 return `📊 Factory Status Summary:
@@ -932,7 +962,7 @@ Would you like specific details on any machine?`;
                 const deviceData = devices[0]; // Sample first device
                 
                 const maintenance = await fetchWithRetry(
-                    `${AZURE_ML_CONFIG.endpoint}/api/ml/maintenance?deviceId=${deviceData}&real=true&temperature=70&vibration=0.4`
+                    `${AZURE_ARCHITECTURE.webApps.mlAPI}/api/ml/maintenance?deviceId=${deviceData}&real=true&temperature=70&vibration=0.4`
                 );
                 
                 return `🏭 ${lineId} Status:
@@ -1013,3 +1043,4 @@ All machines on ${lineId} are performing well. No immediate attention required.`
     </script>
 </body>
 </html>
+

@@ -146,6 +146,10 @@
             }
         };
         const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+        // Environment Detection - GitHub Pages vs Azure Production  
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
         
         // Azure Architecture Configuration (Function Apps + Gateway Pattern)
         const AZURE_ARCHITECTURE = {
