@@ -206,9 +206,6 @@
                 } else {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
             } catch (error) {
                 console.error('❌ Main API Test Failed:', error);
                 resultsDiv.innerHTML = `
