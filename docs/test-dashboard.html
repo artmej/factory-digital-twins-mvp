@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏭 Smart Factory Test Dashboard - No Auth</title>
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -128,6 +129,10 @@
     </div>
 
     <script>
+        // Environment Detection - Must be declared first
+        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
+        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
+        
         // Microsoft Authentication Configuration
         const msalConfig = {
             auth: {
@@ -141,10 +146,6 @@
             }
         };
         const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-        // Environment Detection - GitHub Pages vs Azure Production  
-        const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
-        const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
         
         // Azure Architecture Configuration (Function Apps + Gateway Pattern)
         const AZURE_ARCHITECTURE = {
