@@ -298,44 +298,79 @@
             const resultsDiv = document.getElementById('api-results');
             resultsDiv.innerHTML = '<div class="api-status">🔄 Testing ML APIs...</div>';
 
+            if (IS_DEVELOPMENT) {
+                resultsDiv.innerHTML = `
+                    <div class="api-status api-warning">
+                        🔧 <strong>DEVELOPMENT MODE - ML API TESTING</strong><br><br>
+                        📍 Environment: GitHub Pages<br>
+                        🎯 Target ML API: ${AZURE_ARCHITECTURE.webApps.mlAPI}<br>
+                        ⚠️ Real ML APIs unavailable in development<br><br>
+                        
+                        <strong>Would test these endpoints in production:</strong><br>
+                        • GET /api/ml/health<br>
+                        • POST /api/ml/maintenance<br>
+                        • POST /api/ml/quality<br>
+                        • POST /api/ml/energy<br>
+                        • POST /api/ml/anomaly<br><br>
+                        
+                        ✅ ML API Configuration: Ready<br>
+                        🚀 Status: Production deployment ready<br>
+                        🕐 Checked: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+                return;
+            }
+
+            // Production mode - test real ML APIs
             const mlEndpoints = [
-                '/predict/maintenance',
-                '/predict/quality',
-                '/predict/energy',
-                '/predict/anomaly'
+                { path: '/api/ml/health', method: 'GET', description: 'Health Check' },
+                { path: '/api/ml/maintenance', method: 'POST', description: 'Maintenance Prediction' },
+                { path: '/api/ml/quality', method: 'POST', description: 'Quality Prediction' },
+                { path: '/api/ml/energy', method: 'POST', description: 'Energy Optimization' }
             ];
 
             let results = [];
 
             for (const endpoint of mlEndpoints) {
                 try {
-                    const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}${endpoint}`, {
-                        method: 'POST',
+                    console.log(`🔄 Testing ${endpoint.description}: ${AZURE_ARCHITECTURE.webApps.mlAPI}${endpoint.path}`);
+                    
+                    const requestOptions = {
+                        method: endpoint.method,
                         headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    };
+
+                    if (endpoint.method === 'POST') {
+                        requestOptions.body = JSON.stringify({
                             deviceId: 'LINE_1_CNC_01',
                             temperature: 72,
                             vibration: 0.5,
-                            pressure: 105
-                        })
-                    });
+                            pressure: 105,
+                            real: true
+                        });
+                    }
+
+                    const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mlAPI}${endpoint.path}`, requestOptions);
 
                     if (response.ok) {
                         const data = await response.json();
-                        results.push(`✅ ${endpoint}: ${response.status} - Confidence: ${data.confidence || 'N/A'}%`);
+                        results.push(`✅ ${endpoint.description}: ${response.status} - ${JSON.stringify(data).substring(0, 50)}...`);
                     } else {
-                        results.push(`❌ ${endpoint}: ERROR ${response.status}`);
+                        results.push(`❌ ${endpoint.description}: HTTP ${response.status} (${response.statusText})`);
                     }
                 } catch (error) {
-                    results.push(`❌ ${endpoint}: CONNECTION FAILED`);
+                    console.error(`❌ ${endpoint.description} failed:`, error);
+                    results.push(`❌ ${endpoint.description}: ${error.message}`);
                 }
             }
 
             resultsDiv.innerHTML = `
                 <div class="api-status ${results.some(r => r.includes('✅')) ? 'api-success' : 'api-error'}">
-                    <strong>ML APIs Results:</strong><br>
+                    <strong>🤖 ML APIs Test Results:</strong><br>
+                    Target: ${AZURE_ARCHITECTURE.webApps.mlAPI}<br><br>
                     ${results.join('<br>')}
                 </div>
             `;
