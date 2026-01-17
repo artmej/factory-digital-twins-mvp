@@ -79,6 +79,7 @@
         
         <div class="card">
             <h3>🧪 API Testing</h3>
+            <button class="test-button" onclick="testConfiguration()">Test Configuration</button>
             <button class="test-button" onclick="testMainAPI()">Test Main API</button>
             <button class="test-button" onclick="testMLAPIs()">Test ML APIs</button>
             <button class="test-button" onclick="validateAzureConnection()">Validate Azure APIs</button>
@@ -127,30 +128,53 @@
     </div>
 
     <script>
+        // Microsoft Authentication Configuration
+        const msalConfig = {
+            auth: {
+                clientId: "bf4e2ac7-7f28-476a-8f3f-4e7e6b9a2d1c",
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin + window.location.pathname
+            },
+            cache: {
+                cacheLocation: "localStorage",
+                storeAuthStateInCookie: true
+            }
+        };
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+
         // Environment Detection - GitHub Pages vs Azure Production  
         const IS_DEVELOPMENT = window.location.hostname.includes('github.io') || window.location.hostname === 'localhost';
         const ENVIRONMENT = IS_DEVELOPMENT ? 'DEVELOPMENT' : 'PRODUCTION';
         
-        // Azure Architecture - Function Apps (FD) + Application Gateway (GW) + WebApps
-        const API_CONFIG = {
-            // Application Gateway (GW) - Main entry point
-            gateway: IS_DEVELOPMENT ? null : 'https://smartfactory-gw.azurefd.net',
-            
-            // Function Apps (FD) - Middleware layer
-            functions: {
-                main: IS_DEVELOPMENT ? null : 'https://smartfactory-main-func.azurewebsites.net',
-                ml: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-func.azurewebsites.net'
-            },
-            
-            // WebApp APIs - Backend services
-            webApps: {
-                mainAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-ml-api.azurewebsites.net',
-                fallbackAPI: IS_DEVELOPMENT ? null : 'https://smartfactory-pwa-func-prod.azurewebsites.net/api'
-            },
-            
-            timeout: 10000,
+        // Azure Architecture Configuration (Function Apps + Gateway Pattern)
+        const AZURE_ARCHITECTURE = {
+            // Environment-aware routing
             environment: ENVIRONMENT,
-            useGateway: true // Force routing through gateway
+            
+            // Function Apps (Primary Layer)
+            functions: {
+                ml: IS_DEVELOPMENT ? 
+                    'https://smartfactory-ml-func.azurewebsites.net' : 
+                    'https://smartfactory-ml-func.azurewebsites.net',
+                data: IS_DEVELOPMENT ? 
+                    'https://smartfactory-data-func.azurewebsites.net' : 
+                    'https://smartfactory-data-func.azurewebsites.net',
+                telemetry: IS_DEVELOPMENT ? 
+                    'https://smartfactory-telemetry-func.azurewebsites.net' : 
+                    'https://smartfactory-telemetry-func.azurewebsites.net'
+            },
+            
+            // Application Gateway (Router Layer)
+            gateway: IS_DEVELOPMENT ? 
+                null : 
+                'https://smartfactory-gateway.azure-api.net',
+                
+            // WebApp APIs (Backend Layer)
+            webApps: {
+                mlAPI: 'https://smartfactory-ml-api.azurewebsites.net',
+                cosmosAPI: 'https://smartfactory-cosmos-api.azurewebsites.net',
+                mainAPI: 'https://smartfactoryfunctions.azurewebsites.net'
+            }
         };
 
         // Test main API endpoint
@@ -159,11 +183,15 @@
             resultsDiv.innerHTML = '<div class="api-status">🔄 Testing main API...</div>';
 
             try {
-                const response = await fetch(`${API_CONFIG.mainAPI}/health`, {
+                console.log('🔗 Testing endpoint:', `${AZURE_ARCHITECTURE.webApps.mainAPI}/health`);
+                
+                const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/health`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    timeout: 10000
                 });
 
                 if (response.ok) {
@@ -176,18 +204,20 @@
                         </div>
                     `;
                 } else {
-                    resultsDiv.innerHTML = `
-                        <div class="api-status api-error">
-                            ❌ Main API: ERROR ${response.status}<br>
-                            ${response.statusText}
-                        </div>
-                    `;
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
+                console.error('❌ Main API Test Failed:', error);
                 resultsDiv.innerHTML = `
                     <div class="api-status api-error">
                         ❌ Main API: CONNECTION FAILED<br>
-                        Error: ${error.message}
+                        Error: ${error.message}<br>
+                        Endpoint: ${AZURE_ARCHITECTURE.webApps.mainAPI}/health<br>
+                        Environment: ${ENVIRONMENT}<br>
+                        <small>This is expected in development mode on GitHub Pages</small>
                     </div>
                 `;
                 
@@ -198,12 +228,15 @@
 
         // Try fallback API
         async function tryFallbackAPI() {
+            console.log('🔄 Testing fallback API...');
             try {
-                const response = await fetch(`${API_CONFIG.fallbackAPI}/dashboard`, {
+                const response = await fetch(`${AZURE_ARCHITECTURE.webApps.cosmosAPI}/api/health`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    timeout: 10000
                 });
 
                 if (response.ok) {
@@ -216,20 +249,48 @@
                         </div>
                     `;
                 } else {
-                    document.getElementById('api-results').innerHTML += `
-                        <div class="api-status api-error">
-                            ❌ Fallback API: ERROR ${response.status}
-                        </div>
-                    `;
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
             } catch (error) {
+                console.error('❌ Fallback API Test Failed:', error);
                 document.getElementById('api-results').innerHTML += `
                     <div class="api-status api-error">
-                        ❌ Fallback API: CONNECTION FAILED<br>
-                        Error: ${error.message}
+                        ❌ Fallback API: ALSO FAILED<br>
+                        Error: ${error.message}<br>
+                        <small>All APIs unavailable - this is normal in development mode</small>
                     </div>
                 `;
             }
+        }
+
+        // Test Architecture Configuration
+        function testConfiguration() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = `
+                <div class="api-status api-success">
+                    🛠️ ARCHITECTURE CONFIGURATION<br><br>
+                    <strong>Environment:</strong> ${ENVIRONMENT}<br>
+                    <strong>Development Mode:</strong> ${IS_DEVELOPMENT}<br><br>
+                    
+                    <strong>Function Apps:</strong><br>
+                    • ML: ${AZURE_ARCHITECTURE.functions.ml}<br>
+                    • Data: ${AZURE_ARCHITECTURE.functions.data}<br>
+                    • Telemetry: ${AZURE_ARCHITECTURE.functions.telemetry}<br><br>
+                    
+                    <strong>Application Gateway:</strong><br>
+                    ${AZURE_ARCHITECTURE.gateway || 'Not configured (development mode)'}<br><br>
+                    
+                    <strong>WebApp APIs:</strong><br>
+                    • ML API: ${AZURE_ARCHITECTURE.webApps.mlAPI}<br>
+                    • Cosmos API: ${AZURE_ARCHITECTURE.webApps.cosmosAPI}<br>
+                    • Main API: ${AZURE_ARCHITECTURE.webApps.mainAPI}<br><br>
+                    
+                    <strong>MSAL Configuration:</strong><br>
+                    • Client ID: ${msalConfig.auth.clientId}<br>
+                    • Authority: ${msalConfig.auth.authority}<br>
+                    • Cache Location: ${msalConfig.cache.cacheLocation}
+                </div>
+            `;
         }
 
         // Test ML APIs
@@ -248,7 +309,7 @@
 
             for (const endpoint of mlEndpoints) {
                 try {
-                    const response = await fetch(`${API_CONFIG.mainAPI}${endpoint}`, {
+                    const response = await fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}${endpoint}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -280,8 +341,8 @@
             `;
         }
 
-        // Validate Azure APIs - Environment Aware
-        async function validateAzureAPIs() {
+        // Validate Azure Connection - Environment Aware
+        async function validateAzureConnection() {
             const resultsDiv = document.getElementById('api-results');
             
             if (IS_DEVELOPMENT) {
@@ -316,7 +377,7 @@
             try {
                 // Test real Azure endpoints
                 const azureTests = await Promise.all([
-                    fetch(`${API_CONFIG.mainAPI}/health`),
+                    fetch(`${AZURE_ARCHITECTURE.webApps.mainAPI}/health`),
                     fetch('/api/cosmos/health'),
                     fetch('/api/digitaltwins/health')
                 ]);
@@ -363,3 +424,4 @@
     </script>
 </body>
 </html>
+
