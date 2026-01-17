@@ -56,15 +56,33 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "node:18-alpine",
-              "createOptions": "{\"WorkingDir\":\"/app\",\"Cmd\":[\"node\",\"simulator.js\"],\"Env\":[\"DEVICE_CONN_STRING=$DEVICE_CONN_STRING\",\"SEND_INTERVAL_MS=5000\"]}"
+              "image": "smartfactoryregistry.azurecr.io/factory-simulator:1.0",
+              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"json-file\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"3\"}}}}"
             },
             "env": {
-              "DEVICE_CONN_STRING": {
-                "value": "$DEVICE_CONN_STRING"
+              "TELEMETRY_INTERVAL": {
+                "value": "30"
               },
-              "SEND_INTERVAL_MS": {
-                "value": "5000"
+              "SIMULATION_MODE": {
+                "value": "realistic"
+              }
+            }
+          },
+          "smartFactoryML": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "smartfactoryregistry.azurecr.io/smart-factory-ml:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}]},\"LogConfig\":{\"Type\":\"json-file\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"3\"}}}}"
+            },
+            "env": {
+              "INFERENCE_MODE": {
+                "value": "edge"
+              },
+              "MODEL_VERSION": {
+                "value": "v1.0.0-edge"
               }
             }
           }
@@ -75,8 +93,10 @@
       "properties.desired": {
         "schemaVersion": "1.1",
         "routes": {
+          "factorySimulatorToML": "FROM /messages/modules/factorySimulator/outputs/* INTO BrokeredEndpoint(\"/modules/smartFactoryML/inputs/input1\")",
+          "mlToIoTHub": "FROM /messages/modules/smartFactoryML/outputs/* INTO $upstream",
           "factorySimulatorToIoTHub": "FROM /messages/modules/factorySimulator/outputs/* INTO $upstream",
-          "sensorToIoTHub": "FROM /messages/* INTO $upstream"
+          "allToIoTHub": "FROM /messages/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 3600
@@ -85,11 +105,27 @@
     },
     "factorySimulator": {
       "properties.desired": {
-        "SendIntervalMs": 5000,
-        "FactoryId": "factory1",
-        "LineId": "lineA",
-        "MachineId": "machineA",
-        "SensorId": "sensorA"
+        "telemetryInterval": 30,
+        "simulationMode": "realistic",
+        "devices": [
+          "LINE_1_CNC_01",
+          "LINE_1_ROBOT_01", 
+          "LINE_1_CONV_01",
+          "LINE_2_CNC_02",
+          "LINE_2_ROBOT_02",
+          "LINE_2_CONV_02",
+          "LINE_3_CNC_03",
+          "LINE_3_ROBOT_03",
+          "LINE_3_CONV_03"
+        ]
+      }
+    },
+    "smartFactoryML": {
+      "properties.desired": {
+        "modelVersion": "v1.0.0-edge",
+        "inferenceMode": "edge",
+        "confidenceThreshold": 0.65,
+        "maxPredictionAge": 300
       }
     }
   }

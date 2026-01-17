@@ -1,23 +1,246 @@
-# IoT Edge Deployment
+# Smart Factory IoT Edge Deployment
 
-Este directorio contiene la configuración para desplegar la solución de fábrica digital en IoT Edge.
+Este directorio contiene la configuración completa para desplegar la solución Smart Factory en IoT Edge con capacidades avanzadas de ML e inferencia local.
 
-## Deployment Manifest
-
-El archivo `deployment.json` define:
+## 🏗️ Arquitectura Edge
 
 ### Módulos del Sistema
 - **edgeAgent**: Administra el ciclo de vida de módulos
-- **edgeHub**: Maneja comunicación y routing de mensajes
+- **edgeHub**: Maneja comunicación y routing de mensajes  
+- **Store & Forward**: Almacenamiento local con reenvío automático
 
-### Módulos Personalizados
-- **factorySimulator**: Simulador de telemetría de fábrica
+### 🏭 Módulos Smart Factory
+
+#### 1. Factory Simulator (`factory-simulator`)
+- **Función**: Simulador realista de 9 dispositivos de fábrica
+- **Características**:
+  - Telemetría realista con patrones de desgaste
+  - Anomalías simuladas (5% probabilidad)
+  - Diferentes tipos: CNC, Robot, Conveyor
+  - Intervalos configurables de envío
+- **Dispositivos simulados**:
+  ```
+  LINE_1_CNC_01    - Máquina CNC Línea 1
+  LINE_1_ROBOT_01  - Brazo robótico Línea 1  
+  LINE_1_CONV_01   - Banda transportadora Línea 1
+  LINE_2_CNC_02    - Máquina CNC Línea 2
+  LINE_2_ROBOT_02  - Brazo robótico Línea 2
+  LINE_2_CONV_02   - Banda transportadora Línea 2
+  LINE_3_CNC_03    - Máquina CNC Línea 3
+  LINE_3_ROBOT_03  - Brazo robótico Línea 3
+  LINE_3_CONV_03   - Banda transportadora Línea 3
+  ```
+
+#### 2. Smart Factory ML (`smartFactoryML`)
+- **Función**: Inferencia de ML en el edge para mantenimiento predictivo
+- **Características**:
+  - Modelo de ML con pesos entrenados reales
+  - Predicciones de mantenimiento en tiempo real
+  - API HTTP local para consultas directas
+  - Confianza ajustable (65-95%)
+  - Métricas de importancia de características
+
+## 📁 Estructura de Archivos
+
+```
+edge/
+├── deployment.json              # Configuración básica de Edge
+├── deployment-complete.json     # Configuración completa con ML
+├── README.md                   # Esta documentación
+├── modules/                    # Módulos personalizados
+│   ├── factory-simulator/      # Simulador de dispositivos
+│   │   ├── Dockerfile
+│   │   ├── requirements.txt
+│   │   └── simulator.py
+│   └── smart-factory-ml/       # Módulo de ML
+│       ├── Dockerfile
+│       ├── requirements.txt
+│       └── main.py
+└── scripts/                    # Scripts de gestión
+    ├── build-containers.ps1    # Construcción de contenedores
+    ├── deploy-edge.ps1         # Despliegue a dispositivos
+    └── monitor-edge.ps1        # Monitoreo de dispositivos
+```
+
+## 🚀 Despliegue Rápido
+
+### 1. Construir Contenedores
+```powershell
+cd edge/scripts
+.\build-containers.ps1 -RegistryName "your-registry" -PushImages
+```
+
+### 2. Desplegar a Edge Device
+```powershell
+.\deploy-edge.ps1 -ResourceGroup "smart-factory-rg" -IoTHubName "smart-factory-hub" -EdgeDeviceId "factory-edge-01"
+```
+
+### 3. Monitorear Dispositivo
+```powershell
+.\monitor-edge.ps1 -IoTHubName "smart-factory-hub" -EdgeDeviceId "factory-edge-01" -ShowTelemetry -ShowHealth
+```
+
+## ⚙️ Configuración Detallada
+
+### Variables de Entorno
+
+#### Factory Simulator
+- `TELEMETRY_INTERVAL`: Intervalo de envío en segundos (default: 30)
+- `SIMULATION_MODE`: Modo de simulación (realistic/test)
+
+#### Smart Factory ML
+- `INFERENCE_MODE`: Modo de inferencia (edge/cloud)
+- `MODEL_VERSION`: Versión del modelo ML
+- `CONFIDENCE_THRESHOLD`: Umbral mínimo de confianza
+
+### Rutas de Mensajes
+
+```json
+{
+  "factorySimulatorToML": "FROM /messages/modules/factorySimulator/outputs/* INTO BrokeredEndpoint(\"/modules/smartFactoryML/inputs/input1\")",
+  "mlToIoTHub": "FROM /messages/modules/smartFactoryML/outputs/* INTO $upstream",
+  "factorySimulatorToIoTHub": "FROM /messages/modules/factorySimulator/outputs/* INTO $upstream"
+}
+```
 
 ### Configuración de Store & Forward
 - **timeToLiveSecs**: 3600 (1 hora de almacenamiento local)
 - Permite operación offline con reenvío automático al reconectar
 
-### Rutas de Mensajes
+## 🔧 Comandos de Gestión
+
+### Verificar Estado de Módulos
+```bash
+az iot hub module-identity list --hub-name <hub-name> --device-id <edge-device-id>
+```
+
+### Obtener Logs de Módulos
+```bash
+az iot hub invoke-module-method --hub-name <hub-name> --device-id <edge-device-id> --module-id <module-name> --method-name "GetLogs"
+```
+
+### Reiniciar Módulo
+```bash
+az iot hub invoke-module-method --hub-name <hub-name> --device-id <edge-device-id> --module-id <module-name> --method-name "RestartModule"
+```
+
+## 📊 Monitoreo y Métricas
+
+### Health Check Endpoints
+- **Factory Simulator**: `http://localhost:5001/health`
+- **Smart Factory ML**: `http://localhost:5000/health`
+
+### Telemetría en Tiempo Real
+```bash
+az iot hub monitor-events --hub-name <hub-name> --device-id <edge-device-id>
+```
+
+### Predicciones ML Locales
+```bash
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceId": "LINE_1_CNC_01",
+    "timestamp": "2026-01-16T10:00:00Z",
+    "temperature": 75.5,
+    "vibration": 0.45,
+    "pressure": 32.1,
+    "power": 78.3,
+    "status": "Running"
+  }'
+```
+
+## 🛡️ Seguridad y Mejores Prácticas
+
+### Container Registry
+- Usar Azure Container Registry con autenticación Managed Identity
+- Imágenes firmadas y escaneadas por vulnerabilidades
+- Credenciales seguras a través de variables de entorno
+
+### Networking
+- Comunicación cifrada entre módulos
+- Acceso limitado a puertos expuestos
+- VPN/firewall para administración remota
+
+### Logs y Auditoría
+- Logs centralizados en Azure Monitor
+- Retención automática con rotación
+- Alertas automáticas en fallos críticos
+
+## 🔄 CI/CD para Edge
+
+### GitHub Actions Pipeline
+```yaml
+- name: Build and Push Containers
+  run: |
+    edge/scripts/build-containers.ps1 -PushImages
+    
+- name: Deploy to Edge Fleet
+  run: |
+    edge/scripts/deploy-edge.ps1 -EdgeDeviceId ${{ matrix.device }}
+```
+
+### Actualizaciones OTA (Over-The-Air)
+- Despliegues graduales por lotes de dispositivos
+- Rollback automático en caso de fallas
+- Validación de salud antes de continuar
+
+## 🚨 Troubleshooting
+
+### Problemas Comunes
+
+1. **Módulo no inicia**
+   - Verificar logs: `docker logs <container-id>`
+   - Revisar configuración de recursos
+   - Validar conectividad de red
+
+2. **Sin telemetría**
+   - Verificar rutas de mensajes
+   - Comprobar estado de EdgeHub
+   - Revisar configuración de dispositivo
+
+3. **Predicciones ML fallan**
+   - Verificar formato de datos de entrada
+   - Comprobar modelo ML cargado
+   - Revisar logs del módulo smartFactoryML
+
+### Comandos de Diagnóstico
+```bash
+# Estado general del dispositivo
+az iot hub device-identity show --hub-name <hub> --device-id <device>
+
+# Logs específicos de módulo
+docker logs -f <container-name>
+
+# Métricas de recursos
+docker stats
+
+# Estado de conectividad
+az iot hub monitor-feedback --hub-name <hub>
+```
+
+## 📈 Optimización de Performance
+
+### Recursos Recomendados
+- **CPU**: 2+ cores para inferencia ML
+- **RAM**: 4GB+ para operación estable  
+- **Storage**: 32GB+ para logs y cache
+- **Network**: Conexión estable 1Mbps+
+
+### Tuning de Parámetros
+- Ajustar `TELEMETRY_INTERVAL` según necesidades
+- Optimizar `MaxUpstreamBatchSize` para red
+- Configurar `StoreAndForwardConfiguration` para disconnections
+
+---
+
+## 🎯 Próximos Pasos
+
+1. **Escalar a múltiples dispositivos Edge**
+2. **Implementar actualizaciones OTA automáticas**  
+3. **Agregar más modelos ML especializados**
+4. **Integrar con Azure Digital Twins**
+5. **Configurar alertas avanzadas en Azure Monitor**
 - `factorySimulatorToIoTHub`: Envía telemetría del simulador a IoT Hub
 - `sensorToIoTHub`: Ruta general para sensores adicionales
 
