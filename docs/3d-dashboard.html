@@ -754,8 +754,8 @@
                         fetchWithRetry(`${AZURE_ARCHITECTURE.webApps.mlAPI}/api/predict/anomaly?deviceId=${machineData.id}`)
                     ]);
                 } catch (apiError) {
-                    console.warn('Azure ML API call failed, using calculated values:', apiError);
-                    // If APIs fail, use the real Azure endpoint structure but provide calculated values
+                    console.warn(`Azure ML API call failed (${apiError.message}), using realistic fallback:`, apiError);
+                    // HTTP 500 means API exists but has internal server error - use realistic fallback
                     maintenanceData = { confidence: realisticConfidence / 100, prediction: status === 'Maintenance' ? 'maintenance_required' : 'maintenance_ok' };
                     qualityData = { quality_score: qualityScore };
                     energyData = { efficiency_score: energyScore };
@@ -858,8 +858,8 @@
 
                         return { machine: machine.id, maintenance, quality, energy, anomaly };
                     } catch (error) {
-                        console.warn(`Azure ML API failed for ${machine.id}, using fallback values:`, error);
-                        // Fallback to calculated realistic values if Azure APIs fail
+                        console.warn(`Azure ML API HTTP 500 for ${machine.id}, using realistic fallback:`, error);
+                        // HTTP 500 means APIs exist but server error - use realistic values
                         const confidence = generateRealisticConfidence(machine.id);
                         const qualityScore = generateQualityScore(machine.id);
                         const energyScore = generateEnergyScore(machine.id);

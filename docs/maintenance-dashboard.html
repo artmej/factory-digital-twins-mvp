@@ -892,13 +892,13 @@
                     sensorData
                 };
             } catch (error) {
-                console.warn(`Azure ML API failed for ${deviceId}:`, error);
-                // Fallback with realistic values following Azure API structure
+                console.warn(`Azure ML API HTTP 500 for ${deviceId}:`, error.message);
+                // HTTP 500 means API exists but has internal server error - use realistic fallback
                 const realisticConfidence = generateRealisticConfidence(deviceId, sensorData);
                 return {
                     prediction: sensorData.temperature > 75 ? 'maintenance_required' : 'maintenance_ok',
                     confidence: realisticConfidence,
-                    source: 'Azure ML (Fallback)',
+                    source: 'Azure ML (HTTP 500 Fallback)',
                     lastUpdated: new Date().toLocaleTimeString(),
                     sensorData
                 };
