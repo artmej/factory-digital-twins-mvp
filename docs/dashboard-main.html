@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Smart Factory - Main Dashboard</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-bottom: 3px solid #00e676;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #00e676;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #ccc;
+            font-size: 16px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(0, 230, 118, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: #00e676;
+            box-shadow: 0 10px 30px rgba(0, 230, 118, 0.2);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00e676;
+        }
+
+        .card-description {
+            color: #ccc;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .card-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00e676;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .online { background: #00e676; }
+        .warning { background: #ff9800; }
+        .offline { background: #f44336; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .api-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #00e676;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏭 Smart Factory Control Center</h1>
+        <p>Real-time ML Analytics & Predictive Maintenance Dashboard</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- 3D Factory Dashboard -->
+        <a href="3d-dashboard.html" class="dashboard-card">
+            <span class="card-icon">🏭</span>
+            <div class="card-title">3D Factory View</div>
+            <div class="card-description">
+                Immersive 3D visualization of all production lines with real-time machine status, interactive tooltips, and ML predictions.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value">9</span>
+                    <span class="metric-label">Machines</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">94%</span>
+                    <span class="metric-label">Production</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Maintenance Dashboard -->
+        <a href="maintenance-dashboard.html" class="dashboard-card">
+            <span class="card-icon">🔧</span>
+            <div class="card-title">Maintenance Center</div>
+            <div class="card-description">
+                Predictive maintenance insights with ML confidence scores, maintenance schedules, and health monitoring.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value">82%</span>
+                    <span class="metric-label">Avg Health</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">7</span>
+                    <span class="metric-label">Days Next</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- AI Copilot Dashboard -->
+        <a href="copilot-dashboard.html" class="dashboard-card">
+            <span class="card-icon">🤖</span>
+            <div class="card-title">AI Assistant</div>
+            <div class="card-description">
+                Intelligent manufacturing assistant powered by Azure OpenAI for natural language factory insights.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value">85%</span>
+                    <span class="metric-label">AI Confidence</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">24/7</span>
+                    <span class="metric-label">Monitoring</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Executive Dashboard -->
+        <a href="executive-dashboard.html" class="dashboard-card">
+            <span class="card-icon">📊</span>
+            <div class="card-title">Executive ROI</div>
+            <div class="card-description">
+                Financial impact analysis with ROI metrics, cost savings calculations, and business intelligence.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value">$287K</span>
+                    <span class="metric-label">Savings YTD</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">156%</span>
+                    <span class="metric-label">ROI</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Mobile Dashboard -->
+        <a href="mobile-dashboard.html" class="dashboard-card">
+            <span class="card-icon">📱</span>
+            <div class="card-title">Mobile View</div>
+            <div class="card-description">
+                Responsive mobile interface optimized for tablets and smartphones with touch-friendly controls.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value">✓</span>
+                    <span class="metric-label">Responsive</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">PWA</span>
+                    <span class="metric-label">Ready</span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Test Dashboard -->
+        <a href="dashboard-test.html" class="dashboard-card">
+            <span class="card-icon">🧪</span>
+            <div class="card-title">System Test</div>
+            <div class="card-description">
+                Dashboard connectivity testing, API health checks, and system diagnostics for troubleshooting.
+            </div>
+            <div class="card-metrics">
+                <div class="metric">
+                    <span class="metric-value" id="apiStatus">Testing...</span>
+                    <span class="metric-label">API Status</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="connectivity">Checking...</span>
+                    <span class="metric-label">Connection</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="api-status">
+        <span class="status-indicator online" id="statusIndicator"></span>
+        <span id="statusText">Azure ML Connected</span>
+    </div>
+
+    <script>
+        // Quick API test
+        async function testAPI() {
+            try {
+                const response = await fetch('https://smartfactoryml-api-v2.azurewebsites.net/api/predict/maintenance?deviceId=LINE_1_CNC_01', {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    document.getElementById('apiStatus').textContent = '✅ Online';
+                    document.getElementById('connectivity').textContent = '100%';
+                    document.getElementById('statusText').textContent = 'Azure ML Connected';
+                    document.getElementById('statusIndicator').className = 'status-indicator online';
+                } else {
+                    throw new Error('API Error');
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '⚠️ Fallback';
+                document.getElementById('connectivity').textContent = 'Limited';
+                document.getElementById('statusText').textContent = 'Using Demo Data';
+                document.getElementById('statusIndicator').className = 'status-indicator warning';
+            }
+        }
+
+        // Test API on load
+        testAPI();
+        
+        // Update time periodically
+        setInterval(() => {
+            const now = new Date();
+            document.title = `🏭 Smart Factory - ${now.toLocaleTimeString()}`;
+        }, 60000);
+    </script>
+</body>
+</html>

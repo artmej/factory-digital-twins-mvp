@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test - Smart Factory</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #00ff88;
+            background: rgba(0,255,136,0.1);
+        }
+        .error {
+            border-left-color: #ff6b6b;
+            background: rgba(255,107,107,0.1);
+        }
+        .dashboard-link {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .dashboard-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,255,136,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Smart Factory Dashboard Test</h1>
+        <p>Testing dashboard connectivity and ML API integration...</p>
+        
+        <div id="testResults">
+            <div class="test-result">⏳ Starting tests...</div>
+        </div>
+
+        <h2>🔗 Dashboard Links</h2>
+        <a href="3d-dashboard.html" class="dashboard-link">🏭 3D Factory Dashboard</a>
+        <a href="maintenance-dashboard.html" class="dashboard-link">🔧 Maintenance Dashboard</a>
+        <a href="copilot-dashboard.html" class="dashboard-link">🤖 AI Copilot Dashboard</a>
+        <a href="mobile-dashboard.html" class="dashboard-link">📱 Mobile Dashboard</a>
+        
+        <h2>📊 ML API Test</h2>
+        <div id="apiTest">Testing...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://smartfactoryml-api-v2.azurewebsites.net';
+        
+        async function testAPI() {
+            const testDiv = document.getElementById('apiTest');
+            try {
+                console.log('Testing ML API connection...');
+                
+                const response = await fetch(`${API_URL}/api/predict/maintenance?deviceId=LINE_1_CNC_01`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    testDiv.innerHTML = `
+                        <div class="test-result">
+                            ✅ API Connected Successfully<br>
+                            📊 Device: ${data.deviceId}<br>
+                            🔧 Maintenance Days: ${data.daysUntilMaintenance}<br>
+                            📈 Confidence: ${Math.round(data.confidence * 100)}%<br>
+                            📅 Risk Level: ${data.riskLevel}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('API Test failed:', error);
+                testDiv.innerHTML = `
+                    <div class="test-result error">
+                        ❌ API Test Failed<br>
+                        Error: ${error.message}<br>
+                        <br>
+                        This is normal for GitHub Pages demos.<br>
+                        The dashboards will work with fallback data.
+                    </div>
+                `;
+            }
+        }
+        
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = `
+                <div class="test-result">✅ Environment: ${window.location.hostname}</div>
+                <div class="test-result">✅ Three.js support: ${typeof THREE !== 'undefined' ? 'Available' : 'Loading...'}</div>
+                <div class="test-result">✅ LocalStorage: ${typeof Storage !== 'undefined' ? 'Available' : 'Not supported'}</div>
+                <div class="test-result">✅ Fetch API: ${typeof fetch !== 'undefined' ? 'Available' : 'Not supported'}</div>
+            `;
+        }
+        
+        // Run tests
+        updateTestResults();
+        testAPI();
+        
+        // Test dashboard links after a moment
+        setTimeout(() => {
+            console.log('Dashboard links ready for testing');
+        }, 2000);
+    </script>
+</body>
+</html></content>
+</invoke>

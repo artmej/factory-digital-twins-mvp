@@ -61,16 +61,4 @@ public class DeviceController : ControllerBase
             return StatusCode(500, "Failed to retrieve telemetry data");
         }
     }
-
-    [HttpGet("health")]
-    public IActionResult GetHealth()
-    {
-        return Ok(new 
-        { 
-            Status = "Healthy",
-            Timestamp = DateTime.UtcNow,
-            Version = "1.0.0",
-            TotalDevices = FACTORY_DEVICES.Length
-        });
-    }
 }

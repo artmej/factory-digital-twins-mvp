@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 // Add Azure services
 var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"] ?? throw new ArgumentNullException("CosmosDb:Endpoint");
-var digitalTwinsUrl = builder.Configuration["DigitalTwins:Url"] ?? throw new ArgumentNullException("DigitalTwins:Url");
+var digitalTwinsUrl = builder.Configuration["DigitalTwins:Endpoint"] ?? throw new ArgumentNullException("DigitalTwins:Endpoint");
 
 // Use Managed Identity for authentication
 var credential = new DefaultAzureCredential();
@@ -33,10 +33,15 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("https://*.github.io", "https://localhost:*")
+        policy.WithOrigins(
+                "https://artmej.github.io", 
+                "https://*.github.io", 
+                "https://localhost:*",
+                "http://localhost:*"
+              )
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .SetIsOriginAllowedToAllowWildcardSubdomains();
     });
 });
 

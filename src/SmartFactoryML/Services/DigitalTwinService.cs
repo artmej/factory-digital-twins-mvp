@@ -1,3 +1,4 @@
+using Azure;
 using Azure.DigitalTwins.Core;
 using SmartFactoryML.Models;
 using System.Text.Json;
@@ -21,7 +22,7 @@ public class DigitalTwinService : IDigitalTwinService
         {
             var twinId = $"factory-{deviceId.ToLower()}";
             
-            var patch = new JsonPatchDocument();
+            var patch = new Azure.JsonPatchDocument();
             patch.AppendReplace("/MaintenancePrediction", JsonSerializer.Serialize(prediction));
             patch.AppendReplace("/LastPredictionUpdate", DateTime.UtcNow);
             patch.AppendReplace("/DaysUntilMaintenance", prediction.DaysUntilMaintenance);
@@ -44,7 +45,7 @@ public class DigitalTwinService : IDigitalTwinService
         {
             var twinId = $"factory-{deviceId.ToLower()}";
             
-            var patch = new JsonPatchDocument();
+            var patch = new Azure.JsonPatchDocument();
             patch.AppendReplace("/LastFeedback", JsonSerializer.Serialize(feedback));
             patch.AppendReplace("/LastFeedbackUpdate", DateTime.UtcNow);
             patch.AppendReplace("/FeedbackRating", feedback.Rating);

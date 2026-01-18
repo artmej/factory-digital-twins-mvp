@@ -17,8 +17,8 @@ public class DeviceDataService : IDeviceDataService
         _cosmosClient = cosmosClient;
         _logger = logger;
         
-        // Initialize containers
-        var database = _cosmosClient.GetDatabase("SmartFactory");
+        // Initialize containers - using configured database name
+        var database = _cosmosClient.GetDatabase("SmartFactoryDB");
         _telemetryContainer = database.GetContainer("DeviceTelemetry");
         _predictionsContainer = database.GetContainer("MaintenancePredictions");
         _feedbackContainer = database.GetContainer("MaintenanceFeedback");

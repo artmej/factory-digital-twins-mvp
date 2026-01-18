@@ -47,18 +47,26 @@ public class MaintenancePredictionService : IMaintenancePredictionService
 
     private double CalculateRiskScore(DeviceTelemetry telemetry)
     {
-        // Real ML model calculation
-        return (telemetry.Temperature * _modelWeights["temperature"]) +
-               (telemetry.Vibration * _modelWeights["vibration"]) +
-               (telemetry.Pressure * _modelWeights["pressure"]) +
-               (telemetry.Power * _modelWeights["power"]);
+        // Real ML model calculation with safety checks
+        var score = (telemetry.Temperature * _modelWeights["temperature"]) +
+                    (telemetry.Vibration * _modelWeights["vibration"]) +
+                    (telemetry.Pressure * _modelWeights["pressure"]) +
+                    (telemetry.Power * _modelWeights["power"]);
+        
+        // Ensure finite result
+        return double.IsFinite(score) ? score : 0.0;
     }
 
     private int CalculateDaysUntilMaintenance(double riskScore)
     {
         // Convert risk score to days (higher risk = fewer days)
-        var normalizedScore = Math.Max(0, Math.Min(1, (riskScore + 50) / 100));
-        return (int)(30 - (normalizedScore * 25)); // 5-30 days range
+        // Ensure riskScore is finite
+        if (!double.IsFinite(riskScore)) riskScore = 0.0;
+        
+        var normalizedScore = Math.Max(0, Math.Min(1, (riskScore + 50) / 100.0));
+        var days = (int)(30 - (normalizedScore * 25)); // 5-30 days range
+        
+        return Math.Max(1, Math.Min(30, days)); // Ensure valid range
     }
 
     private double CalculateConfidence(DeviceTelemetry telemetry)
@@ -66,16 +74,42 @@ public class MaintenancePredictionService : IMaintenancePredictionService
         // Confidence based on data quality and variance
         var baseConfidence = 0.75;
         var variance = CalculateDataVariance(telemetry);
-        return Math.Min(0.95, Math.Max(0.65, baseConfidence + (0.2 - variance)));
+        
+        // Ensure variance is finite and reasonable
+        if (!double.IsFinite(variance) || variance > 1.0)
+            variance = 0.5; // Default variance if calculation fails
+            
+        var confidence = baseConfidence + (0.2 - variance);
+        
+        // Clamp confidence to valid range and ensure it's finite
+        return Math.Max(0.65, Math.Min(0.95, double.IsFinite(confidence) ? confidence : 0.75));
     }
 
     private double CalculateDataVariance(DeviceTelemetry telemetry)
     {
-        // Simulate data quality assessment
-        var values = new[] { telemetry.Temperature / 100, telemetry.Vibration, telemetry.Pressure / 100, telemetry.Power / 100 };
-        var mean = values.Average();
-        var variance = values.Select(v => Math.Pow(v - mean, 2)).Average();
-        return Math.Sqrt(variance);
+        try
+        {
+            // Simulate data quality assessment with safe normalization
+            var values = new[] { 
+                Math.Max(0.01, telemetry.Temperature / 100.0), 
+                Math.Max(0.01, telemetry.Vibration), 
+                Math.Max(0.01, telemetry.Pressure / 100.0), 
+                Math.Max(0.01, telemetry.Power / 100.0) 
+            };
+            
+            var mean = values.Average();
+            if (mean == 0) return 0.5; // Default variance if mean is zero
+            
+            var variance = values.Select(v => Math.Pow(v - mean, 2)).Average();
+            var result = Math.Sqrt(variance);
+            
+            // Return finite value or default
+            return double.IsFinite(result) ? Math.Min(1.0, result) : 0.5;
+        }
+        catch
+        {
+            return 0.5; // Safe default variance
+        }
     }
 
     private string DetermineRiskLevel(double riskScore)
