@@ -131,17 +131,19 @@
             timeout: 10000
         };
 
-        // Enhanced fetch with intelligent fallback for specific APIs
+        // Enhanced fetch with intelligent fallback - SILENT for broken APIs
         async function fetchWithRetry(url, options = {}, retries = AZURE_ARCHITECTURE.retryAttempts) {
             const isEnergyAPI = url.includes('/energy?');
             const isAnomalyAPI = url.includes('/anomaly?');
-            const shouldSilentFallback = isEnergyAPI || isAnomalyAPI;
+            
+            // Skip broken APIs entirely - no HTTP calls, no errors, just return null
+            if (isEnergyAPI || isAnomalyAPI) {
+                return null;
+            }
             
             for (let i = 0; i <= retries; i++) {
                 try {
-                    if (!shouldSilentFallback) {
-                        console.log(`🔄 API attempt ${i + 1}/${retries}: ${url}`);
-                    }
+                    console.log(`🔄 API attempt ${i + 1}/${retries}: ${url}`);
                     const response = await fetch(url, {
                         ...options,
                         timeout: 5000 // 5 second timeout
@@ -152,22 +154,13 @@
                     }
                     
                     const data = await response.json();
-                    if (!shouldSilentFallback) {
-                        console.log(`✅ API success: ${url}`, data);
-                    }
+                    console.log(`✅ API success: ${url}`, data);
                     return data;
                 } catch (error) {
-                    if (!shouldSilentFallback && i < retries - 1) {
-                        console.warn(`⚠️ API attempt ${i + 1} failed:`, error.message);
-                    }
+                    console.warn(`⚠️ API attempt ${i + 1} failed:`, error.message);
                     if (i === retries - 1) {
-                        if (shouldSilentFallback) {
-                            // Silent fallback for energy/anomaly APIs
-                            return null;
-                        } else {
-                            // Strict validation for maintenance/quality APIs that should work
-                            throw new Error(`Azure API call failed for ${url}. Integration validation requires real APIs only.`);
-                        }
+                        // Only critical APIs reach here (maintenance/quality that should work)
+                        throw new Error(`Azure API call failed for ${url}. Integration validation requires real APIs only.`);
                     }
                     await new Promise(resolve => setTimeout(resolve, AZURE_ARCHITECTURE.retryDelay));
                 }
