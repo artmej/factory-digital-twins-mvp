@@ -159,32 +159,6 @@
             }
         }
 
-        // INTEGRATION PHASE - NO MOCK DATA FUNCTIONS ALLOWED
-        // All data must come from real Azure ML APIs
-                        ...options,
-                        timeout: 10000,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            ...options.headers
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                } catch (error) {
-                    console.warn(`🔄 Attempt ${i + 1}/${retries + 1} failed:`, error.message);
-                    if (i === retries) {
-                        // Integration phase - NO fallback to mock data
-                        throw new Error(`Azure API call failed after ${retries + 1} attempts. Real APIs required in integration phase.`);
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-                }
-            }
-        }
-
         // Generate realistic ML confidence values for 3D dashboard
         function generateRealisticConfidence(machineId) {
             // Pre-defined realistic confidence values for each machine (67-91%)
@@ -977,11 +951,13 @@
             console.log('Labels toggle - placeholder');
         }
 
-        // Handle window resize
+        // Handle window resize - with safety check
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
         });
     </script>
 </body>
