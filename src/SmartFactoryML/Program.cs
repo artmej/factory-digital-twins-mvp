@@ -10,18 +10,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Azure services
-var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"] ?? throw new ArgumentNullException("CosmosDb:Endpoint");
-var digitalTwinsUrl = builder.Configuration["DigitalTwins:Endpoint"] ?? throw new ArgumentNullException("DigitalTwins:Endpoint");
+// Add Azure services conditionally
+var cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"];
+var digitalTwinsUrl = builder.Configuration["DigitalTwins:Endpoint"];
+var isDevelopment = builder.Environment.IsDevelopment();
 
-// Use Managed Identity for authentication
-var credential = new DefaultAzureCredential();
+if (!isDevelopment && !string.IsNullOrEmpty(cosmosEndpoint) && !string.IsNullOrEmpty(digitalTwinsUrl))
+{
+    // Use Managed Identity for authentication in production
+    var credential = new DefaultAzureCredential();
 
-builder.Services.AddSingleton<CosmosClient>(provider => 
-    new CosmosClient(cosmosEndpoint, credential));
+    builder.Services.AddSingleton<CosmosClient>(provider => 
+        new CosmosClient(cosmosEndpoint, credential));
 
-builder.Services.AddSingleton<DigitalTwinsClient>(provider => 
-    new DigitalTwinsClient(new Uri(digitalTwinsUrl), credential));
+    builder.Services.AddSingleton<DigitalTwinsClient>(provider => 
+        new DigitalTwinsClient(new Uri(digitalTwinsUrl), credential));
+}
+else
+{
+    // In development, use mock/stub implementations
+    builder.Services.AddSingleton<CosmosClient>(provider => null!);
+    builder.Services.AddSingleton<DigitalTwinsClient>(provider => null!);
+}
 
 // Register services
 builder.Services.AddScoped<IMaintenancePredictionService, MaintenancePredictionService>();
