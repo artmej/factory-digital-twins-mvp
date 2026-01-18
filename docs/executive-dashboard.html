@@ -730,27 +730,13 @@
             total: 1410000          // $1.41M total
         };
 
-        // Microsoft Authentication (Optional in development)
-        const msalConfig = {
-            auth: {
-                clientId: window.ENV?.AZURE_CLIENT_ID || "b8f47171-4cc9-4937-8d97-3a01c42e4c8b",
-                authority: "https://login.microsoftonline.com/common",
-                redirectUri: window.location.origin + window.location.pathname
-            },
-            cache: {
-                cacheLocation: "localStorage",
-                storeAuthStateInCookie: true
-            }
-        };
-
-        const msalInstance = new msal.PublicClientApplication(msalConfig);
-        let currentUser = { name: "Demo User", username: "demo@smartfactory.com" }; // Default for development
+        // No authentication required - direct data display
+        let currentUser = { name: "Executive User", username: "exec@smartfactory.com" };
         let dashboardData = {};
 
         // Initialize app
         async function initializeApp() {
-            // Use default user and show data immediately
-            currentUser = { name: "Executive Demo", username: "exec@factory.com" };
+            console.log('🚀 Initializing Executive Dashboard...');
             updateUserDisplay();
             
             // Show financial data immediately
@@ -792,17 +778,6 @@
             
             // Start background data refresh
             setTimeout(startDataCollection, 2000);
-        }
-
-        async function loginUser() {
-            try {
-                const response = await msalInstance.loginPopup();
-                currentUser = response.account;
-                updateUserDisplay();
-                startDataCollection();
-            } catch (error) {
-                console.error('Login failed:', error);
-            }
         }
 
         function updateUserDisplay() {
