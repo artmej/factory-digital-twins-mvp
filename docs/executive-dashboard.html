@@ -721,13 +721,13 @@
             'LINE_3_CNC_03', 'LINE_3_ROBOT_03', 'LINE_3_CONV_03'
         ];
 
-        // Financial targets (conservative)
+        // Conservative financial targets (85% baseline efficiency)
         const ANNUAL_TARGETS = {
-            maintenance: 480000,    // $480K
-            downtime: 420000,       // $420K 
-            quality: 360000,        // $360K
-            energy: 150000,         // $150K
-            total: 1410000          // $1.41M total
+            maintenance: 320000,    // $320K (conservative from 85% baseline)
+            downtime: 280000,       // $280K (reduced from current high efficiency)
+            quality: 240000,        // $240K (quality improvements over 85% baseline)
+            energy: 100000,         // $100K (energy efficiency gains)
+            total: 940000           // $940K total (conservative target)
         };
 
         // No authentication required - direct data display
@@ -920,8 +920,10 @@
                     avgConfidence += maintenance.confidence || await getRealExecutiveConfidence(device);
                     totalQuality += quality.quality_score || await getRealExecutiveQuality(device);
 
-                    // Calculate maintenance savings based on ML confidence
-                    const maintenanceSavings = maintenance.confidence * 65000; // Up to $65K per device
+                    // Calculate conservative maintenance savings (85% current efficiency baseline)
+                    const currentEfficiency = 0.85; // Factory already operates at 85% efficiency
+                    const improvementPotential = maintenance.confidence - currentEfficiency;
+                    const maintenanceSavings = Math.max(0, improvementPotential * 45000); // Conservative $45K max per device
                     totalMaintenance += maintenanceSavings;
 
                 } catch (error) {
@@ -930,7 +932,10 @@
                     const fallbackConfidence = await getRealExecutiveConfidence(device);
                     const fallbackQuality = await getRealExecutiveQuality(device);
                     
-                    totalMaintenance += fallbackConfidence * 65000; // Realistic maintenance savings
+                    // Conservative fallback calculations (85% baseline efficiency)
+                    const currentEfficiency = 0.85;
+                    const improvementPotential = Math.max(0, fallbackConfidence - currentEfficiency);
+                    totalMaintenance += improvementPotential * 45000; // Conservative maintenance savings
                     totalQuality += fallbackQuality;
                     avgConfidence += fallbackConfidence;
                     deviceCount++;
@@ -940,12 +945,13 @@
             avgConfidence = avgConfidence / deviceCount;
             const avgQuality = totalQuality / deviceCount;
 
-            // Calculate financial impact based on real data
+            // Calculate conservative financial impact (85% current efficiency baseline)
+            const currentEfficiency = 0.85;
             const financialMetrics = {
-                maintenance: Math.min(totalMaintenance, ANNUAL_TARGETS.maintenance),
-                downtime: (avgConfidence * ANNUAL_TARGETS.downtime), // Higher confidence = less downtime
-                quality: ((avgQuality / 100) * ANNUAL_TARGETS.quality), // Quality score impact
-                energy: (avgConfidence * ANNUAL_TARGETS.energy) // Efficiency based on confidence
+                maintenance: Math.min(totalMaintenance, ANNUAL_TARGETS.maintenance * 0.6), // Cap at 60% of target
+                downtime: Math.max(0, (avgConfidence - currentEfficiency) * ANNUAL_TARGETS.downtime * 0.7), // Conservative downtime improvement
+                quality: Math.max(0, ((avgQuality - 85) / 100) * ANNUAL_TARGETS.quality * 0.8), // Quality improvement over 85% baseline
+                energy: Math.max(0, (avgConfidence - currentEfficiency) * ANNUAL_TARGETS.energy * 0.5) // Conservative energy savings
             };
 
             // Store for progress calculations
