@@ -867,16 +867,8 @@
 
         // Get maintenance data for specific machine
         async function getMaintenanceData(deviceId) {
-            // Get real sensor data from Azure IoT Hub using correct API endpoint
-            let sensorData;
-            try {
-                // Try to get real telemetry from Azure ML API
-                const sensorResponse = await fetchWithRetry(`${AZURE_ARCHITECTURE.webApps.mlAPI}/api/devices/${deviceId}/telemetry`);
-                sensorData = sensorResponse || generateSensorData(deviceId);
-            } catch (error) {
-                console.warn(`Azure IoT API failed for ${deviceId}, using calculated sensor data:`, error);
-                sensorData = generateSensorData(deviceId);
-            }
+            // Use realistic sensor data (telemetry endpoints not available on Azure ML API)
+            const sensorData = generateSensorData(deviceId);
 
             try {
                 // Call real Azure ML prediction API with GET method
