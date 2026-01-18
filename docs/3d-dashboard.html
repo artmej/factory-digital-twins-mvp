@@ -797,10 +797,15 @@
                     anomalyData = { anomaly_detected: status === 'Alert', risk_level: anomalyRisk };
                 }
                 
+                // Safe property access with fallbacks for null responses
+                const finalQualityScore = (qualityData && qualityData.quality_score) || qualityScore || 85;
+                const finalEnergyScore = (energyData && energyData.efficiency_score) || energyScore || 80;
+                const finalConfidence = (maintenanceData && maintenanceData.confidence) || (realisticConfidence / 100) || 0.75;
+                
                 const healthScore = (
-                    (qualityData.quality_score || qualityScore) + 
-                    (energyData.efficiency_score || energyScore) + 
-                    ((maintenanceData.confidence || realisticConfidence / 100) * 100)
+                    finalQualityScore + 
+                    finalEnergyScore + 
+                    (finalConfidence * 100)
                 ) / 3;
 
                 // Update tooltip with real Azure ML API data structure
@@ -812,23 +817,23 @@
                     </div>
                     <div class="tooltip-metric">
                         <span class="tooltip-label">ML Confidence:</span>
-                        <span class="tooltip-value good">${Math.round((maintenanceData.confidence || realisticConfidence / 100) * 100)}%</span>
+                        <span class="tooltip-value good">${Math.round(finalConfidence * 100)}%</span>
                     </div>
                     <div class="tooltip-metric">
                         <span class="tooltip-label">Quality:</span>
-                        <span class="tooltip-value ${(qualityData.quality_score || qualityScore) > 85 ? 'good' : (qualityData.quality_score || qualityScore) > 70 ? 'warning' : 'error'}">${(qualityData.quality_score || qualityScore).toFixed(1)}%</span>
+                        <span class="tooltip-value ${finalQualityScore > 85 ? 'good' : finalQualityScore > 70 ? 'warning' : 'error'}">${finalQualityScore.toFixed(1)}%</span>
                     </div>
                     <div class="tooltip-metric">
                         <span class="tooltip-label">Energy:</span>
-                        <span class="tooltip-value ${(energyData.efficiency_score || energyScore) > 80 ? 'good' : 'warning'}">${(energyData.efficiency_score || energyScore).toFixed(1)}%</span>
+                        <span class="tooltip-value ${finalEnergyScore > 80 ? 'good' : 'warning'}">${finalEnergyScore.toFixed(1)}%</span>
                     </div>
                     <div class="tooltip-metric">
                         <span class="tooltip-label">Status:</span>
-                        <span class="tooltip-value ${statusClass}">${maintenanceData.prediction === 'maintenance_required' ? 'Maintenance' : 'Running'}</span>
+                        <span class="tooltip-value ${statusClass}">${maintenanceData && maintenanceData.prediction === 'maintenance_required' ? 'Maintenance' : 'Running'}</span>
                     </div>
                     <div class="tooltip-metric">
                         <span class="tooltip-label">Anomaly:</span>
-                        <span class="tooltip-value ${(anomalyData.anomaly_detected || status === 'Alert') ? 'error' : 'good'}">${anomalyData.risk_level || anomalyRisk} Risk</span>
+                        <span class="tooltip-value ${(anomalyData && anomalyData.anomaly_detected) || status === 'Alert' ? 'error' : 'good'}">${(anomalyData && anomalyData.risk_level) || anomalyRisk} Risk</span>
                     </div>
                 `;
             } catch (error) {
