@@ -721,13 +721,13 @@
             'LINE_3_CNC_03', 'LINE_3_ROBOT_03', 'LINE_3_CONV_03'
         ];
 
-        // Conservative financial targets (85% baseline efficiency)
+        // Financial targets based on 8% improvement over 85% baseline (target: 93%)
         const ANNUAL_TARGETS = {
-            maintenance: 320000,    // $320K (conservative from 85% baseline)
-            downtime: 280000,       // $280K (reduced from current high efficiency)
-            quality: 240000,        // $240K (quality improvements over 85% baseline)
-            energy: 100000,         // $100K (energy efficiency gains)
-            total: 940000           // $940K total (conservative target)
+            maintenance: 280000,    // $280K (8% improvement in maintenance efficiency)
+            downtime: 320000,       // $320K (8% reduction in downtime costs)
+            quality: 200000,        // $200K (8% quality improvement benefits)
+            energy: 120000,         // $120K (8% energy efficiency gains)
+            total: 920000           // $920K total (8% improvement target)
         };
 
         // No authentication required - direct data display
@@ -920,10 +920,12 @@
                     avgConfidence += maintenance.confidence || await getRealExecutiveConfidence(device);
                     totalQuality += quality.quality_score || await getRealExecutiveQuality(device);
 
-                    // Calculate conservative maintenance savings (85% current efficiency baseline)
-                    const currentEfficiency = 0.85; // Factory already operates at 85% efficiency
-                    const improvementPotential = maintenance.confidence - currentEfficiency;
-                    const maintenanceSavings = Math.max(0, improvementPotential * 45000); // Conservative $45K max per device
+                    // Calculate savings based on 8% improvement target (85% → 93%)
+                    const currentEfficiency = 0.85; // Current factory efficiency
+                    const targetEfficiency = 0.93;  // Target: 85% + 8% improvement
+                    const improvementPotential = Math.min(maintenance.confidence, targetEfficiency) - currentEfficiency;
+                    const improvementProgress = improvementPotential / 0.08; // Progress toward 8% improvement
+                    const maintenanceSavings = Math.max(0, improvementProgress * 35000); // $35K max per device for 8% improvement
                     totalMaintenance += maintenanceSavings;
 
                 } catch (error) {
@@ -932,10 +934,12 @@
                     const fallbackConfidence = await getRealExecutiveConfidence(device);
                     const fallbackQuality = await getRealExecutiveQuality(device);
                     
-                    // Conservative fallback calculations (85% baseline efficiency)
+                    // Fallback calculations for 8% improvement target (85% → 93%)
                     const currentEfficiency = 0.85;
-                    const improvementPotential = Math.max(0, fallbackConfidence - currentEfficiency);
-                    totalMaintenance += improvementPotential * 45000; // Conservative maintenance savings
+                    const targetEfficiency = 0.93;
+                    const improvementPotential = Math.min(fallbackConfidence, targetEfficiency) - currentEfficiency;
+                    const improvementProgress = improvementPotential / 0.08;
+                    totalMaintenance += Math.max(0, improvementProgress * 35000); // $35K per device
                     totalQuality += fallbackQuality;
                     avgConfidence += fallbackConfidence;
                     deviceCount++;
@@ -945,13 +949,16 @@
             avgConfidence = avgConfidence / deviceCount;
             const avgQuality = totalQuality / deviceCount;
 
-            // Calculate conservative financial impact (85% current efficiency baseline)
+            // Calculate financial impact based on 8% improvement plan (85% → 93%)
             const currentEfficiency = 0.85;
+            const targetEfficiency = 0.93;
+            const improvementGoal = 0.08; // 8% improvement
+            
             const financialMetrics = {
-                maintenance: Math.min(totalMaintenance, ANNUAL_TARGETS.maintenance * 0.6), // Cap at 60% of target
-                downtime: Math.max(0, (avgConfidence - currentEfficiency) * ANNUAL_TARGETS.downtime * 0.7), // Conservative downtime improvement
-                quality: Math.max(0, ((avgQuality - 85) / 100) * ANNUAL_TARGETS.quality * 0.8), // Quality improvement over 85% baseline
-                energy: Math.max(0, (avgConfidence - currentEfficiency) * ANNUAL_TARGETS.energy * 0.5) // Conservative energy savings
+                maintenance: Math.min(totalMaintenance, ANNUAL_TARGETS.maintenance), 
+                downtime: Math.max(0, Math.min((avgConfidence - currentEfficiency) / improvementGoal, 1) * ANNUAL_TARGETS.downtime), // Progress toward 8% improvement
+                quality: Math.max(0, Math.min(((avgQuality - 85) / 8), 1) * ANNUAL_TARGETS.quality), // Quality improvement toward 93%
+                energy: Math.max(0, Math.min((avgConfidence - currentEfficiency) / improvementGoal, 1) * ANNUAL_TARGETS.energy) // Energy savings toward 8% improvement
             };
 
             // Store for progress calculations
