@@ -963,17 +963,23 @@
                         document.getElementById('anomaly').className = 'metric-value good';
                     }
 
-                    // Update machine status lights
+                    // Update machine status lights with null-safe access
                     results.forEach((result, index) => {
                         const machineIndex = FACTORY_LAYOUT.lines.findIndex(m => m.id === result.machine);
-                        if (machineIndex >= 0 && machines[machineIndex]) {
+                        if (machineIndex >= 0 && machines[machineIndex] && machines[machineIndex].userData && machines[machineIndex].userData.statusLight) {
                             const statusLight = machines[machineIndex].userData.statusLight;
-                            if (result.anomaly.predictions?.anomaly_detected) {
-                                statusLight.material.color.setHex(0xff0000); // Red
-                            } else if (result.maintenance.predictions?.maintenance_needed) {
-                                statusLight.material.color.setHex(0xffaa00); // Orange
-                            } else {
-                                statusLight.material.color.setHex(0x00ff00); // Green
+                            if (statusLight.material) {
+                                // Check anomaly status - handle both old and new API formats
+                                const hasAnomaly = result.anomaly && (result.anomaly.predictions?.anomaly_detected || result.anomaly.isAnomaly);
+                                const needsMaintenance = result.maintenance && (result.maintenance.predictions?.maintenance_needed || result.maintenance.prediction === 'maintenance_required');
+                                
+                                if (hasAnomaly) {
+                                    statusLight.material.color.setHex(0xff0000); // Red
+                                } else if (needsMaintenance) {
+                                    statusLight.material.color.setHex(0xffaa00); // Orange
+                                } else {
+                                    statusLight.material.color.setHex(0x00ff00); // Green
+                                }
                             }
                         }
                     });
